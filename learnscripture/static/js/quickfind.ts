@@ -4,6 +4,7 @@
 
 import { handleFormValidationErrors, ajaxFailed } from './common';
 import { BIBLE_BOOK_INFO } from './bible_book_info';
+import * as htmx from "htmx.org";
 
 var lastSetReference = null;
 
@@ -327,10 +328,20 @@ var setupQuickFindControls = function() {
             $(this).closest('form').find('[type=submit].primary:first').click();
         }
     });
-    languageChange();
+    var $form = $('form.quickfind');
+    if ($form.length > 0) {
+        languageChange();
+    };
 };
 
 
 $(document).ready(function() {
     setupQuickFindControls();
+    htmx.onLoad(function(content) {
+        var $parsedRefInput = $(content).parent().find('[data-parsed-reference]');
+        if ($parsedRefInput.length > 0) {
+            var $form = $parsedRefInput.closest('form.quickfind');
+            setControlsFromParsedRef($form, JSON.parse($parsedRefInput.attr('data-parsed-reference')));
+        }
+    })
 });

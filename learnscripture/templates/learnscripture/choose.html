@@ -15,6 +15,7 @@
         <form action="." method="GET"
           hx-get="."
           hx-target="#id-choose-verseset-results"
+          data-trigger-on-input-change="true"
           hx-indicator="#id-choose-verseset-results"
           id="id-choose-verseset-form"
         >
@@ -46,13 +47,19 @@
         {% url 'create_passage_set' as create_passage_set_url %}
         <p>{% ftlmsg 'choose-choose-verse-explanation-html' create_passage_set_url=create_passage_set_url %}</p>
 
-        <form action="" method="GET" class="quickfind always-adjust-size" id="id-quick-find-form">
+        <form
+          action=""
+          method="GET"
+          class="quickfind"
+          id="id-quick-find-form"
+          hx-get="{% url 'choose_individual_verse_find' %}"
+          hx-target="#id-quickfind-search-results"
+        >
           {% include "learnscripture/quick_find_controls.html" %}
         </form>
-        <div class="quickfind_search_results">
+        <div id="id-quickfind-search-results">
         </div>
 
-        {# See also "learnscripture/choose_individual_results_inc.html" which is rendered via VerseFind API call #}
       </div>
     </section>
 

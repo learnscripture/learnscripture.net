@@ -410,7 +410,6 @@ class VerseFind(ApiView):
             return rc.BAD_REQUEST("Parameters q, version_slug, passage_mode, render_for required")
 
         TEMPLATES = {
-            "choose-individual": "learnscripture/choose_individual_results_inc.html",
             "create-selection-set": "learnscripture/create_selection_results_inc.html",
             "create-selection-row": "learnscripture/create_selection_row_inc.html",
             "create-passage-row": "learnscripture/create_passage_row_inc.html",
@@ -435,6 +434,7 @@ class VerseFind(ApiView):
                 page=page,
                 page_size=QUICK_FIND_SEARCH_LIMIT,
                 allow_searches=not passage_mode,
+                identity=getattr(request, "identity", None),
             )
         except InvalidVerseReference as e:
             return validation_error_response({"__all__": [e.args[0]]})
@@ -494,31 +494,6 @@ def duplicate_passage_check(request, language_code, start_internal_reference, en
     else:
         context = {"verse_sets": verse_sets, "language_code": language_code}
         return render_to_string_ftl("learnscripture/duplicate_passage_warning_inc.html", context, request=request)
-
-
-class AddVerseToQueue(ApiView):
-    @require_preexisting_identity_m
-    def post(self, request):
-        identity = request.identity
-
-        version = None
-        try:
-            version = TextVersion.objects.get(slug=request.POST["version_slug"])
-        except (KeyError, TextVersion.DoesNotExist):
-            return rc.BAD_REQUEST("Invalid version_slug")
-
-        ref = request.POST.get("localized_reference", None)
-        if ref is not None:
-            # First ensure it is valid
-            try:
-                version.get_verse_list(ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
-            except InvalidVerseReference:
-                return rc.BAD_REQUEST("Invalid localized_reference")
-
-            identity.add_verse_choice(ref, version=version)
-            return {}
-        else:
-            return rc.BAD_REQUEST("No localized_reference")
 
 
 class DeleteNotice(ApiView):

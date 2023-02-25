@@ -1,4 +1,5 @@
 import { isTouchDevice, handleFormValidationErrors, ajaxFailed, getLocation } from './common';
+import * as htmx from "htmx.org";
 
 declare var learnscriptureThemeFonts: string[][];
 
@@ -184,4 +185,7 @@ export const setupNeedsPreferencesControls = function(section) {
 $(document).ready(function() {
     setupPreferencesControls();
     setPreferences($('#id-preferences-data').data());
+    htmx.onLoad(function(content) {
+        setupNeedsPreferencesControls($(content));
+    });
 });

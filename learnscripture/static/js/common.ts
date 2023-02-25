@@ -136,7 +136,7 @@ $(document).ready(function() {
     }
 
     // HTMX
-    document.querySelectorAll('form[hx-target]').forEach((form, idx) => {
+    document.querySelectorAll('form[hx-target][data-trigger-on-input-change]').forEach((form, idx) => {
         form.querySelectorAll('input, select').forEach((input, idx) => {
             input.addEventListener("change", (ev) => {
                 htmx.trigger(form, 'submit', null);

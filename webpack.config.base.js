@@ -76,6 +76,7 @@ module.exports = {
             $: "jquery",
             jQuery: "jquery",
             "window.jQuery": "jquery",
+            htmx: "htmx.org",
         })
     ],
     resolve: {

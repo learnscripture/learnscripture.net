@@ -1,0 +1,41 @@
+{% load verse_utils %}
+{% load ftl %}
+
+<div class="actionset">
+  <form action="{% url 'handle_choose_verse' %}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="localized_reference" value="{{ result.localized_reference }}">
+    <input type="hidden" name="version" value="{{ version }}">
+    {% if result.already_learning %}
+      <button type="submit" name="learn_now" class="btn primary">{% ftlmsg 'choose-review-button' %}</button>
+    {% else %}
+      <button type="submit" name="learn_now" class="btn primary needs-preferences">{% ftlmsg 'choose-learn-button' %}</button>
+    {% endif %}
+  </form>
+  {% if request.identity.account %}
+    <form
+      hx-post="{% url 'add_verse_to_queue' %}"
+      hx-swap="outerHTML"
+      hx-target="closest div.actionset"
+    >
+      <input type="hidden" name="localized_reference" value="{{ result.localized_reference }}">
+      <input type="hidden" name="version" value="{{ version }}">
+      {% if result.already_added %}
+        <button type="submit" name="add_to_queue" class="btn" disabled>{% ftlmsg 'choose-add-to-queue-button-added' %}</button>
+      {% else %}
+        <button
+          type="submit"
+          name="add_to_queue"
+          class="btn needs-preferences"
+        >{% ftlmsg 'choose-add-to-queue-button' %}</button>
+      {% endif %}
+    </form>
+  {% endif %}
+  <div class="verselist">
+    {% for verse in result.verses %}
+      <div class="verse">
+        <span class="versenumber">{{ verse.localized_reference }}</span> {{ verse|html_format_text }}
+      </div>
+    {% endfor %}
+  </div>
+</div>

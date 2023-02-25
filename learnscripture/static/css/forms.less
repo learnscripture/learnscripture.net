@@ -262,11 +262,10 @@ ul.inputs-list, div.input ul {
     }
 }
 
-form[hx-target] {
+form[hx-target][data-trigger-on-input-change] {
     // Radio buttons act immediately, so we style them to look
     // more like buttons.
     .buttonradios();
-
 }
 
 @media screen and (max-width: @narrowWidthBreak3) {

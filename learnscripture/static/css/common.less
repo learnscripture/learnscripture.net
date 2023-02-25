@@ -167,6 +167,7 @@ q {
     form {
         float: right;
         text-align: right;
+        clear: right;
         margin: 0;
         padding: 0;
 
@@ -183,6 +184,10 @@ q {
         .icon-public {
             margin-right: -0.5em;
         }
+    }
+
+    form + form > button {
+        margin-top: 5px;
     }
 }
 

@@ -93,7 +93,7 @@ choose-learn-button = Çalış
 choose-add-to-queue-button = Sıraya ekle
 
 # Caption for 'add a verse to the learning queue' button after it has been used and the verse has been added
-choose-add-to-queue-button-added = Eklendi!
+choose-add-to-queue-button-added = Sıraya eklendi
 
 # Message when no verses were found when searching for a verse
 choose-verse-search-no-verses-found = Girilen terimler ile eşleşen bir ayet bulunamdı

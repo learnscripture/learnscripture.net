@@ -59,7 +59,7 @@
                 <li><a href="#"
                   hx-post="{% url 'logout' %}"
                   hx-confirm="{% ftlmsg 'site-logout-confirm-prompt' %}"
-                  hx-params='{"url_after_logout": "{{ url_after_logout }}"}'
+                  hx-vals='{"url_after_logout": "{{ url_after_logout }}"}'
                 ><i class="icon-fw icon-logout"></i> {% ftlmsg 'site-log-out-link' %}</a></li>
               {% endif %}
             </ul>

@@ -89,11 +89,14 @@ choose-catechisms-link = Browse our list of catechisms
 # Button to start learning a verse or verse set
 choose-learn-button = Learn
 
+# Button to continue learning a verse that appears in a seach result
+choose-review-button = Review
+
 # Button to add a verse to the learning queue
 choose-add-to-queue-button = Add to queue
 
 # Caption for 'add a verse to the learning queue' button after it has been used and the verse has been added
-choose-add-to-queue-button-added = Added!
+choose-add-to-queue-button-added = Added to queue
 
 # Message when no verses were found when searching for a verse
 choose-verse-search-no-verses-found = No verses were found matching your search

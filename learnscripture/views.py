@@ -1,3 +1,4 @@
+import json
 import urllib.parse
 from datetime import timedelta
 
@@ -9,7 +10,10 @@ from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetView as AuthPasswordResetView
 from django.contrib.sites.models import Site
+from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http.request import HttpRequest
+from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -31,7 +35,9 @@ from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
 from bibleverses.forms import VerseSetForm
 from bibleverses.languages import LANG, LANGUAGES
 from bibleverses.models import (
+    MAX_VERSE_QUERY_SIZE,
     MAX_VERSES_FOR_SINGLE_CHOICE,
+    QUICK_FIND_SEARCH_LIMIT,
     InvalidVerseReference,
     TextType,
     TextVersion,
@@ -40,6 +46,8 @@ from bibleverses.models import (
     VerseSetType,
     get_passage_sections,
     is_continuous_set,
+    make_verse_set_passage_id,
+    quick_find,
     verse_set_passage_id_to_parsed_ref,
 )
 from bibleverses.parsing import (
@@ -615,6 +623,89 @@ def choose(request):
     return TemplateResponse(request, "learnscripture/choose.html", ctx)
 
 
+def choose_individual_verse_find(request: HttpRequest):
+    # htmx-only view
+    return TemplateResponse(
+        request,
+        "learnscripture/choose_individual.html",
+        _verse_find(request, passage_mode=False),
+    )
+
+
+# TODO this is currently duplicating a lot from VerseFind, which will
+# eventually go away when we migrate all to htmx
+def _verse_find(request: HttpRequest, *, passage_mode: bool) -> dict:
+    try:
+        # TODO could probably replace this with a Form and cleanup validation?
+        q = request.GET["quick_find"]
+        version_slug = request.GET["version"]
+        page = int(request.GET.get("page", "0"))
+    except KeyError:
+        return {"errors": ErrorList(["Parameters quick_find, version required"])}
+
+    q = q.replace("—", "-").replace("–", "-")
+
+    try:
+        version = bible_versions_for_request(request).get(slug=version_slug)
+    except TextVersion.DoesNotExist:
+        return {"errors": ErrorList(["Valid version required"])}
+
+    try:
+        results, more_results = quick_find(
+            q,
+            version,
+            max_length=MAX_VERSES_FOR_SINGLE_CHOICE if not passage_mode else MAX_VERSE_QUERY_SIZE,
+            page=page,
+            page_size=QUICK_FIND_SEARCH_LIMIT,
+            allow_searches=not passage_mode,
+            identity=getattr(request, "identity", None),
+        )
+    except InvalidVerseReference as e:
+        return {"errors": ErrorList([e.args[0]])}
+
+    if "single" in request.GET or passage_mode:
+        results = results[0:1]
+        more_results = False
+
+    context = {
+        "results": results,
+        "get_more_results_url": str(
+            furl.furl(request.get_full_path()).remove(query=["page"]).add(query_params={"page": page + 1})
+        ),
+        "more_results": more_results,
+        "page": page,
+        "version": version_slug,
+    }
+
+    if len(results) == 1 and results[0].parsed_ref is not None:
+        # Trigger an OOB swap that will update the quick find form
+        parsed_reference = results[0].parsed_ref
+        context.update(
+            {
+                "quick_find_parsed_reference_json": json.dumps(parsed_reference.__dict__),
+                "quick_find_canonical_reference": parsed_reference.canonical_form(),
+                "quick_find_passage_id": make_verse_set_passage_id(
+                    parsed_reference.get_start().to_internal(), parsed_reference.get_end().to_internal()
+                ),
+            }
+        )
+
+    if passage_mode and len(results) == 1:
+        # TODO pull this out into calling view?
+        start_internal_reference = results[0].verses[0].internal_reference
+        end_internal_reference = results[0].verses[-1].internal_reference
+        passage_id = make_verse_set_passage_id(start_internal_reference, end_internal_reference)
+        verse_sets = verse_sets_visible_for_request(request)
+        verse_sets = verse_sets.filter(
+            set_type=VerseSetType.PASSAGE, language_code=version.language_code, passage_id=passage_id
+        ).select_related("created_by")
+
+        if len(verse_sets) > 0:
+            context.update({"duplicate_verse_sets": verse_sets, "language_code": version.language_code})
+
+    return context
+
+
 @require_preferences
 @require_POST
 def handle_choose_set(request):
@@ -641,7 +732,7 @@ def handle_choose_verse(request):
     identity = request.identity
     default_bible_version = default_bible_version_for_request(request)
     try:
-        version = TextVersion.objects.get(slug=request.POST["version_slug"])
+        version = TextVersion.objects.get(slug=request.POST["version"])
     except (KeyError, TextVersion.DoesNotExist):
         version = default_bible_version
 
@@ -1776,3 +1867,29 @@ def logout(request):
     redirect_url = request.GET.get("url_after_logout", "") or request.headers.get("Referer", "") or "/"
     p_url = urllib.parse.urlparse(redirect_url)
     return HttpResponseRedirect(p_url.path + (("?" + p_url.query) if p_url.query else ""))
+
+
+@require_POST
+@require_identity
+def add_verse_to_queue(request):
+    # htmx only view, used from choose page
+    identity = request.identity
+
+    version = None
+    try:
+        version = TextVersion.objects.get(slug=request.POST["version"])
+    except (KeyError, TextVersion.DoesNotExist):
+        return HttpResponseBadRequest("Invalid version_slug")
+
+    ref = request.POST.get("localized_reference", None)
+    if ref is None:
+        return HttpResponseBadRequest("No localized_reference")
+    # First ensure it is valid
+    try:
+        version.get_verse_list(ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+    except InvalidVerseReference:
+        return HttpResponseBadRequest("Invalid localized_reference")
+
+    identity.add_verse_choice(ref, version=version)
+    results, _ = quick_find(ref, version=version, allow_searches=False, identity=identity)
+    return TemplateResponse(request, "learnscripture/choose_individual_result_inc.html", {"result": results[0]})

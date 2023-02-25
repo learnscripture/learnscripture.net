@@ -1,0 +1,21 @@
+{% load ftl %}
+{% if results or page > 0 %}
+  <div class="more-results-container">
+    <div class="paging">
+      {% if more_results %}
+        <span class="paging-part">
+          <a href="{{ get_more_results_url }}"
+            hx-get="{{ get_more_results_url }}"
+            hx-target="closest .more-results-container"
+            hx-swap="outerHTML"
+          >{% ftlmsg 'pagination-show-more' %}</a>
+        </span>
+      {% endif %}
+      {% if results|length > 1 or page > 0 %}
+        <span class="paging-part">
+          <a href="#id-quick-find-form">{% ftlmsg 'pagination-jump-to-top' %}</a>
+        </span>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

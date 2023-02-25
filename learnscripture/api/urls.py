@@ -28,7 +28,6 @@ urlpatterns = [
     path("reviewsooner/", handlers.ReviewSoonerHandler.as_view(), name="learnscripture.api.reviewsooner"),
     path("actionlogs/", handlers.ActionLogs.as_view(), name="learnscripture.api.actionlogs"),
     path("versefind/", handlers.VerseFind.as_view(), name="learnscripture.api.versefind"),
-    path("addversetoqueue/", handlers.AddVerseToQueue.as_view(), name="learnscripture.api.addversetoqueue"),
     path("deletenotice/", handlers.DeleteNotice.as_view(), name="learnscripture.api.deletenotice"),
     path("addcomment/", handlers.AddComment.as_view(), name="learnscripture.api.addcomment"),
     path("hidecomment/", handlers.HideComment.as_view(), name="learnscripture.api.hidecomment"),

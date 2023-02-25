@@ -23,6 +23,11 @@ urlpatterns = [
     path("choose/", learnscripture.views.choose, name="choose"),
     path("choose-set/", learnscripture.views.handle_choose_set, name="handle_choose_set"),
     path("choose-verse/", learnscripture.views.handle_choose_verse, name="handle_choose_verse"),
+    path(
+        "choose-individual-verse-find/",
+        learnscripture.views.choose_individual_verse_find,
+        name="choose_individual_verse_find",
+    ),
     path("catechisms/", learnscripture.views.view_catechism_list, name="catechisms"),
     path("catechisms/<slug:slug>/", learnscripture.views.view_catechism, name="view_catechism"),
     path("learn-legacy/", RedirectView.as_view(pattern_name="learn")),
@@ -31,6 +36,7 @@ urlpatterns = [
     path("progress/", learnscripture.views.user_verses, name="user_verses"),
     path("my-verse-sets/", learnscripture.views.user_verse_sets, name="user_verse_sets"),
     path("verse-options/", learnscripture.views.verse_options, name="verse_options"),
+    path("add-verse-to-queue/", learnscripture.views.add_verse_to_queue, name="add_verse_to_queue"),
     # Payment
     path("donate/", learnscripture.views.donate, name="donate"),
     path("donation-complete/", learnscripture.views.pay_done, name="pay_done"),

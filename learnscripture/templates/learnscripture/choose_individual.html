@@ -1,0 +1,20 @@
+{% if quick_find_canonical_reference %}
+  {# OOB update of #id_quick_find, which triggers JS updates for other quick find controls #}
+  <input
+    id="id_quick_find"
+    type="text"
+    name="quick_find"
+    value="{{ quick_find_canonical_reference }}"
+    hx-swap-oob="true"
+    {% if quick_find_parsed_reference_json %}
+      data-parsed-reference="{{ quick_find_parsed_reference_json }}"
+    {% endif %}
+  >
+{% endif %}
+{% if errors %}
+  {{ errors }}
+{% else %}
+  {% include "learnscripture/choose_individual_results_inc.html" with results=results  %}
+
+  {% include "learnscripture/quick_find_search_show_more_htmx.html" with results=results page=page more_results=more_results get_more_results_url=get_more_results_url %}
+{% endif %}
