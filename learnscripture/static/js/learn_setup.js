@@ -1,8 +1,4 @@
-// For the moment, this is separated out from base.js to minimize breakage, but
-// will be merged eventually.
-
 // node_modules libs
-import 'expose-loader?jQuery!jquery';
 import { UAParser } from 'ua-parser-js';
 
 // Ours
@@ -12,7 +8,7 @@ import { doBeep, setUpAudio } from './sound';
 import { getSavedCalls, storeSavedCalls } from './offlineutils';
 
 
-import Elm from "../elm/Learn";
+// import Elm from "../elm/Learn";
 
 if ($('body.learn-page').length > 0) {
     var preferencesNode = document.getElementById('id-preferences-data');

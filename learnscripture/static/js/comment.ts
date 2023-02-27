@@ -1,4 +1,4 @@
-import autosize = require('autosize');
+import * as autosize from "autosize";
 import { ajaxFailed, displaySimpleAjaxError } from './common';
 
 

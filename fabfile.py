@@ -539,7 +539,7 @@ def build_static(c: Connection):
         os.unlink(f)
     if os.path.exists(webpack_stats_file):
         os.unlink(webpack_stats_file)
-    c.run("./node_modules/.bin/webpack --config webpack.config.deploy.js", echo=True)
+    c.run("npm run build:deploy", echo=True)
     webpack_data = json.load(open(webpack_stats_file))
     assert webpack_data["status"] == "done"
 

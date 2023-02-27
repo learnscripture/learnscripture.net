@@ -27,11 +27,11 @@ installed.
 
 3. Create a virtualenv for the project e.g.::
 
-     mkvirtualenv learnscripture --python=`which python3.9` -a `pwd`
+     mkvirtualenv learnscripture --python=`which python3.10` -a `pwd`
 
    Add project path to the venv::
 
-     pwd > $VIRTUAL_ENV/lib/python3.9/site-packages/project.pth
+     pwd > $VIRTUAL_ENV/lib/python3.10/site-packages/project.pth
 
 4. Install dependencies.
 
@@ -49,15 +49,11 @@ installed.
 
    npm/javascript dependencies. First do::
 
-     nodeenv --node=10.24.1 --python-virtualenv
-
-   (Later node versions give us problems with installing Elm 0.18 it seems, need to check)
-
-   Deactivate and re-activate the virtualenv for changes to take effect.
+     nvm install 19
+     nvm use 19
 
    Now we also need our node and Javascript deps::
 
-     nodeenv --update -p --requirement=requirements-node.txt
      npm install
 
    We also need to install Elm dependencies::

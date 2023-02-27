@@ -19,7 +19,7 @@ django-sql-utils==0.6.1
 # Upgrades to django-webpack-loader are complicated,
 # seems to require newer npm packages, which require
 # newer node
-django-webpack-loader==0.7.0
+django-webpack-loader==1.8.1
 django==3.2.9
 djangorestframework==3.12.4
 docutils==0.18.1

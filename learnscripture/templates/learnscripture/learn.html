@@ -10,7 +10,7 @@
     <meta name="viewport" content="initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     {% include "learnscripture/favicon_inc.html" %}
-    {% render_bundle 'base' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
+    {% render_bundle 'main' 'css' attrs='charset="utf-8"' %}
 
   </head>
 
@@ -19,8 +19,7 @@
     </div>
     {% include "learnscripture/preferences_form_inc.html" %}
     {% include "learnscripture/preferences_data_inc.html" %}
-    {% render_bundle 'base' 'js' 'DEFAULT' %}
-
+    {% render_bundle 'main' 'js' %}
     {% include "learnscripture/theme_fonts_inc.html" %}
   </body>
 </html>

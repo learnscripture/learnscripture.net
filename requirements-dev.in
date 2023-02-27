@@ -9,8 +9,7 @@ flake8==4.0.1
 ipython==7.29
 isort==5.10.1
 mock==4.0.3
-nodeenv==1.6.0
-pip-tools==6.4.0
+pip-tools==6.12.2
 pre-commit==2.15.0
 pyinotify==0.9.6
 pytest-django==4.4.0

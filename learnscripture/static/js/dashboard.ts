@@ -1,4 +1,4 @@
-import CalHeatMap = require('cal-heatmap');
+import * as CalHeatMap from 'cal-heatmap';
 import 'cal-heatmap/cal-heatmap.css';
 
 import { getSavedCalls } from './offlineutils';

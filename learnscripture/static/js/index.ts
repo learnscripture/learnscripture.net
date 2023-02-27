@@ -5,7 +5,8 @@
 
 // this seems to be the only way to get select2 lib to see window.jQuery,
 // configuring in webpack.config does not seem to work.
-import 'expose-loader?jQuery!jquery';
+// import 'expose-loader?jQuery!jquery';
+
 import "jquery-ui/ui/widgets/sortable";
 import 'autosize';
 import 'htmx.org';

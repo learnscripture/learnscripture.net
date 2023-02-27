@@ -1,5 +1,5 @@
 // Common functionality and requirements.
-import htmx = require('htmx.org');
+import * as htmx from "htmx.org";
 
 
 // Django CSRF requirements
