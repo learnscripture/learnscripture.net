@@ -11,7 +11,7 @@ import "jquery-ui/ui/widgets/sortable";
 import 'autosize';
 import 'htmx.org';
 
-
+//import "expose-loader?exposes=$,jQuery!jquery";
 // Ours
 
 // We put javascript for (almost) all pages in the base template, with maximum

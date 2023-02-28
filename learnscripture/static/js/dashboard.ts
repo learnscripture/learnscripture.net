@@ -1,4 +1,5 @@
-import * as CalHeatMap from 'cal-heatmap';
+import CalHeatmap from 'cal-heatmap';
+
 import 'cal-heatmap/cal-heatmap.css';
 
 import { getSavedCalls } from './offlineutils';
@@ -68,7 +69,7 @@ var createOrRefreshCalendarHeatmap = function(allData, streaks) {
     }
 
     if (calHeatMapInstance == null) {
-        calHeatMapInstance = new CalHeatMap();
+        calHeatMapInstance = new CalHeatmap();
         var today = new Date();
         var year = today.getUTCFullYear();
         var month = today.getUTCMonth();
@@ -78,21 +79,31 @@ var createOrRefreshCalendarHeatmap = function(allData, streaks) {
         // This gives the best results visually.
         var numberOfYears = 2;
         year -= numberOfYears;
-        calHeatMapInstance.init({
-            cellSize: 10, // need to change #id-heatmap-div height if this is changed.
-            data: stats,
-            displayLegend: false,
-            domain: "month",
-            domainLabelFormat: "%b %Y",
+        calHeatMapInstance.paint({
+            domain: {
+                type: "month",
+                label: "%b %Y",
+            },
+            subDomain: {
+                // need to change #id-heatmap-div height if this is changed.
+                width: 10,
+                height: 10,
+            },
+            data: {
+                source: stats,
+            },
+            date: {
+                start: new Date(year, month, 1),
+                max: utcToday,
+                highlight: utcToday,
+            },
             itemSelector: '#id-heatmap-div',
-            maxDate: utcToday,
-            nextSelector: '#id-heatmap-next',
-            previousSelector: '#id-heatmap-previous',
+            // nextSelector: '#id-heatmap-next',  TODO add onClick
+            // previousSelector: '#id-heatmap-previous',
             range: numberOfYears * 12 + 1,
-            start: new Date(year, month, 1),
-            subDomainDateFormat: "%Y-%m-%d",
-            legend: [0, 10, 20, 35, 55, 80],
-            highlight: utcToday,
+
+            // subDomainDateFormat: "%Y-%m-%d", TODO use tooltip
+            // legend: [0, 10, 20, 35, 55, 80], TODO use plugin
             afterLoadData: function(data) {
                 $('#id-heatmap-loading').remove();
                 return data;

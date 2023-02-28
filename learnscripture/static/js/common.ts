@@ -1,7 +1,6 @@
 // Common functionality and requirements.
 import * as htmx from "htmx.org";
 
-
 // Django CSRF requirements
 $(document).ajaxSend(function(event, xhr, settings) {
     // due to CSRF_COOKIE_HTTPONLY, we get token from HTML, not cookie
@@ -9,7 +8,7 @@ $(document).ajaxSend(function(event, xhr, settings) {
         return $('[name=csrfmiddlewaretoken]').val();
     }
 
-    function sameOrigin(url) {
+    function sameOrigin(url: string) {
         // url could be relative or scheme relative or absolute
         var host = document.location.host; // host + port
         var protocol = document.location.protocol;
@@ -21,7 +20,7 @@ $(document).ajaxSend(function(event, xhr, settings) {
             // or any other URL that isn't scheme relative or absolute i.e relative.
             !(/^(\/\/|http:|https:).*/.test(url));
     }
-    function safeMethod(method) {
+    function safeMethod(method: string) {
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     }
 
