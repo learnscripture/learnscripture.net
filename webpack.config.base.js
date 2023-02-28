@@ -3,7 +3,7 @@ var webpack = require('webpack')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
-var elmSource = path.resolve(__dirname, './learnscripture/static/elm');
+// var elmSource = path.resolve(__dirname, './learnscripture/static/elm');
 
 
 module.exports = {

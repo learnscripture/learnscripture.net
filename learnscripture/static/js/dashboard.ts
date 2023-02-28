@@ -34,7 +34,8 @@ var setupCalendarHeatmap = function() {
                 for (var i = 0; i < dataRows.length; i++) {
                     var d = {};
                     for (var j = 0; j < headers.length; j++) {
-                        d[headers[j]] = dataRows[i][j];
+                        var val = dataRows[i][j];
+                        d[headers[j]] = (!val.includes("-")) ? parseInt(val, 10) : val;
                     }
                     final.push(d);
                 }
@@ -60,70 +61,72 @@ var createOrRefreshCalendarHeatmap = function(allData, streaks) {
         $('#id-current-streak').text(streaks[selectedStat]['current']);
         $('#id-biggest-streak').text(streaks[selectedStat]['biggest']);
     }
-    // calculate dict in form required by CalHeatMap.
-    var stats = {};
-    for (var i = 0; i < allData.length; i++) {
-        var ts = Date.parse(allData[i]['Date']) / 1000;
-        var num = parseInt(allData[i][selectedStat], 10)
-        stats[ts] = num;
-    }
 
     if (calHeatMapInstance == null) {
         calHeatMapInstance = new CalHeatmap();
-        var today = new Date();
-        var year = today.getUTCFullYear();
-        var month = today.getUTCMonth();
-        var dayOfMonth = today.getUTCDate();
-        var utcToday = new Date(year, month, dayOfMonth);
-        // Go back 2 years, and then clip the left hand side
-        // This gives the best results visually.
-        var numberOfYears = 2;
-        year -= numberOfYears;
-        calHeatMapInstance.paint({
-            domain: {
-                type: "month",
-                label: "%b %Y",
-            },
-            subDomain: {
-                // need to change #id-heatmap-div height if this is changed.
-                width: 10,
-                height: 10,
-            },
-            data: {
-                source: stats,
-            },
-            date: {
-                start: new Date(year, month, 1),
-                max: utcToday,
-                highlight: utcToday,
-            },
-            itemSelector: '#id-heatmap-div',
-            // nextSelector: '#id-heatmap-next',  TODO add onClick
-            // previousSelector: '#id-heatmap-previous',
-            range: numberOfYears * 12 + 1,
-
-            // subDomainDateFormat: "%Y-%m-%d", TODO use tooltip
-            // legend: [0, 10, 20, 35, 55, 80], TODO use plugin
-            afterLoadData: function(data) {
-                $('#id-heatmap-loading').remove();
-                return data;
-            }
+        calHeatMapInstance.on('fill', () => {
+            $('#id-heatmap-loading').remove();
         });
-    } else {
-        calHeatMapInstance.update(stats);
-    };
-}
 
-var setupCalendarControls = function() {
-    $('#id-heatmap-div').on('click', 'svg rect', function(ev) {
-        var candidates = ev.currentTarget.parentNode.childNodes;
-        for (var i = 0; i < candidates.length; i++) {
-            var node = candidates[i];
-            if (node.nodeName == 'title') {
-                $('#id-heatmap-domain-title').text(node.textContent);
-            }
+        calHeatMapInstance.on('click', (event, timestamp: number, value) => {
+            var d = new Date(timestamp);
+            $('#id-heatmap-domain-title').text(d.toISOString().split('T')[0] + ": " + value.toString());
+
+        })
+    }
+    var today = new Date();
+
+    // Switch to UTC, which is what our stats are in
+    var year = today.getUTCFullYear();
+    var month = today.getUTCMonth();
+    var dayOfMonth = today.getUTCDate();
+    var utcToday = new Date(year, month, dayOfMonth);
+    // To cope with different screens, we include lots of data
+    // but clip the left hand side
+    var rangeInYears = 1;
+    var start = new Date(year - rangeInYears, month, dayOfMonth);
+    calHeatMapInstance.paint({
+        itemSelector: '#id-heatmap-div',
+        range: 12 * rangeInYears + 1,
+        date: {
+            start: start,
+            max: utcToday,
+            highlight: utcToday,
+        },
+        data: {
+            source: allData,
+            x: "Date",
+            y: selectedStat,
+        },
+        domain: {
+            type: "month",
+            label: {
+                text: "MMM YYYY",
+            },
+        },
+        subDomain: {
+            type: "day",
+            width: 10,
+            height: 10,
+            color: "#ededed",
+        },
+        scale: {
+            color: {
+                scheme: 'Greens',
+                type: 'linear',
+                domain: [0, 10, 20, 35, 55, 80],
+            },
         }
     });
+};
+
+var setupCalendarControls = function() {
+    $('#id-heatmap-next').on('click', () => {
+        calHeatMapInstance.next();
+    })
+    $('#id-heatmap-previous').on('click', () => {
+        calHeatMapInstance.previous();
+    })
 
     $('#id-heatmap-stat-selector input').on('change', function(ev) {
         createOrRefreshCalendarHeatmap(calHeatMapData, streaksCaptions);
