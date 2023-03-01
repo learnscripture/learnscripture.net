@@ -166,6 +166,7 @@ LANGUAGE_CODE = "en"
 LANGUAGES = [
     ("en", "English"),
     ("tr", "Turkçe"),
+    ("es", "Español"),
 ]
 LANGUAGE_CODES = [c for c, n in LANGUAGES]
 
