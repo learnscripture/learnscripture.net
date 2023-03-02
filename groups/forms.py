@@ -6,13 +6,26 @@ from groups.models import Group
 from learnscripture.ftl_bundles import t, t_lazy
 
 
+class MyModelSelect2Multiple(autocomplete.ModelSelect2Multiple):
+    @property
+    def media(self):
+        retval = super().media
+        jquery_dep = "admin/js/vendor/jquery/jquery.js"
+        # ModelSelect2Multiple assumes we are in admin, which has already
+        # loaded jQuery.
+        if not any(jquery_dep in jslist for jslist in retval._js_lists):
+            # Insert it at the beginning
+            retval._js_lists = [(jquery_dep,)] + retval._js_lists
+        return retval
+
+
 class EditGroupForm(forms.ModelForm):
 
     invited_users = forms.ModelMultipleChoiceField(
         label=t_lazy("groups-invited-users"),
         required=False,
         queryset=Account.objects.all(),
-        widget=autocomplete.ModelSelect2Multiple(
+        widget=MyModelSelect2Multiple(
             url="account_autocomplete",
             attrs={
                 "data-placeholder": t_lazy("accounts-username"),
