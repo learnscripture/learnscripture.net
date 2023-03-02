@@ -1,9 +1,9 @@
 {
   "name": "learnscripture-client",
   "scripts": {
-    "watch": "webpack --config webpack.config.dev.js --watch",
-    "build:dev": "webpack --config webpack.config.dev.js",
-    "build:deploy": "webpack --config webpack.config.deploy.js"
+    "watch": "webpack --env mode=development --watch",
+    "build:dev": "webpack --env mode=development",
+    "build:deploy": "webpack --env mode=production"
   },
   "dependencies": {
     "autosize": "^6.0.1",
