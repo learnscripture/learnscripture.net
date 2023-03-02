@@ -12,9 +12,10 @@ from django.http.response import HttpResponse
 from django.utils import timezone
 from django.utils import translation as gettext_translation
 from django.utils.http import urlencode
-from django.utils.translation import LANGUAGE_SESSION_KEY
 from django_ftl import override
 from sentry_sdk import set_user
+
+from learnscripture.session import LANGUAGE_SESSION_KEY
 
 LANGUAGE_KEY = "lang"
 

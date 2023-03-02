@@ -4,13 +4,15 @@ from datetime import datetime
 from django.db.models import TextChoices
 from django.urls import reverse
 from django.utils import timezone
-from django.views import i18n as i18n_views
 
 from accounts.models import Account, Identity, UserVerseStatus
 from bibleverses.models import MemoryStage
 
+LANGUAGE_SESSION_KEY = "_language"
 
 # Also defined in Learn.elm learningTypeDecoder
+
+
 class LearningType(TextChoices):
     REVISION = "REVISION", "Revision"
     LEARNING = "LEARNING", "Learning"
@@ -246,4 +248,4 @@ def unfinished_session_first_uvs(request):
 
 def set_interface_language(request, lang_code):
     if hasattr(request, "session"):
-        request.session[i18n_views.LANGUAGE_SESSION_KEY] = lang_code
+        request.session[LANGUAGE_SESSION_KEY] = lang_code

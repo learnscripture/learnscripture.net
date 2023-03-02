@@ -144,7 +144,7 @@ class ApiView(View):
     def get_serializable(self, data):
         return make_serializable(data, getattr(self, "fields", []))
 
-    @never_cache
+    @method_decorator(never_cache)
     def dispatch(self, request, *args, **kwargs):
         retval = super().dispatch(request, *args, **kwargs)
         if isinstance(retval, HttpResponse):

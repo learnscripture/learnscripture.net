@@ -5,14 +5,14 @@ attrs==21.2.0
 certifi==2021.10.8
 concurrent-log-handler==0.9.19
 django-anymail==8.4
-django-autocomplete-light==3.8.2
+django-autocomplete-light==3.9.4
 django-autoslug==1.9.8
 django-capture-tag==1.0
-django-compressor==2.4.1
+django-compressor==4.3.1
 django-ftl==0.13
 django-markup==1.5
 django-mptt==0.13.4
-django-paypal==1.1.1
+django-paypal==2.0
 django-q==1.3.9
 django-spurl==0.6.8
 django-sql-utils==0.6.1
@@ -20,10 +20,10 @@ django-sql-utils==0.6.1
 # seems to require newer npm packages, which require
 # newer node
 django-webpack-loader==1.8.1
-django==3.2.9
+django==4.1.7
 djangorestframework==3.12.4
 docutils==0.18.1
-easy-thumbnails==2.8
+easy-thumbnails==2.8.5
 furl==2.1.3
 lxml==4.6.4
 numpy==1.21.4
