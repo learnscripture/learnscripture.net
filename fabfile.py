@@ -395,7 +395,7 @@ def code_quality_checks(c: Connection):
     check_ftl(c)
     run_ftl2elm(c)
     with c.cd("learnscripture/static/elm"):
-        c.run("elm-test --skip-install", echo=True)
+        c.run("npx elm-test --skip-install", echo=True)
     c.run("pytest -m 'not selenium'", echo=True)
 
 

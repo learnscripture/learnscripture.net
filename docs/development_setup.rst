@@ -52,16 +52,23 @@ installed.
      nvm install 19
      nvm use 19
 
+   You should set up your shell to ensure this runs each time you work on the project
+
    Now we also need our node and Javascript deps::
 
      npm install
 
-   We also need to install Elm dependencies::
+   We also need to install Elm:
+
+   Because we’re now on a very old version, I’ve found the easiest way is get the Elm binaries from the
+   link below and copy them into your virtualenv PATH:  https://github.com/lydell/elm-old-binaries/releases
+
+   Then::
 
      cd learnscripture/static/elm
-     elm-install
+     npx elm-install
      cd tests
-     elm-install
+     npx elm-install
 
 
 5. Create ``learnscripture/settings_local.py`` from ``learnscripture/settings_local_example.py``

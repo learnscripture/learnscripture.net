@@ -53,7 +53,7 @@ def get_assets(self):
     if not _loaded:
         for f in glob.glob("./learnscripture/static/webpack_bundles/*.tests.*"):
             os.unlink(f)
-        subprocess.check_call(["./node_modules/.bin/webpack", "--config", "webpack.config.tests.js"])
+        subprocess.check_call(["./node_modules/.bin/webpack", "--env", "mode=tests"])
         _loaded.append(True)
     return original_get_assets(self)
 

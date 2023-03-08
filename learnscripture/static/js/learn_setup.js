@@ -8,7 +8,7 @@ import { doBeep, setUpAudio } from './sound';
 import { getSavedCalls, storeSavedCalls } from './offlineutils';
 
 
-// import Elm from "../elm/Learn";
+import Elm from "../elm/Learn.elm";
 
 if ($('body.learn-page').length > 0) {
     var preferencesNode = document.getElementById('id-preferences-data');

@@ -5,17 +5,17 @@ var webpack = require('webpack')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const BundleTracker = require('webpack-bundle-tracker')
 
-// var elmSource = path.resolve(__dirname, './learnscripture/static/elm');
+var elmSource = path.resolve(__dirname, './learnscripture/static/elm');
 
 module.exports = (env) => {
-    var mode = env.mode;
-    if (mode != "development" && mode != "production") {
-        throw new Error("mode must be passed using `--env mode=production` or `--env mode=development`")
+    var mode = env.mode
+    if (mode != "development" && mode != "production" && mode != "tests") {
+        throw new Error("mode must be passed using `--env mode=production|development|tests`")
     }
-    var filenameSuffix = (mode == "development" ? "dev" : "deploy");
+    var filenameSuffix = (mode == "development" ? "dev" : (mode == "tests" ? "tests" : "deploy"));
 
     return {
-        mode: mode,
+        mode: (mode == "tests" ? "development" : mode),
         context: __dirname,
         target: "web",
         entry: './learnscripture/static/js/index',
@@ -25,6 +25,7 @@ module.exports = (env) => {
             chunkFilename: "[name]-[fullhash]" + filenameSuffix + ".js"
         },
         module: {
+            noParse: /.elm$/,
             rules: [
                 {
                     test: /\.tsx?$/,
@@ -56,25 +57,18 @@ module.exports = (env) => {
                     ],
                 },
                 {
-                    // https://github.com/d3/d3/wiki#supported-environments
-
-                    // "If you are using a bundler, make sure your bundler is
-                    // configured to consume the modules entry point in the
-                    // package.json. See webpack’s resolve.mainFields, for example."
-
-                    test: require.resolve("d3"),
-                    resolve: {
-                        mainFields: ['module']
+                    test: /\.elm$/,
+                    exclude: [/elm-stuff/, /node_modules/],
+                    use: {
+                        loader: 'elm-webpack-loader',
+                        options: {
+                            cwd: elmSource,
+                            verbose: true,
+                            warn: true,
+                            debug: mode == "development"
+                        }
                     }
                 },
-                // {
-                //     // Make $ and jQuery available everywhere, including at console
-                //     test: require.resolve("jquery"),
-                //     loader: "expose-loader",
-                //     options: {
-                //         exposes: ["$", "jQuery"],
-                //     },
-                // },
             ],
         },
         resolve: {
@@ -100,48 +94,8 @@ module.exports = (env) => {
                 $: "jquery",
                 jQuery: "jquery",
                 "window.jQuery": "jquery",
-                d3: "d3",
             }),
-            //     htmx: "htmx.org",
-            // })
             new BundleTracker({filename: './webpack-stats.' + filenameSuffix + '.json'}),
         ],
-
-        // module: {
-        //     noParse: /.elm$/,
-        //     rules: [
-        //         {
-        //             test: /\.ts$/,
-        //             use: 'ts-loader',
-        //             exclude: /node_modules/
-        //         },
-        //         {
-        //             test: require.resolve('jquery'),
-        //             use: [{
-        //                 loader: 'expose-loader',
-        //                 options: 'jQuery'
-        //             }]
-        //         },
-        //         {
-        //             test: /\.elm$/,
-        //             exclude: [/elm-stuff/, /node_modules/],
-        //             use: {
-        //                 loader: 'elm-webpack-loader',
-        //                 options: {
-        //                     cwd: elmSource,
-        //                     verbose: true,
-        //                     warn: true,
-        //                     debug: false
-        //                 }
-        //             }
-        //         },
-        //     ]
-        // },
-        // resolve: {
-        //     alias: {
-        //         "jquery": "jquery/src/jquery",
-        //         "cal-heatmap$": "cal-heatmap/cal-heatmap.js",
-        //     }
-        // }
     };
 }
