@@ -212,7 +212,8 @@ MIDDLEWARE = [
         (True, "learnscripture.middleware.token_login_middleware"),
         (True, "django.contrib.messages.middleware.MessageMiddleware"),
         (True, "django.middleware.clickjacking.XFrameOptionsMiddleware"),
-        (DEVBOX, "learnscripture.middleware.debug_middleware"),
+        (DEBUG, "learnscripture.middleware.debug_middleware"),
+        (DEBUG, "learnscripture.db_debug.db_debug_middleware"),
         (DEBUG, "learnscripture.middleware.paypal_debug_middleware"),
         (True, "learnscripture.middleware.identity_middleware"),
         (True, "learnscripture.middleware.activate_language_from_request"),
@@ -413,6 +414,9 @@ def show_toolbar(request):
         return False
 
     if request.headers.get("Hx-Request", False):
+        return False
+
+    if request.GET.get("format", "") == "json":
         return False
 
     return bool(settings.DEBUG)

@@ -19,4 +19,5 @@ selenium==4.1.3
 Werkzeug==2.0.2
 time-machine==2.6.0
 fabric==3.0.0
+texttable==1.6.7
 -rsubmodules/fabutils/requirements.in
