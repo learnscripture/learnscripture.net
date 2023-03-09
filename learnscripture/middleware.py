@@ -59,11 +59,13 @@ def activate_language_from_request(get_response):
             language_code = settings.LANGUAGE_CODE
 
         request.LANGUAGE_CODE = language_code
-        with override(language_code, deactivate=True):
-            # For some things, e.g. 'timeuntil' templatetag, it is useful to
-            # have gettext translation available as well, at least
-            # until we have a replacement.
-            gettext_translation.activate(language_code)
+
+        # We are mostly relying on django_ftl for i18n, but for some things,
+        # e.g. 'timeuntil' templatetag, it is useful to have gettext
+        # translation available as well, at least until we have a replacement.
+        # So we use both for the duration of the request.
+
+        with override(language_code, deactivate=True), gettext_translation.override(language_code, deactivate=True):
             response = get_response(request)
             if set_cookie:
                 response.set_cookie(LANGUAGE_KEY, language_code)
