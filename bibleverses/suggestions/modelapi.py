@@ -287,7 +287,6 @@ def generate_suggestions_single_item(
     to_create.append(
         WordSuggestionData(
             version_slug=version.slug,
-            language_code=version.language_code,
             localized_reference=item.localized_reference,
             suggestions=item_suggestions,
             hash=hash_text(text),
