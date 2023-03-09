@@ -2260,6 +2260,7 @@ buttonsForStage model verse verseStore preferences =
                 TestFinished { accuracy, testType } ->
                     let
                         defaultMorePractice =
+                            -- If we are below the accuracy threshold, we need more practice
                             (accuracy < accuracyDefaultMorePracticeLevel)
                                 || (testType
                                         == FirstTest
@@ -2268,7 +2269,10 @@ buttonsForStage model verse verseStore preferences =
                                                     False
 
                                                 Just recordedTest ->
-                                                    recordedTest.scaledStrengthDelta <= 0
+                                                    -- If we haven't fully learnt, and made negative progress,
+                                                    -- then we need more practice
+                                                    (recordedTest.scaledStrengthDelta <= 0)
+                                                        && (currentVerseStrength verse < MemoryModel.learned)
                                            )
                                    )
                     in
