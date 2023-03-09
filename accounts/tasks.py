@@ -18,7 +18,7 @@ def notify_account_about_comment(comment_id):
     # Notify the account that generated the event
     notify_about_comment(event, comment, event.account)
     # Notify contributors
-    for c in event.comments.all():
+    for c in event.comments.all().select_related("author"):
         notify_about_comment(event, comment, c.author)
 
 
