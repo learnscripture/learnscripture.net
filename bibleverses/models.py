@@ -708,9 +708,15 @@ class VerseSet(models.Model):
         return self.name
 
     def save(self, **kwargs):
-        self._update_passage_id()
+        already_saved = self.pk is not None
+        if already_saved:
+            self._update_passage_id()
         self._update_any_language()
         super().save(**kwargs)
+        if not already_saved:
+            # Have to wait until after PK is set to do passage ID changes
+            if self._update_passage_id():
+                VerseSet.objects.filter(id=self.id).update(passage_id=self.passage_id)
 
     def get_absolute_url(self):
         return reverse("view_verse_set", kwargs=dict(slug=self.slug))
@@ -763,7 +769,11 @@ class VerseSet(models.Model):
 
         self.save()  # to run update_passage_id and save
 
-    def _update_passage_id(self):
+    def _update_passage_id(self) -> bool:
+        """
+        Updates passage_id from verse choices. Returns True if the passage ID was changed
+        """
+        old_passage_id = self.passage_id
         if self.is_passage:
             verse_choices = list(self.verse_choices.all())
             if len(verse_choices) == 0:
@@ -774,6 +784,7 @@ class VerseSet(models.Model):
             )
         else:
             self.passage_id = ""
+        return self.passage_id != old_passage_id
 
     def _update_any_language(self):
         # If a verse set is for a passage, and the name can be fully translated,
