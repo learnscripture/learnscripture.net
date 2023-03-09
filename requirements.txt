@@ -114,7 +114,7 @@ django-extensions==3.2.1
     # via -r requirements-dev.in
 django-ftl==0.13
     # via -r requirements.in
-django-functest==1.4
+django-functest==1.5.3
     # via -r requirements-dev.in
 django-js-asset==1.2.2
     # via django-mptt
@@ -290,7 +290,7 @@ pytest==6.2.5
     #   pytest-django
     #   pytest-forked
     #   pytest-xdist
-pytest-django==4.4.0
+pytest-django==4.5.2
     # via -r requirements-dev.in
 pytest-forked==1.3.0
     # via pytest-xdist

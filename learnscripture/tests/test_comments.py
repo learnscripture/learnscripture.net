@@ -100,6 +100,7 @@ class CommentPageTests(FullBrowserTest):
         self.click_and_confirm(".moderate-comment", wait_for_reload=False)
 
         # Test page
+        self.wait_until(lambda d: not self.is_element_present(f"#comment-{c1.id}"))
         self.assertTextAbsent("This is a naughty message")
 
         # Test DB

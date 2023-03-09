@@ -214,6 +214,7 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
     display = TESTS_SHOW_BROWSER
     default_timeout = 20
     page_load_timeout = 40
+    scroll_method = "legacyWindowScrollTo"
 
     @classmethod
     def get_webdriver_options(cls):

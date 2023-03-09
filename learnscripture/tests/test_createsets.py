@@ -9,9 +9,6 @@ from .base import BibleVersesMixin, FullBrowserTest
 
 
 class CreateSetTests(BibleVersesMixin, FullBrowserTest):
-
-    browser_window_size = (1024, 1200)
-
     def setUp(self):
         super().setUp()
         self._identity, self._account = self.create_account()
