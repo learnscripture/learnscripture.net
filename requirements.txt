@@ -154,6 +154,8 @@ executing==1.2.0
     # via stack-data
 fabric==3.0.0
     # via -r requirements-dev.in
+fabutils @ git+https://github.com/learnscripture/fabutils.git@67e9a529f90616312e6374de25bcf394e24d135f
+    # via -r requirements-dev.in
 filelock==3.4.0
     # via virtualenv
 flake8==4.0.1
@@ -199,8 +201,8 @@ lxml==4.6.4
     #   -r requirements.in
     #   elm-fluent
     #   pyquery
-makefun==1.15.0
-    # via -r submodules/fabutils/requirements.in
+makefun==1.15.1
+    # via fabutils
 matplotlib-inline==0.1.3
     # via ipython
 mccabe==0.6.1

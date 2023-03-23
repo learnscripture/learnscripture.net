@@ -20,4 +20,4 @@ Werkzeug==2.0.2
 time-machine==2.6.0
 fabric==3.0.0
 texttable==1.6.7
--rsubmodules/fabutils/requirements.in
+git+https://github.com/learnscripture/fabutils.git@67e9a529f90616312e6374de25bcf394e24d135f#fabutils
