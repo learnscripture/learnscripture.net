@@ -125,8 +125,6 @@ def for_htmx(
 
                     if use_block_from_params:
                         use_block_from_params_val = _get_param_from_request(request, "use_block")
-                        if use_block_from_params_val is None:
-                            return HttpResponse("No `use_block` in request params", status="400")
 
                         block_to_use = use_block_from_params_val
 
