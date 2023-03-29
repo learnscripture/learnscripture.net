@@ -547,16 +547,17 @@ def build_static(c: Connection):
 def push_static(c: Connection, target: Version):
     webpack_data = json.load(open(webpack_stats_file))
     assert webpack_data["status"] == "done"
-    deploy_files = [os.path.abspath(f) for f in glob.glob(webpack_deploy_files_pattern)]
-    deploy_files_2 = [part["path"] for chunk in webpack_data["chunks"].values() for part in chunk]
+    deploy_files = [
+        os.path.abspath(f) for f in glob.glob(webpack_deploy_files_pattern) if not f.endswith(".LICENCE.txt")
+    ]
+    deploy_files_2 = [asset["path"] for asset in webpack_data["assets"].values()]
     s1 = set(deploy_files)
     s2 = set(deploy_files_2)
     assert s1 == s2, f"Expected {s1} == {s2}"
 
     # Now rewrite stats file to use server paths
-    for name, chunk in webpack_data["chunks"].items():
-        for part in chunk:
-            part["path"] = os.path.join(target.SRC_ROOT, "learnscripture/static/webpack_bundles", part["name"])
+    for name, asset in webpack_data["assets"].items():
+        asset["path"] = os.path.join(target.SRC_ROOT, "learnscripture/static/webpack_bundles", asset["name"])
     with open(webpack_stats_file, "w") as fp:
         json.dump(webpack_data, fp)
 
