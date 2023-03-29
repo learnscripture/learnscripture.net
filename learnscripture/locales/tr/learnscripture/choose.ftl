@@ -89,6 +89,9 @@ choose-catechisms-link = İlmihal listesine gözat
 # Button to start learning a verse or verse set
 choose-learn-button = Çalış
 
+# Button to continue learning a verse that appears in a seach result
+choose-review-button = Tekrarla
+
 # Button to add a verse to the learning queue
 choose-add-to-queue-button = Sıraya ekle
 
