@@ -21,3 +21,4 @@ time-machine==2.6.0
 fabric==3.0.0
 texttable==1.6.7
 git+https://github.com/learnscripture/fabutils.git@67e9a529f90616312e6374de25bcf394e24d135f#fabutils
+filelock==3.4.0

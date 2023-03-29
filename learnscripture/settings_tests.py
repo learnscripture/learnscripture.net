@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+import filelock
 from webpack_loader.loader import WebpackLoader
 
 from .settings_local import *  # noqa
@@ -50,7 +51,13 @@ _loaded = []
 
 def get_assets(self):
     if not _loaded:
-        subprocess.check_call(["./node_modules/.bin/webpack", "--env", "mode=tests"])
+        # When run multi-process (pytest-xdist) we hit nasty condition where
+        # all processes are rebuilding at the same time. So we use a lockfile.
+        # Ideally we'd fix so that we only run webpack once, but that is
+        # harder.
+        lock = filelock.FileLock(".pytest-webpack.lock")
+        with lock:
+            subprocess.check_call(["./node_modules/.bin/webpack", "--env", "mode=tests"])
         _loaded.append(True)
     return original_get_assets(self)
 

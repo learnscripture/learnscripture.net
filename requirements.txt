@@ -157,7 +157,9 @@ fabric==3.0.0
 fabutils @ git+https://github.com/learnscripture/fabutils.git@67e9a529f90616312e6374de25bcf394e24d135f
     # via -r requirements-dev.in
 filelock==3.4.0
-    # via virtualenv
+    # via
+    #   -r requirements-dev.in
+    #   virtualenv
 flake8==4.0.1
     # via -r requirements-dev.in
 fluent-compiler==0.3
