@@ -1,30 +1,30 @@
 # Tooltip title for 'Your stats' icon on heatmap
 heatmap-your-stats =
-    Your stats
+    Tus estadísticas
 
 # Tooltip title for 'Your progress' icon on heatmap
 heatmap-your-progress =
-    Your progress
+    Tu progreso
 
 heatmap-longest-streak =
-    Longest streak:
+    Racha más larga:
 
 
 heatmap-current-streak =
-    Current streak:
+    Racha actual:
 
 heatmap-timezone-note =
-    The calendar and streaks work in the UTC/GMT timezone
+    El calendario y las rachas funcionan en la zona horaria UTC/GMT
 
 heatmap-streak-length =
-    { $days } days
+    { $days } días
 
 
 # Caption for 'Number of items started' statistic
-heatmap-items-started-stat = Items started
+heatmap-items-started-stat = Elementos comenzados
 
 # Caption for 'Number of items tested' statistic
-heatmap-items-tested-stat = Items tested
+heatmap-items-tested-stat = Elementos probados
 
 # Caption for statistic that combines both the above
-heatmap-combined-stat = Combined
+heatmap-combined-stat = Combinado

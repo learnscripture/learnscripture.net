@@ -6,7 +6,7 @@ site-description = Una manera divertida, fácil y sociable de memorizar la Bibli
 ## Site navigation links:
 
 # Link in top nav to dashboard
-site-nav-dashboard = Tablero
+site-nav-dashboard = Panel de control
 
 # Link in top nav to 'Choose verses' page
 site-nav-choose = Elegir
@@ -66,7 +66,7 @@ site-messages-clear-this = Cerrar mensaje
 site-messages-clear-messages-help = Puedes cerrar los mensajes con este botón ↑
 
 # A personal link on every page that can be used for sharing the page
-site-referral-link = Enlace de afiliado
+site-referral-link = Enlace de referencia
 
 # The link text next to the referral link that goes to an explanation
 site-referral-link-whats-this = ¿Qué es esto?
@@ -87,7 +87,7 @@ site-footer-privacy = Privacidad y cookies
 site-footer-bible-versions = Versiones de la Biblia
 
 # Link in the footer to info about referral program
-site-footer-referral-program = Programa de afiliados
+site-footer-referral-program = Programa de referidos
 
 # Link in the footer to page for contacting learnscripture
 site-footer-contact-us = Contacto
@@ -97,7 +97,7 @@ site-footer-bible-texts-used = Textos bíblicos y catecismos usados con autoriza
 site-footer-choose-language = Idioma del sitio:
 
 # Caption for button that changes the language
-site-footer-choose-language-button = Elegir
+site-footer-choose-language-button = Aplicar
 
 # Option that appears in filters that allow choosing languages, for choosing
 # any/all languages.

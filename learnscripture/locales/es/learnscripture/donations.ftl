@@ -1,64 +1,64 @@
 ### Donations.
 
 # 'Product name' that appears in PayPal if user is making a donation
-donations-paypal-title = Donation to LearnScripture.net
+donations-paypal-title = Donación a LearnScripture.net
 
 ## Donate page.
 
 # Page title
-donations-page-title = Donate
+donations-page-title = Donar
 
 donations-page-top-html =
-  <p>LearnScripture.net is funded entirely by donations.
-  If you would like to donate to support the ongoing costs of running this site, that would be much appreciated!</p>
+  <p>LearnScripture.net es financiado completamente por donaciones.
+  ¡Apreciariamos mucho si quisieras donar para apoyar los costos de mantener este sitio!</p>
 
-  <p>Our running costs include:</p>
+  <p>Los costos de mantener este sitio incluyen:</p>
   <ul>
-    <li>Web server hosting (currently about &pound;60/year)</li>
-    <li>Domain name</li>
-    <li>Other services we use to ensure good service.</li>
+    <li>El costo de mantener el servidor web (actualmente es de &pound;60/año)</li>
+    <li>El costo del dominio</li>
+    <li>Otros servicios que usamos para asegurar un buen servicio.</li>
   </ul>
 
-  <p>You can donate as much or as little as you like! If a significant fraction
-  of users gave $5.00 or £5.00 every 3 years, that would go a long way!</p>
+  <p>¡Puedes donar lo que quieras! Si una fracción significativa de los
+  usuarios donara $5.00 o £5.00 cada 3 años, ¡eso ayudaría mucho!</p>
 
-  <p><b>Due to an issue with our PayPal account, we are not currently accepting donations.</b></p>
+  <p><b>Debido a un problema con nuestra cuenta de PayPal, no estamos aceptando donaciones en este momento.</b></p>
 
 # Message displayed on donations page if user is not logged in
-donations-login-to-donate-html = Please <a href="{ $login_and_redirect_url }">log in</a> to donate, so that we track your donation.
+donations-login-to-donate-html = <a href="{ $login_and_redirect_url }">Inicia sesión</a> para donar, para que podamos rastrear tu donación.
 
 
 
 ## Donation complete page.
 
 # Page title
-donations-completed-page-title = Donation complete
+donations-completed-page-title = Donación completada
 
 # Thank you message
-donations-done-thank-you = Thank you for your donation!
+donations-done-thank-you = ¡Gracias por tu donación!
 
 ## Donation cancelled page.
 
 # Page title
-donations-cancelled-page-title = Donation cancelled
+donations-cancelled-page-title = Donación cancelada
 
-donations-cancelled-message-html = You cancelled part way through the payment process. You can <a href="{ $donate_url }">return to the donation page</a>.
+donations-cancelled-message-html = La donación fue cancelada a mitad del proceso de pago. Puedes <a href="{ $donate_url }">regresar a la página de donaciones</a>.
 
 ## Donation received email.
 
-donations-donation-received-subject = LearnScripture.net - donation received
+donations-donation-received-subject = LearnScripture.net - donación recibida
 
 donations-donation-received-email =
-    Hi { $account_name },
+    Hola { $account_name },
 
-    Thank you for your donation of { $payment_amount }!
+    ¡Gracias por tu donación de { $payment_amount }!
 
-    Donations like these really help to keep the site running, and
-    allow us to make further improvements to the service.
+    Donaciones como estas realmente ayudan a mantener el sitio funcionando, y
+    nos permiten hacer mejoras al servicio.
 
-    We hope you continue to enjoy and benefit from your use of the site!
+    ¡Esperamos que sigas disfrutando y beneficiándote de tu uso del sitio!
 
-    The LearnScripture.net team.
+    El equipo de LearnScripture.net.
 
 
 ## Target reached email.
@@ -68,19 +68,19 @@ donations-donation-received-email =
 # $name is the user's username,
 # $target is the target of the donation drive (a number in GBP),
 # $amount is the amount the user gave (a number in GBP)
-donations-target-reached-email = Hi { $name },
+donations-target-reached-email = Hola { $name },
 
-  Our target of { $target } was reached!
+  ¡Nuestro objetivo de { $target } fue alcanzado!
 
-  Thanks to your contribution of { $amount } we reached our funding target.
+  Gracias a tu contribución de { $amount } alcanzamos nuestro objetivo de financiamiento.
 
-  This money is used to pay for the ongoing costs of the LearnScripture.net
-  service, including hosting costs and other services.
+  Este dinero es usado para pagar los costos continuos del servicio de LearnScripture.net,
+  incluyendo los costos de alojamiento y otros servicios.
 
-  Thanks so much for your support,
+  ¡Muchas gracias por tu apoyo!
 
-  The LearnScripture.net team.
+  El equipo de LearnScripture.net.
 
 
 # Subject of email sent out to donators when the target is reached
-donations-target-reached-email-subject = LearnScripture.net - donation target reached!
+donations-target-reached-email-subject = LearnScripture.net - ¡Nuestro objetivo de donación fue alcanzado!
