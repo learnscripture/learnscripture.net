@@ -1,93 +1,93 @@
 ### User's verse list page.
 
 # Page title
-user-verses-page-title = Progress stats
+user-verses-page-title = Estadísticas de progreso
 
 # Label for box where user can enter search terms for filtering list of verses
-user-verses-search-label = Search:
+user-verses-search-label = Buscar:
 
 # Caption for button that will do the search
-user-verses-search-button = Search
+user-verses-search-button = Buscar
 
 # Search query field for searching through user's verses
-user-verses-filter-query = Search
-                         .placeholder = Bible ref e.g. Gen 1:1
+user-verses-filter-query = Buscar
+                         .placeholder = Referencia e.g. Gen 1:1
 
 
 # Caption for the 'text type' filter (options are 'bible' or 'catechism')
-user-verses-filter-text-type = Type
+user-verses-filter-text-type = Tipo
 
 
 # Caption for the sorting options
-user-verses-order = Order
+user-verses-order = Orden
 
 # Caption for showing memorized items sorted by the 'weakest' memory first
-user-verses-order-weakest-first = Weakest first
+user-verses-order-weakest-first = Más débil primero
 
 # Caption for showing memorized items sorted by the 'strongest' memory first
-user-verses-order-strongest-first = Strongest first
+user-verses-order-strongest-first = Más fuerte primero
 
 # Caption for showing memorized items sorted according to the natural text order (e.g. Bible order)
-user-verses-order-text = Text order
+user-verses-order-text = Orden del texto
 
 # Shown in verse list when the user hasn't started learning any verses, or none that match the search terms
-user-verses-no-verses = No verses found.
+user-verses-no-verses = No se encontraron versículos.
 
 # Shown in the list when the user hasn't started learning any catechism questions, or none that match the search terms
-user-verses-no-catechism-questions = No catechism questions found.
+user-verses-no-catechism-questions = No se encontraron preguntas de catecismo.
 
 # Heading in table for verse references
-user-verses-verse-reference-heading = Verse reference
+user-verses-verse-reference-heading = Referencias de versículos
 
 # Heading in table for catechism question
-user-verses-question-heading = Question
+user-verses-question-heading = Pregunta
 
 # Heading in table for Bible version
-user-verses-version-heading = Version
+user-verses-version-heading = Versión
 
 # Heading in table for Catechism name
-user-verses-catechism-heading = Catechism
+user-verses-catechism-heading = Catecismo
 
 # Heading in table for column showing the level/strength to which a verse has been learned
-user-verses-strength-heading = Strength
+user-verses-strength-heading = Fortaleza
 
 # Button for reviewing a verse
 # $reference is a verse reference (e.g. "Genesis 1:1")
-user-verses-review-verse-button = Review { $reference }
+user-verses-review-verse-button = Repasar { $reference }
 
 # Button for reviewing a catechism question
-user-verses-review-question-button = Review question
+user-verses-review-question-button = Repasar pregunta
 
 # Button for practising a verse.
 # $reference is a verse reference (e.g. "Genesis 1:1")
-user-verses-practise-verse-button = Practise { $reference }
+user-verses-practise-verse-button = Practicar { $reference }
 
 # Button for practising a catechism question
-user-verses-practise-question-button = Practise question
+user-verses-practise-question-button = Practicar pregunta
 
 # Button for reviewing a section of a passage
-user-verses-review-section-button = Review section: { $section_reference }
+user-verses-review-section-button = Repasar sección: { $section_reference }
 
 # Button for practising a section of a passage
-user-verses-practise-section-button = Practise section: { $section_reference }
+user-verses-practise-section-button = Practicar sección: { $section_reference }
 
 # Button for reviewing a passage
-user-verses-review-passage-button = Review passage: { $passage_reference }
+user-verses-review-passage-button = Repasar pasaje: { $passage_reference }
 
 # Button for practising a passage
-user-verses-practise-passage-button = Practise passage: { $passage_reference }
+user-verses-practise-passage-button = Practicar pasaje: { $passage_reference }
 
 # Button for reviewing/practicing the whole of a catechsim
-user-verses-review-or-practice-catechism = Practice or review all of { $catechism_name }
+user-verses-review-or-practice-catechism = Practicar o repasar todo el { $catechism_name }
 
 # Button for stopping learning a verse
-user-verses-stop-learning-verse-button = Stop learning this
+user-verses-stop-learning-verse-button = Dejar de memorizar esto
 
 # Confirmation prompt for stopping learning a verse
-user-verses-stop-learning-verse-prompt = Are you sure you want to stop learning { $reference } in { $version_name }?
+user-verses-stop-learning-verse-prompt = ¿Quieres dejar de memorizar { $reference } en { $version_name }?
 
 # Button for stopping learning a whole passage
-user-verses-stop-learning-passage-button = Stop learning this passage
+user-verses-stop-learning-passage-button = Dejar de memorizar este pasaje
 
 # Confirmation prompt for stopping learning a passage
-user-verses-stop-learning-passage-prompt = Are you sure you want to stop learning { $passage_reference } in { $version_name }?
+user-verses-stop-learning-passage-prompt = ¿Quieres dejar de memorizar { $passage_reference } en { $version_name }?

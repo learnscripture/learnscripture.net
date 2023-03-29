@@ -65,7 +65,7 @@ accounts-preferences-instructions = Configura tus preferencias y presiona '{ acc
 # Additional notes about preferences
 accounts-preferences-instructions-additional-notes =
     Todas las preferencias pueden ajustarse más tarde, y la
-    versión de la Biblia puede elegirse para cada versículo
+    versión de la Biblia puede elegirse para cada versículo.
 
 
 # Caption for the account 'default bible version' field
@@ -78,7 +78,7 @@ accounts-type-whole-word-testing-method = Escribir la palabra - más completo
 
 accounts-type-first-letter-testing-method = Escribir la primera letra - más rápido
 
-accounts-choose-from-list-testing-method = Elegir la palabra de la lista - ideal para dispositivos móviles.
+accounts-choose-from-list-testing-method = Elegir la palabra de la lista - ideal para dispositivos móviles
 
 accounts-desktop-testing-method = Método de prueba para escritorio
 

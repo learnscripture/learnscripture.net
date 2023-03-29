@@ -1,29 +1,27 @@
 ## Contact form page:
 
 # Page title
-contact-form-page-title = Contact us
+contact-form-page-title = Contáctanos
 
 
 # Displayed at the top of the contact us page
 contact-form-page-top-html =
-    <p>You can use the email address below to contact us:</p>
-
-    <p>Before contacting us, please check whether your question is answered on any of these pages:</p>
+    <p>Antes de contactarnos, por favor, comprueba si tu pregunta ya ha sido respondida en alguna de estas páginas:</p>
 
     <ul>
-      <li><a href="/faq/">Frequently Asked Questions</a></li>
-      <li><a href="/help/">Help</a></li>
-      <li><a href="/bible-versions/">Bible versions</a></li>
-      <li><a href="/handhelds/">Handheld devices (phones and tablets)</a></li>
-      <li><a href="/browsers/">Web browsers</a></li>
+      <li><a href="/faq/">Preguntas frecuentes</a></li>
+      <li><a href="/help/">Ayuda</a></li>
+      <li><a href="/bible-versions/">Versiones de la Biblia</a></li>
+      <li><a href="/handhelds/">Dispositivos móviles (teléfonos y tabletas)</a></li>
+      <li><a href="/browsers/">Navegadores web</a></li>
     </ul>
 
-    <p>We’re sorry that we won’t be able to answer queries that are already answered above.</p>
+    <p>No podremos responder a las consultas que ya hayan sido respondidas arriba.</p>
 
-    <p>The next place to ask questions is the <a href="/groups/website-help/">Website Help Group</a>, where you can get help from other users.</p>
+    <p>El siguiente lugar para hacer preguntas es el <a href="/groups/website-help/">Grupo de Ayuda</a>, donde puedes obtener ayuda de otros usuarios.</p>
 
-    <p>For other queries, if it is something urgent we will try to respond. However,
-    <b>the LearnScripture.net site is volunteer run</b>.
-    Please don't be offended if your query does not receive a fast reply!</p>
+    <p>Para otras consultas, si es algo urgente, intentaremos responder. Sin embargo,
+    <b>el sitio LearnScripture.net es gestionado por voluntarios</b>.
+    ¡Por favor, no te ofendas si tu consulta no recibe una respuesta rápida!</p>
 
-    <p>Email: <a href="mailto:contact@learnscripture.net?body={ $email_body }">contact@learnscripture.net</a></p>
+    <p>Correo electrónico: <a href="mailto:contact@learnscripture.en?body={ $email_body }">contact@learnscripture.net</a></p>

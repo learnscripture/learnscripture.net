@@ -1,49 +1,56 @@
 ## Referrals program.
 
 # Page title
-referrals-page-title = Referral program
+referrals-page-title = Programa de referidos
 
 # First paragraph on referrals program page
-referrals-intro = If you like LearnScripture.net and want to spread the word about it, our
-    referral program will help you get badges while you do so!
+referrals-intro =
+    Si te gusta LearnScripture.net y quieres compartirlo con otros, ¡nuestro
+    programa de referidos te ayudará a obtener insignias mientras lo haces!
 
 # Title for section explanation how it works
-referrals-how-it-works-title = How it works
+referrals-how-it-works-title = Cómo funciona
 
-referrals-how-it-works-paragraph-1 = For us to recognize that you were the source of the referral, you need a link
-      like the following one to refer people to LearnScripture.net:
+referrals-how-it-works-paragraph-1 =
+    Para que podamos reconocer que fuiste la fuente de una referencia,
+    necesitas un enlace como el siguiente para referir a las personas a
+    LearnScripture.net:
 
-referrals-how-it-works-paragraph-2 = Click on the text, then choose 'Share' (mobile devices), or
-      copy-and-paste this link and pass it on to a friend. If they use this link
-      to get to the site, and then start learning verses, we'll track it and
-      know that you referred them.
+referrals-how-it-works-paragraph-2 =
+    Presiona el texto, luego elige 'Compartir' (dispositivos móviles), o copia
+    y pega este enlace y pásalo a un amigo. Si usan este enlace para llegar al
+    sitio, y luego comienzan a memorizar versículos, lo rastrearemos y sabremos
+    que tú los referiste.
 
 # Displayed on the referrals page if the user is not logged in.
-referrals-you-need-to-create-an-account-html = You first need an account, and need to <a href="{ $login_url }">sign in</a> to get the full instructions and the referral link.
+referrals-you-need-to-create-an-account-html = Necesitas una cuenta y debes <a href="{ $login_url }">iniciar sesión</a> para obtener las instrucciones completas y el enlace de referencia.
 
 
 # Sub-title for list of things not to do
-referrals-please-dont-title = Please don't:
+referrals-please-dont-title = Por favor, evita:
 
-referrals-please-dont-send-bulk-emails = Send bulk emails to friends about this. Many of them may consider this to
-      be spam, or even think it came from us, and you may give LearnScripture.net a
-      bad name!
+referrals-please-dont-send-bulk-emails =
+      Enviar correos electrónicos masivos a tus amigos sobre esto. Muchos de ellos
+      pueden considerarlo spam, o incluso pensar que vino de nosotros, y puedes
+      darle a LearnScripture.net una mala reputación.
 
 # Sub-title for list of things you should/can do
-referrals-please-do-title = Please do:
+referrals-please-do-title = Por favor:
 
-referrals-please-do-share-on-social-media = Post this link to social sites like Twitter or Pinterest (as long as you don't post it repeatedly and annoy people!)
+referrals-please-do-share-on-social-media = Comparte este enlace en redes sociales como Twitter o Pinterest (¡siempre y cuando no lo publiques repetidamente y moleste a la gente!)
 
-referrals-please-do-include-personal-comments = Include some personal comment about why you like LearnScripture.net or how it has helped you.
+referrals-please-do-include-personal-comments = Incluye algún comentario personal sobre por qué te gusta LearnScripture.net o cómo te ha ayudado.
 
 # Sub title for section about sharing specific pages
-referrals-specific-pages-title = Specific pages
+referrals-specific-pages-title = Páginas específicas
 
-referrals-specific-pages-paragraph-1 = You can also get a referral link for specific pages. At the bottom of most
-    pages that make good starting points, you'll see 'Share link'. These will
-    automatically use the right URL with the '?from=' bit added. Click on the link to
-    select it and share.
+referrals-specific-pages-paragraph-1 =
+    También puedes obtener un enlace de referencia para páginas específicas. En la
+    parte inferior de la mayoría de las páginas que son buenos puntos de partida
+    verás 'Compartir enlace'. Estos enlaces usarán automáticamente la URL correcta
+    con el '?from=' agregado al final. Presiona el enlace para seleccionarlo y compartirlo.
 
-referrals-paragraph-2-html = This can be especially useful to get a group of friends to start learning
-    a <a href="{ $choose_url }">verse set</a>, or to join a
-    <a href="{ $groups_url }">group</a>.
+referrals-paragraph-2-html =
+    Esto puede ser especialmente útil para que un grupo de amigos comience a memorizar
+    un <a href="{ $choose_url }">conjunto de versículos</a>, o para unirse a un
+    <a href="{ $groups_url }">grupo</a>.

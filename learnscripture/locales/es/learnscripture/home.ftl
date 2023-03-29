@@ -1,65 +1,73 @@
 ### Home page text.
 
-home-bible-text = Let the word of Christ dwell in you richly
+home-bible-text = Que la palabra de Cristo habite en vosotros abundantemente
 
-home-bible-reference = Colossians 3:16
+home-bible-reference = Colosenses 3:16
 
-home-strapline = The easiest way to memorize the Word of God online.
+home-strapline = La manera más fácil de memorizar la Biblia en línea
 
-home-start-learning-button = Start learning!
+home-start-learning-button = ¡Empezar a memorizar!
 
 # A quotation about LearnScripture.net from a user
-home-user-quotation = ...finally something profitable on the internet that I can get addicted to...
+home-user-quotation = ...al fin algo útil en internet con lo que puedo engancharme...
 
 # Heading 1 describing feature of learnscripture
-home-easy-to-use-heading = Easy to use
+home-easy-to-use-heading = Fácil de usar
 
-home-easy-to-use-explanation = We try to make sure that your effort is spent memorizing the Bible, and
-        not figuring out what to do next or trying to track your progress.
+home-easy-to-use-explanation =
+    Intentamos asegurarnos de que tu esfuerzo se dedique a memorizar la Biblia,
+    y no a averiguar qué hacer a continuación o intentar rastrear tu progreso.
 
 # Heading 2 describing feature of learnscripture
-home-online-heading = Online
+home-online-heading = En línea
 
 
-home-online-explanation = No need to install anything, it works with any recent browser, and no
-        problems if something happens to your computer.
+home-online-explanation =
+    No necesitas instalar nada, funciona con cualquier navegador reciente, y no
+    hay problemas si algo le pasa a tu dispositivo.
 
 # Heading 3 describing feature of learnscripture
-home-proven-system-heading = Proven system
+home-proven-system-heading = Sistema probado
 
-home-proven-system-explanation = Based on principles from the Charlotte Mason Scripture Memory System and
-        other proven techniques for memory strengthening, we’ve added some 21st
-        century refinements to produce an extremely efficient method.
+home-proven-system-explanation =
+    Basado en principios del Sistema de memorización de la Biblia de Charlotte Mason y
+    otras técnicas probadas para fortalecer la memoria, hemos añadido algunas
+    refinaciones del siglo XXI para producir un método extremadamente eficiente.
 
 # Heading 4 describing feature of learnscripture
-home-phones-heading = Great for phones
+home-phones-heading = Para móviles
 
-home-phones-explanation = The interface has been designed to adapt to small screens,
-        so you can use the same web site from your desktop, laptop or other internet capable
-        device, including most recent smart-phones
+home-phones-explanation =
+    La interfaz ha sido diseñada para adaptarse a pantallas pequeñas, así que
+    puedes usar el mismo sitio web desde tu escritorio, portátil o cualquier
+    otro dispositivo con conexión a internet, incluyendo la mayoría de los
+    teléfonos inteligentes recientes.
 
 # Heading 5 describing feature of learnscripture
-home-child-friendly-heading = Child friendly
+home-child-friendly-heading = Ideal para niños
 
-home-child-friendly-explanation = With a choice of fun interface themes and a memorization method which
-        works well with all ages, we’ve made sure that children will have no problem
-        using the site. (Parents have to create accounts though).
+home-child-friendly-explanation =
+    Contamos con una variedad de temas divertidos y un método de memorización que
+    funciona bien con todas las edades, para asegurarnos de que los niños no tendrán
+    ningún problema en usar el sitio. (Los padres o encargados tienen que crear cuentas para los menores).
 
 # Heading 6 describing feature of learnscripture
 home-social-heading = Social
 
-home-social-explanation = Our groups, leaderboards, comments, points and badges features are
-        great for keeping things fun, addictive and motivational!
-        You can also add and share your own sets of verses to learn — perfect for
-        church or friendship groups who want to learn the same thing.
+home-social-explanation =
+    Los grupos, las tablas de clasificación, los comentarios, los puntos y las insignias son
+    ideales para mantener las cosas divertidas, emocionantes y motivadoras.
+    También puedes añadir y compartir tus propios conjuntos de versículos para memorizar — perfecto para
+    grupos de iglesia o de amigos que quieran memorizar lo mismo.
 
 # Heading 7 describing feature of learnscripture
-home-free-heading = Free!
+home-free-heading = ¡Gratuíto!
 
-home-free-explanation = All aspects of the site are free for everyone. Since we are also keeping
-        the site free of ads, we cover our costs entirely by donations.
+home-free-explanation =
+    Todos los aspectos del sitio son gratuitos para todos. Como también mantenemos el sitio
+    libre de anuncios, cubrimos nuestros costes enteramente con donaciones.
 
 # Last heading
-home-interested-heading = Interested?
+home-interested-heading = ¿Te interesa?
 
-home-interested-explanation-html = You can <a href="/about/">find out more</a> or just <a href="/choose/">jump in.</a>
+home-interested-explanation-html = Puedes <a href="/about/">conocer más</a> o simplemente <a href="/choose/">empezar ahora.</a>
