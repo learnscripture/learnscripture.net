@@ -368,6 +368,7 @@ def deploy(c: Connection, skip_checks=False, test_host=False):
     push_static(c, target)
     create_venv(c, target)
     install_requirements(c, target)
+    smoke_test(c, target)
     collect_static(c, target)
     upload_project_templates(c, target)
     update_database(c, target)
@@ -567,6 +568,10 @@ def push_static(c: Connection, target: Version):
             c.run(f"mkdir -p {d}", echo=True)
 
         files.put(c, f, remote_f)
+
+
+def smoke_test(c: Connection, target: Version):
+    target.project_run(c, "./manage.py smoke_test", echo=True)
 
 
 def collect_static(c: Connection, target: Version):
