@@ -6,6 +6,7 @@ import glob
 import json
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime
 from shlex import quote
@@ -349,7 +350,7 @@ def check_templates():
 
 
 @task()
-def deploy(c: Connection, skip_checks=False, test_host=False, skip_selenium=False):
+def deploy(c: Connection, skip_checks=False, test_host=False, skip_selenium=False, allow_missing_ftl: bool = False):
     """
     Deploy project.
     """
@@ -360,7 +361,7 @@ def deploy(c: Connection, skip_checks=False, test_host=False, skip_selenium=Fals
 
     build_static(c)
     if not skip_checks:
-        code_quality_checks(c, skip_selenium=skip_selenium)
+        code_quality_checks(c, skip_selenium=skip_selenium, allow_missing_ftl=allow_missing_ftl)
     if not test_host:
         push_to_central_vcs(c)
     target = create_target(c)
@@ -386,13 +387,14 @@ def deploy(c: Connection, skip_checks=False, test_host=False, skip_selenium=Fals
 
 
 @local_task()
-def code_quality_checks(c: Connection, skip_selenium: bool = False):
+def code_quality_checks(c: Connection, skip_selenium: bool = False, allow_missing_ftl: bool = False):
     """
     Run code quality checks, including tests.
     """
+    # Quicker tests first
     c.run("flake8 .", echo=True)
     c.run("isort -c .", echo=True)
-    check_ftl(c)
+    check_ftl(c, allow_missing_ftl=allow_missing_ftl)
     run_ftl2elm(c)
     with c.cd("learnscripture/static/elm"):
         c.run("npx elm-test --skip-install", echo=True)
@@ -508,7 +510,7 @@ def check_sentry_auth(c: Connection):
 
 
 @local_task()
-def check_ftl(c: Connection):
+def check_ftl(c: Connection, allow_missing_ftl: bool = False):
     import django
 
     django.setup()
@@ -522,6 +524,26 @@ def check_ftl(c: Connection):
         print("Errors in FTL files:")
         print("".join(str(e) for e in errors))
         sys.exit(1)
+
+    missing_ftl_messages = _check_missing_ftl_messages()
+    if missing_ftl_messages:
+        print(missing_ftl_messages)
+        if not allow_missing_ftl:
+            sys.exit(1)
+
+
+def _check_missing_ftl_messages():
+    s = subprocess.check_output(["compare-locales", "l10n.toml", ".", "--json", "-"]).decode("utf-8")
+    data = json.loads(s)[0]
+    files = data["details"]
+    output = []
+    for filename, problems in sorted(files.items()):
+        output.append(f"- File: {filename}")
+        for item in problems:
+            if "missingEntity" in item:
+                output.append(" - Missing: " + item["missingEntity"])
+
+    return "\n".join(output)
 
 
 @local_task()

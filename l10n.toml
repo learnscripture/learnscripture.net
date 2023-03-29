@@ -5,6 +5,7 @@ basepath = "."
 locales = [
     "en",
     "tr",
+    "es",
 ]
 
 [[paths]]
@@ -13,4 +14,5 @@ reference = "learnscripture/locales/en/**/*.ftl"
 l10n = "learnscripture/locales/{locale}/**/*.ftl"
 locales = [
     "tr",
+    "es",
 ]

@@ -1,3 +1,7 @@
+from pathlib import Path
+
+import toml
+from django.conf import settings
 from django_functest import FuncBaseMixin
 
 from .base import AccountTestMixin, BibleVersesMixin, FullBrowserTest, WebTestBase
@@ -47,3 +51,11 @@ class LanguageTestsFB(LanguageTestsBase, BibleVersesMixin, FullBrowserTest):
         self.set_preferences(bible_version="TCL02 (Kutsal Kitap Yeni Çeviri)")
         self.wait_until_loaded(".help-tour-welcome")
         self.assertTextPresent("Selam! Bu gezinti size çalışma sayfası arabirimini tanıtır.")
+
+
+def test_l10n_toml_updated():
+    l10n_toml = toml.load(Path(settings.SRC_ROOT) / "l10n.toml")
+    for code, _ in settings.LANGUAGES:
+        assert code in l10n_toml["locales"]
+        if code != "en":
+            assert code in l10n_toml["paths"][0]["locales"]
