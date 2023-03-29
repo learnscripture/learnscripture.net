@@ -11,7 +11,6 @@ from datetime import datetime
 from shlex import quote
 
 from fabric.connection import Connection
-
 from fabutils import apt, disks, files, locales, postgresql, services, ssh, ssl, users
 from fabutils.connections import local_task, managed_connection_task
 from fabutils.templates import Template, upload_template_and_reload
@@ -40,7 +39,7 @@ DEFAULT_HOST = "learnscripture.net"  # Where to deploy to.
 DEFAULT_USER = PROJECT_USER
 
 # Python version
-PYTHON_BIN = "python3.9"
+PYTHON_BIN = "python3.10"
 PYTHON_PREFIX = ""  # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = f"{PYTHON_PREFIX}/bin/{PYTHON_BIN}" if PYTHON_PREFIX else PYTHON_BIN
 
@@ -90,10 +89,10 @@ REQS = [
     "python3-pip",
     "python3-wheel",
     "python3-virtualenv",
-    "python3.9",
-    "python3.9-dev",
-    "python3.9-full",
-    "python3.9-venv",
+    "python3.10",
+    "python3.10-dev",
+    "python3.10-full",
+    "python3.10-venv",
     "python3-virtualenvwrapper",
     "python3-setuptools",
     # For building Python extensions
