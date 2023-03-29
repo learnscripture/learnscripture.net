@@ -1068,7 +1068,13 @@ def create_or_edit_set(request, set_type=None, slug=None):
     )
     ctx.update(context_for_quick_find(request))
 
-    return TemplateResponse(request, "learnscripture/create_set.html", ctx)
+    return TemplateResponse(
+        request,
+        "learnscripture/create_selection_set.html"
+        if set_type == VerseSetType.SELECTION
+        else "learnscripture/create_passage_set.html",
+        ctx,
+    )
 
 
 def normalize_break_list(breaks):

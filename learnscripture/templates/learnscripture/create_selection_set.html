@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% load form_rendering %}
+{% load ftl %}
+
+{% block content %}
+
+  <div id="id-create-selection-set">
+
+    <form id="id-verse-set-form" action="" method="POST">
+      <input type="hidden" value="" id="id-internal-reference-list"  name="internal_reference_list">
+      <h3>{% ftlmsg 'versesets-about-set-fields' %}</h3>
+      {% csrf_token %}
+      {{ verse_set_form|render_form }}
+
+      <div id="id-verse-list">
+        <h3>{% ftlmsg 'versesets-verse-list' %}</h3>
+
+        <div id="id-verse-list-empty-message">
+          {% ftlmsg 'versesets-no-verses-yet' %}
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>{% ftlmsg 'bibleverses-reference' %}</th>
+              <th>{% ftlmsg 'bibleverses-text' %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in verses %}
+              <tr data-internal-reference="{{ v.internal_reference }}">
+                <td>{{ v.localized_reference }}</td>
+                <td>{{ v.text }}</td>
+                <td><span title="{% ftlmsg 'lists-item-move-up' %}"><i class="icon-arrow-up"></i></span></td>
+                <td><span title="{% ftlmsg 'lists-item-move-down' %}"><i class="icon-arrow-down"></i></span></td>
+                <td><span title="{% ftlmsg 'lists-item-remove' %}"><i class="icon-trash"></i></span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5">
+                {% ftlmsg 'lists-drag-drop-to-re-order' %}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </form>
+
+    {# See also "learnscripture/create_selection_row_inc.html" which is rendered by VerseFind API call #}
+
+    <h3>{% ftlmsg 'versesets-add-verses-subtitle' %}</h3>
+
+    <form action="" method="GET" class="quickfind" id="id-quick-find-form">
+      {% include "learnscripture/quick_find_controls.html" %}
+    </form>
+    <div class="quickfind_search_results">
+    </div>
+
+    {# See also "learnscripture/create_selection_results_inc.html" which is rendered by VerseFind API call #}
+
+    <form>
+      <hr>
+      <div class="actions">
+        <button name="save" type="submit" class="btn primary" id="id-save-btn">{% ftlmsg 'versesets-save-verseset-button' %}</button>
+      </div>
+    </form>
+
+  </div>
+
+{% endblock %}

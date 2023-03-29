@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% load form_rendering %}
+{% load ftl %}
+
+{% block content %}
+
+  <div id="id-create-passage-set">
+    <h3>{% ftlmsg 'versesets-choose-passage' %}</h3>
+
+    {% with quick_find_mode='PASSAGE' %}
+      <form action="" method="GET" class="quickfind" id="id-quick-find-form">
+        {% include "learnscripture/quick_find_controls.html" %}
+      </form>
+      <div class="quickfind_search_results">
+      </div>
+    {% endwith %}
+
+    <div id="id-duplicate-warning"></div>
+
+    {# See also "learnscripture/duplicate_passage_warning_inc.html" which is rendered by VerseFind API call #}
+
+    <div id="id-verse-list">
+      <p>{% ftlmsg 'versesets-natural-break-explanation' %}</p>
+      <p>{% ftlmsg 'versesets-natural-break-explanation-part-2-html' %}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>{% ftlmsg 'versesets-section-break' %}</th>
+            <th>{% ftlmsg 'bibleverses-reference' %}</th>
+            <th>{% ftlmsg 'bibleverses-text' %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in verses %}
+            <tr data-internal-reference="{{ v.internal_reference }}">
+              <td><input type="checkbox" {% if v.break_here %}checked{% endif %}/></td>
+              <td>{{ v.localized_reference }}</td>
+              <td>{{ v.text }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+
+    {# See also "learnscripture/create_passage_row_inc.html" which is rendered by VerseFind API call #}
+
+    <form id="id-verse-set-form" action="" method="POST">
+      <input type="hidden" name="initial_localized_reference" value="{{ initial_localized_reference }}">
+      {% csrf_token %}
+
+      <h3>{% ftlmsg 'versesets-optional-info' %}</h3>
+
+      {% if verse_set_form.non_field_errors %}
+        <p>The verse set could not be saved:</p>
+      {% endif %}
+
+      {{ verse_set_form|render_form }}
+
+      <div class="actions">
+        <input type="hidden" value="{{ verse_set.passage_id }}" id="id-passage-id"  name="passage_id">
+        <input type="hidden" value="" id="id-break-list"  name="break_list">
+        <button name="save" type="submit" class="btn primary" id="id-save-btn">{% ftlmsg 'versesets-save-verseset-button' %}</button>
+      </div>
+
+    </form>
+  </div>
+
+{% endblock %}
