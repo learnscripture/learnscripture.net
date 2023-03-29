@@ -1,5 +1,4 @@
 {# See also language_selector_inc_home.html #}
-{% load i18n %}
 {% load ftl %}
 
 <div id="id-language-chooser-form">
@@ -7,11 +6,9 @@
     {% csrf_token %}
     {% ftlmsg 'site-footer-choose-language' %}
     <select name="language">
-      {% get_available_languages as LANGUAGES %}
-      {% get_language_info_list for LANGUAGES as languages %}
-      {% for language in languages %}
-        <option value="{{ language.code }}"{% if language.code == request.LANGUAGE_CODE %} selected{% endif %}>
-          {{ language.name_local }}
+      {% for language in settings.LANGUAGES %}
+        <option value="{{ language.0 }}"{% if language.0 == request.LANGUAGE_CODE %} selected{% endif %}>
+          {{ language.1 }}
         </option>
       {% endfor %}
     </select>

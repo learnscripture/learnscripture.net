@@ -165,7 +165,7 @@ LANGUAGE_CODE = "en"
 # which may be different from those supported for Bible versions (see bibleverses.languages)
 LANGUAGES = [
     ("en", "English"),
-    ("tr", "Turkçe"),
+    ("tr", "Türkçe"),
     ("es", "Español"),
 ]
 LANGUAGE_CODES = [c for c, n in LANGUAGES]

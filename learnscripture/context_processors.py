@@ -132,6 +132,7 @@ def settings_processor(request):
     return {
         "settings": {
             "SENTRY_DSN": settings.SENTRY_DSN,
+            "LANGUAGES": settings.LANGUAGES,
         }
     }
 
