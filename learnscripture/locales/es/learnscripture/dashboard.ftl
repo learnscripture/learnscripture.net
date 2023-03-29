@@ -167,7 +167,7 @@ dashboard-choose-link-html = Cuando hayas terminado con lo de arriba, <a href="{
 dashboard-todays-stats-title = Estadísticas de hoy
 
 # Indicates the number of new verses the user has started today
-dashboard-todays-stats-new-verses-begun = Versículos nuevos empezados: { $new_verses_begun }
+dashboard-todays-stats-new-verses-begun = Versículos nuevos empezados: { $new_verses_started }
 
 # Indicates the number of verses the user has been tested on today
 dashboard-todays-stats-total-verses-tested = Versículos probados: { $total_verses_tested }
