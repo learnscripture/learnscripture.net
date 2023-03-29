@@ -349,7 +349,7 @@ def check_templates():
 
 
 @task()
-def deploy(c: Connection, skip_checks=False, test_host=False):
+def deploy(c: Connection, skip_checks=False, test_host=False, skip_selenium=False):
     """
     Deploy project.
     """
@@ -360,7 +360,7 @@ def deploy(c: Connection, skip_checks=False, test_host=False):
 
     build_static(c)
     if not skip_checks:
-        code_quality_checks(c)
+        code_quality_checks(c, skip_selenium=skip_selenium)
     if not test_host:
         push_to_central_vcs(c)
     target = create_target(c)
@@ -386,7 +386,7 @@ def deploy(c: Connection, skip_checks=False, test_host=False):
 
 
 @local_task()
-def code_quality_checks(c: Connection):
+def code_quality_checks(c: Connection, skip_selenium: bool = False):
     """
     Run code quality checks, including tests.
     """
@@ -396,7 +396,7 @@ def code_quality_checks(c: Connection):
     run_ftl2elm(c)
     with c.cd("learnscripture/static/elm"):
         c.run("npx elm-test --skip-install", echo=True)
-    c.run("pytest", echo=True)
+    c.run("pytest" + (" -m 'not selenium'" if skip_selenium else ""), echo=True)
 
 
 def check_branch(c: Connection):
