@@ -431,7 +431,7 @@ DEBUG_TOOLBAR_CONFIG = {
 CACHES = (
     {
         "default": {
-            "BACKEND": "django.core.cache.backends.memcached.MemcachedCache",
+            "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
             "LOCATION": f"unix:{HOME_DIR}/learnscripture_memcached.sock",
             "KEY_PREFIX": "learnscripture.net",
         }

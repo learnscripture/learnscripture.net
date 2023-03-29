@@ -30,10 +30,10 @@ numpy==1.21.4
 parsy==1.4.0
 psycopg2-binary==2.9.2
 pyquery==1.4.3
-python-memcached==1.59
 pytz==2021.3
 requests==2.26.0
 sentry-sdk==1.5.0
 uwsgi==2.0.20
 django-render-block==0.9.1
 pyuca==1.2
+pymemcache==4.0.0

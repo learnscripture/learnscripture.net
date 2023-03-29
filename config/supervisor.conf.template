@@ -28,7 +28,7 @@ environment=LANG="%(LOCALE)s",LC_ALL="%(LOCALE)s",LC_LANG="%(LOCALE)s"
 
 
 [program:%(PROJECT_NAME)s_memcached]
-command=/usr/bin/memcached -m 24 -s /home/%(PROJECT_USER)s/%(PROJECT_NAME)s_memcached.sock
+command=/usr/bin/memcached -m 24 -s /home/%(PROJECT_USER)s/learnscripture_memcached.sock
 user=%(PROJECT_USER)s
 autostart=true
 autorestart=true
