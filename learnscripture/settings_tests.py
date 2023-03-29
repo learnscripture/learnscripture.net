@@ -1,4 +1,3 @@
-import glob
 import os
 import subprocess
 
@@ -40,9 +39,9 @@ WEBPACK_LOADER["DEFAULT"]["CACHE"] = True
 WEBPACK_LOADER["DEFAULT"]["STATS_FILE"] = os.path.join(SRC_ROOT, WEBPACK_STATS_FILE)
 
 
-# Monkey patch WebpackLoader to call `webpack` just in time.
-# This means that tests that don't need to run webpack
-# don't have that overhead.
+# Monkey patch WebpackLoader to call `webpack`. so that we don't have to run
+# webpack before running tests. We do it "just in time", so that tests that
+# don't need to run webpack don't have that overhead.
 
 original_get_assets = WebpackLoader.get_assets
 
@@ -51,8 +50,6 @@ _loaded = []
 
 def get_assets(self):
     if not _loaded:
-        for f in glob.glob("./learnscripture/static/webpack_bundles/*.tests.*"):
-            os.unlink(f)
         subprocess.check_call(["./node_modules/.bin/webpack", "--env", "mode=tests"])
         _loaded.append(True)
     return original_get_assets(self)
