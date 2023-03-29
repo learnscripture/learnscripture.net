@@ -96,6 +96,9 @@ choose-catechisms-link = Ver los catecismos disponibles
 # Button to start learning a verse or verse set
 choose-learn-button = Memorizar
 
+# Button to continue learning a verse that appears in a seach result
+choose-review-button = Repasar
+
 # Button to add a verse to the learning queue
 choose-add-to-queue-button = Añadir a la cola
 
