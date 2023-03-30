@@ -17,3 +17,4 @@ elm/tests/elm.js
 Ftl/
 *.aur
 settings_local.py
+.pytest-xdist*

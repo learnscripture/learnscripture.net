@@ -1,5 +1,6 @@
 import os
 import subprocess
+from pathlib import Path
 
 import filelock
 from webpack_loader.loader import WebpackLoader
@@ -46,19 +47,36 @@ WEBPACK_LOADER["DEFAULT"]["STATS_FILE"] = os.path.join(SRC_ROOT, WEBPACK_STATS_F
 
 original_get_assets = WebpackLoader.get_assets
 
-_loaded = []
+# process global to check if Webpack has been run
+_webpack_run_once = []
 
 
 def get_assets(self):
-    if not _loaded:
-        # When run multi-process (pytest-xdist) we hit nasty condition where
-        # all processes are rebuilding at the same time. So we use a lockfile.
-        # Ideally we'd fix so that we only run webpack once, but that is
-        # harder.
-        lock = filelock.FileLock(".pytest-webpack.lock")
-        with lock:
+    if not _webpack_run_once:
+
+        def run_webpack():
             subprocess.check_call(["./node_modules/.bin/webpack", "--env", "mode=tests"])
-        _loaded.append(True)
+
+        # For pytest-xdist, we want webpack to run just once, because it is
+        # pretty slow. This means we need interprocess communication, but we
+        # also want to ensure that subsequent runs also run webpack,
+        # irrespective of whether the previous run shut down cleanly.
+
+        # We solve using 1) a file lock and 2) PYTEST_XDIST_TESTRUNUID which is
+        # shared across these processes, but not between runs.
+
+        if (run_id := os.environ.get("PYTEST_XDIST_TESTRUNUID", None)) is None:
+            # single process, simple case:
+            run_webpack()
+        else:
+            lock = filelock.FileLock(".pytest-xdist.lock")
+            with lock:
+                run_id_path = Path(".pytest-xdist-run.txt")
+                if not run_id_path.exists() or run_id not in run_id_path.read_text():
+                    run_webpack()
+                    with run_id_path.open("w") as f:
+                        f.write(run_id + "\n")
+        _webpack_run_once.append(True)
     return original_get_assets(self)
 
 
