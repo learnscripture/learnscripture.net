@@ -14,7 +14,7 @@ from events.models import Event, EventType
 from learnscripture.forms import AccountSetPasswordForm
 from scores.models import Scores
 
-from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase
+from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase, create_account
 
 
 class SignupTestsBase(AccountTestMixin):
@@ -22,6 +22,11 @@ class SignupTestsBase(AccountTestMixin):
         username = self.create_account_interactive()
         assert Account.objects.filter(username=username).exists()
         self.assertTextPresent("Account created")
+
+    def test_signup_dupe(self):
+        create_account(username=(username := "mytestusername"))
+        self.create_account_interactive(username=username)
+        self.assertTextPresent("Account with this username already exists")
 
 
 class SignupTestsWT(SignupTestsBase, WebTestBase):
