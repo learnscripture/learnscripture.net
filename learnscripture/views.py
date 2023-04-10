@@ -216,13 +216,25 @@ def signup(request):
 
         if form.is_valid():
             identity = getattr(request, "identity", None)
-            if identity is None or identity.account_id is not None:
-                # Need to create a new identity if one doesn't exist,
-                # or the current one is assigned to an existing user.
+            if identity is None:
+                # Need to create a new identity if one doesn't exist
                 identity = session.start_identity(request)
             account = form.save(commit=False)
             account.last_login = timezone.now()
-            account.save()
+            try:
+                account.save()
+            except IntegrityError:
+                # This can only happen due to race condition in allocating
+                # username, typically if user double-clicks when saving. So we
+                # try to find out if they have actually managed to create an
+                # account in another request:
+                identity.refresh_from_db()
+                if identity.account_id is not None:
+                    return _login_redirect(request)
+                else:
+                    # failed somehow, redirect to same page to try again
+                    return redirect(".", permanent=False)
+
             account.identity = identity
             identity.account = account
             identity.save()
