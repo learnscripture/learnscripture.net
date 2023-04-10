@@ -208,10 +208,11 @@ def signup(request):
     from accounts.signals import new_account
 
     ctx = {}
-    if account_from_request(request) is not None:
+    existing_account = account_from_request(request)
+    if existing_account is not None:
         ctx["already_signed_up"] = True
-
-    if request.method == "POST":
+        form = None
+    elif request.method == "POST":
         form = SignUpForm(request.POST, prefix="signup")
 
         if form.is_valid():

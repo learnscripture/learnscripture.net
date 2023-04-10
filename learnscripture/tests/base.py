@@ -164,9 +164,10 @@ class AccountTestMixin(TextVersionsMixin):
     create_identity = staticmethod(create_identity)
     create_account = staticmethod(create_account)
 
-    def create_account_interactive(self, email="test2@test.com", username="tëst2", password="testpassword2"):
+    def create_account_interactive(self, email="test2@test.com", username="tëst2", password="testpassword2") -> str:
         self.get_url("signup")
         self.fill_in_account_form(email=email, username=username, password=password)
+        return username
 
     def fill_in_account_form(self, email="test2@test.com", username="tëst2", password="testpassword2"):
         self.fill({"#id_signup-email": email, "#id_signup-username": username, "#id_signup-password": password})

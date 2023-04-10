@@ -17,6 +17,21 @@ from scores.models import Scores
 from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase
 
 
+class SignupTestsBase(AccountTestMixin):
+    def test_signup(self):
+        username = self.create_account_interactive()
+        assert Account.objects.filter(username=username).exists()
+        self.assertTextPresent("Account created")
+
+
+class SignupTestsWT(SignupTestsBase, WebTestBase):
+    pass
+
+
+class SignupTestsFB(SignupTestsBase, FullBrowserTest):
+    pass
+
+
 class AccountTests(AccountTestMixin, TestBase):
     maxDiff = None
 
