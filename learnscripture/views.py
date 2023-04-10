@@ -10,11 +10,12 @@ from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetView as AuthPasswordResetView
 from django.contrib.sites.models import Site
+from django.db import IntegrityError
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBadRequest
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -1715,7 +1716,12 @@ def _create_or_edit_group(request, group=None):
             group.created_by = account
             if was_public:
                 group.public = True
-            group.save()
+            try:
+                group.save()
+            except IntegrityError:
+                # Race condition when the user double-clicks 'Save'.
+                # It means there is already a group created, so we redirect to it.
+                return redirect(reverse("edit_group", kwargs=dict(slug=group.slug)))
 
             if not was_public and group.public:
                 public_group_created.send(sender=group)
