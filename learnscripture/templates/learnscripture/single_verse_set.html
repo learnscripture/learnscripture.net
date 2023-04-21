@@ -49,7 +49,7 @@
           <select id="id-version-select" name="version">
             {% for v in bible_versions %}
               <option value="{{ v.slug }}"
-                {% if v.slug == version.slug %}selected{% endif %}
+                      {% if v.slug == version.slug %}selected{% endif %}
               >{{ v.short_name }} ({{ v.full_name }})</option>
             {% endfor %}
           </select>

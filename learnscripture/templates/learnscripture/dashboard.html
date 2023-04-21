@@ -20,7 +20,7 @@
   {% if request.identity.scoring_enabled %}
     <h2>{% ftlmsg 'dashboard-learning-events' %}
       <a href="#"
-        id="id-show-heatmap"
+         id="id-show-heatmap"
       >
         {% if request.identity.heatmap_default_show %}
           <i class="icon-fw icon-heatmap-toggle expanded"></i>
@@ -30,9 +30,9 @@
       </a>
     </h2>
     <div id="id-heatmap-section" class="borderedbox"
-      {% if not request.identity.heatmap_default_show %}
-        style="display: none;"
-      {% endif %}
+         {% if not request.identity.heatmap_default_show %}
+           style="display: none;"
+         {% endif %}
     >
       <div style="float: right; font-size: 120%;">
         <a href="{% url 'user_stats' request_account.username %}" title="{% ftlmsg 'heatmap-your-stats' %}"><i class="icon-fw icon-stats"></i></a>
@@ -59,9 +59,9 @@
             {% for value, caption in heatmap_stats_types %}
               <li>
                 <input type="radio" name="stat"
-                  value="{{ value }}"
-                  id="id-heatmap-select-stat-{{ value }}"
-                  {% if request.identity.heatmap_default_stats_type == value %}checked{% endif %}
+                       value="{{ value }}"
+                       id="id-heatmap-select-stat-{{ value }}"
+                       {% if request.identity.heatmap_default_stats_type == value %}checked{% endif %}
                 ><label for="id-heatmap-select-stat-{{ value }}">{{ caption }}</label>
               </li>
             {% endfor %}
@@ -77,9 +77,9 @@
     {# There are two types of unfinished session #}
     {# One is detected server side with session.unfinished_session #}
     {# The other can only be detected using localStorage client side #}
-    {% if not unfinished_session_first_uvs %}
-      style="display: none;"
-    {% endif %}
+       {% if not unfinished_session_first_uvs %}
+         style="display: none;"
+       {% endif %}
   >
     <h2>{% ftlmsg 'dashboard-continue-title' %}</h2>
     <div class="actionset">
@@ -118,19 +118,19 @@
           <input type="hidden" name="version_id" value="{{ cvs.version.id }}" />
           {% if cvs.splittable %}
             <button type="submit" name="reviewpassage" class="btn primary"
-              id="id-reviewpassage-btn-{{ cvs.id }}"
+                    id="id-reviewpassage-btn-{{ cvs.id }}"
             >{% ftlmsg 'dashboard-review-whole-passage-button' %}</button><br/>
             <button type="submit" name="reviewpassagenextsection" class="btn primary"
-              id="id-reviewpassage-sections-btn-{{ cvs.id }}"
+                    id="id-reviewpassage-sections-btn-{{ cvs.id }}"
             >{% ftlmsg 'dashboard-review-one-section-button' verse_count=cvs.next_section_verse_count %}</button><br/>
           {% else %}
             <button type="submit" name="reviewpassage" class="btn primary"
-              id="id-reviewpassage-btn-{{ cvs.id }}"
+                    id="id-reviewpassage-btn-{{ cvs.id }}"
             >{% ftlmsg 'dashboard-review-button' %}</button><br/>
 
           {% endif %}
           <button type="submit" name="cancelpassage" class="btn"
-            id="id-cancelpassage-btn-{{ cvs.id }}"
+                  id="id-cancelpassage-btn-{{ cvs.id }}"
           >{% ftlmsg 'dashboard-cancel-learning' %}</button><br/>
         </form>
         <h3><a href="{% url 'view_verse_set' cvs.verse_set.slug %}?version={{ cvs.version.slug }}">{{ cvs.verse_set.smart_name_dict|lookup:cvs.version.language_code }}</a> ({{ cvs.version.short_name }})<br/>
@@ -222,7 +222,7 @@
           <input type="hidden" name="verse_set_id" value="{{ cvs.verse_set.id }}" />
           <input type="hidden" name="version_id" value="{{ cvs.version.id }}" />
           <button type="submit" name="learnpassage" class="btn primary"
-            id="id-learnpassage-btn-{{ cvs.id }}">
+                  id="id-learnpassage-btn-{{ cvs.id }}">
             {% if cvs.tested_total == 0 %}
               {% ftlmsg 'dashboard-learn-start-learning-button' %}
             {% else %}
@@ -230,7 +230,7 @@
             {% endif %}
           </button><br>
           <button type="submit" name="cancelpassage" class="btn"
-            id="id-cancelpassage-btn-{{ cvs.id }}">
+                  id="id-cancelpassage-btn-{{ cvs.id }}">
             {% ftlmsg 'dashboard-cancel-learning' %}
           </button>
         </form>
@@ -258,11 +258,11 @@
         <div class="addclearfix">
           <form action="" method="POST"
             {# for benefit of testing: #}
-            {% if verse_set %}
-              id="id-learning-queue-verse-set-{{ verse_set.id }}"
-            {% else %}
-              id="id-learning-queue-non-verse-set"
-            {% endif %}
+                {% if verse_set %}
+                  id="id-learning-queue-verse-set-{{ verse_set.id }}"
+                {% else %}
+                  id="id-learning-queue-non-verse-set"
+                {% endif %}
           >
             {% csrf_token %}
             <button type="submit" name="learnbiblequeue" class="btn primary">{% ftlmsg 'dashboard-learn-button' %}</button><br /><button type="submit" name="clearbiblequeue" class="btn">{% ftlmsg 'dashboard-clear-queue-button' %}</button>
@@ -404,9 +404,9 @@
 
 
   <div id="id-dashboard-script-data"
-    {% if request.identity.account %}
-      data-user-timeline-stats-user="{{ request.identity.account.username }}"
-    {% endif %}
+       {% if request.identity.account %}
+         data-user-timeline-stats-user="{{ request.identity.account.username }}"
+       {% endif %}
   >
   </div>
   {% include "learnscripture/dashboard_js_i18n_strings_inc.html" %}

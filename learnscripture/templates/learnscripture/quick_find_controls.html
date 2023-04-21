@@ -40,9 +40,9 @@
         <option value="">----</option>
         {% for b in bible_books %}
           <option value="{{ b|lookup:"internal" }}"
-            {% for l in language_codes %}
-              data-lang-{{ l }}="{{ b|lookup:l }}"
-            {% endfor %}
+                  {% for l in language_codes %}
+                    data-lang-{{ l }}="{{ b|lookup:l }}"
+                  {% endfor %}
           >{{ b|lookup:current_language_code }}</option>
         {% endfor %}
       </select>
@@ -69,8 +69,8 @@
       <select id="id-version-select" name="version">
         {% for v in bible_versions %}
           <option value="{{ v.slug }}"
-            lang="{{ v.language_code }}"
-            {% if v.slug == default_bible_version.slug %}selected{% endif %}
+                  lang="{{ v.language_code }}"
+                  {% if v.slug == default_bible_version.slug %}selected{% endif %}
           >{{ v.short_name }} ({{ v.full_name }})</option>
         {% endfor %}
       </select>

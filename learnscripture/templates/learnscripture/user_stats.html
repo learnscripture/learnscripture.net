@@ -8,9 +8,9 @@
   {{ block.super }}
   <script type="text/javascript" src="{{ STATIC_URL }}lib/dygraph-combined.js"></script>
   <script type="text/javascript"
-    id="id-script-user-stats-chart"
-    data-verses-started-caption="{% ftlmsg 'user-stats-verses-started' %}"
-    data-verses-tested-caption="{% ftlmsg 'user-stats-verses-tested' %}"
+          id="id-script-user-stats-chart"
+          data-verses-started-caption="{% ftlmsg 'user-stats-verses-started' %}"
+          data-verses-tested-caption="{% ftlmsg 'user-stats-verses-tested' %}"
   >
     $(document).ready(function () {
       $.ajax({
@@ -269,7 +269,7 @@
   {% endif %}
 
   <div id="id-user-stats-script-data"
-    data-user-timeline-stats-user="{{ account.username }}">
+       data-user-timeline-stats-user="{{ account.username }}">
   </div>
 
 {% endblock %}

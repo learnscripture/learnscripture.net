@@ -10,11 +10,11 @@
   <h2>{% ftlmsg 'comments-comment-list-title' %}</h2>
 
   <form action="." method="GET"
-    hx-get="."
-    hx-target="#id-group-wall-comments"
-    hx-vals='{"use_block": "results"}'
-    hx-indicator="#id-group-wall-comments"
-    data-trigger-on-input-change="true"
+        hx-get="."
+        hx-target="#id-group-wall-comments"
+        hx-vals='{"use_block": "results"}'
+        hx-indicator="#id-group-wall-comments"
+        data-trigger-on-input-change="true"
   >
     {{ filter_form|render_form }}
   </form>
@@ -24,7 +24,7 @@
     {% block results %}
       <div class="groupcomments" data-group-id="{{ group.id }}">
         <div class="commentblock"
-          data-new-comments-position="{% if sort_order == 'newestfirst' %}top{% else %}bottom{% endif %}"
+             data-new-comments-position="{% if sort_order == 'newestfirst' %}top{% else %}bottom{% endif %}"
         >
 
           {% block page-and-paging %}
@@ -44,11 +44,11 @@
                   </span>
                   {% if results.more %}
                     <span class="paging-part"><a href="{{ results.more_link }}"
-                      hx-get="{{ results.more_link }}"
-                      hx-target="#id-more-results-container"
-                      hx-indicator="#id-more-results-container"
-                      hx-vals='{"use_block": "page-and-paging"}'
-                      hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
+                                                 hx-get="{{ results.more_link }}"
+                                                 hx-target="#id-more-results-container"
+                                                 hx-indicator="#id-more-results-container"
+                                                 hx-vals='{"use_block": "page-and-paging"}'
+                                                 hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
                   {% endif %}
                   <span class="paging-part"><a href="#id-page-top">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
                 </div>

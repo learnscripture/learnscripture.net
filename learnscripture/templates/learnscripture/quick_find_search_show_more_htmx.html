@@ -5,9 +5,9 @@
       {% if more_results %}
         <span class="paging-part">
           <a href="{{ get_more_results_url }}"
-            hx-get="{{ get_more_results_url }}"
-            hx-target="closest .more-results-container"
-            hx-swap="outerHTML"
+             hx-get="{{ get_more_results_url }}"
+             hx-target="closest .more-results-container"
+             hx-swap="outerHTML"
           >{% ftlmsg 'pagination-show-more' %}</a>
         </span>
       {% endif %}

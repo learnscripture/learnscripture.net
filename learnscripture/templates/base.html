@@ -56,10 +56,10 @@
                 <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> {% ftlmsg 'site-verse-sets-link' %}</a></li>
                 <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> {% ftlmsg 'site-user-stats-link' %}</a></li>
                 <li><a href="#"
-                  hx-post="{% url 'logout' %}"
-                  hx-confirm="{% ftlmsg 'site-logout-confirm-prompt' %}"
-                  hx-vals='{"url_after_logout": "{{ url_after_logout }}"}'
-                ><i class="icon-fw icon-logout"></i> {% ftlmsg 'site-log-out-link' %}</a></li>
+                       hx-post="{% url 'logout' %}"
+                       hx-confirm="{% ftlmsg 'site-logout-confirm-prompt' %}"
+                       hx-vals='{"url_after_logout": "{{ url_after_logout }}"}'
+                  ><i class="icon-fw icon-logout"></i> {% ftlmsg 'site-log-out-link' %}</a></li>
               {% endif %}
             </ul>
           </div>

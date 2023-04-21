@@ -8,11 +8,11 @@
 
 {% block content %}
   <form action="." method="GET"
-    hx-get="."
-    hx-target="#id-user-verses-results"
-    hx-indicator="#id-user-verses-results"
-    hx-vals='{"use_block": "results"}'
-    data-trigger-on-input-change="true"
+        hx-get="."
+        hx-target="#id-user-verses-results"
+        hx-indicator="#id-user-verses-results"
+        hx-vals='{"use_block": "results"}'
+        data-trigger-on-input-change="true"
   >
     <div class="form-row">
       <label for="id_query">{% ftlmsg 'user-verses-search-label' %}</label>
@@ -50,9 +50,9 @@
             {% for verse in results.items %}
               {% ifchanged verse.localized_reference verse.version.slug %}
                 <tbody {% if verse.verse_set_id %}
-                  data-verse-set-id="{{ verse.verse_set_id }}"
-                {% endif %}
-                  data-version-id="{{ verse.version_id }}"
+                         data-verse-set-id="{{ verse.verse_set_id }}"
+                       {% endif %}
+                       data-version-id="{{ verse.version_id }}"
                 >
                   <tr>
                     <td>{{ verse.title }}</td>
@@ -87,11 +87,11 @@
                       <span class="paging-part">{% ftlmsg 'pagination-showing-shown-of-total' shown=results.shown_count total=results.total %}</span>
                       <span class="paging-part">
                         <a href="{{ results.more_link }}"
-                          hx-get="{{ results.more_link }}"
-                          hx-target="#id-more-results-container"
-                          hx-vals='{"use_block": "page-plus-paging"}'
-                          hx-indicator="#id-more-results-container"
-                          hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
+                           hx-get="{{ results.more_link }}"
+                           hx-target="#id-more-results-container"
+                           hx-vals='{"use_block": "page-plus-paging"}'
+                           hx-indicator="#id-more-results-container"
+                           hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
                       <span class="paging-part"><a href="#id-page-top">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
                     </div>
                   </td>
