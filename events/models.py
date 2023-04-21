@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 from datetime import timedelta
 
@@ -418,7 +420,7 @@ def dedupe_iterable(iterable, keyfunc):
 
 
 class EventManager(models.Manager):
-    def for_dashboard(self, language_code, now=None, account=None):
+    def for_dashboard(self, language_code, now=None, account=None) -> list[Event]:
         if now is None:
             now = timezone.now()
 
@@ -464,8 +466,10 @@ class EventManager(models.Manager):
         if viewer is None or not viewer.is_hellbanned:
             qs_base = qs_base.exclude(account__is_hellbanned=True)
 
-        # Exclude all comments from private groups
-        qs_1 = qs_base.exclude(group__isnull=False, group__public=False)
+        # Exclude all comments from private groups and quietened groups
+        qs_1 = qs_base.exclude(group__isnull=False, group__public=False).exclude(
+            group__isnull=False, group__quietened=True
+        )
 
         if viewer is not None:
             # Re-add events from groups

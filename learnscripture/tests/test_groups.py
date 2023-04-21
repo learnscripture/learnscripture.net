@@ -12,13 +12,14 @@ from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase, get_
 from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-def create_group(slug="my-group", created_by=None, public=False):
+def create_group(*, slug="my-group", created_by=None, public=False, quietened=False) -> Group:
     if created_by is None:
         created_by = get_or_create_any_account()
     return Group.objects.create(
         slug=slug,
         created_by=created_by,
         public=public,
+        quietened=quietened,
     )
 
 

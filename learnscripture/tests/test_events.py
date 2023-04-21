@@ -84,6 +84,26 @@ class EventTests(AccountTestMixin, TestBase):
         # account2 and viewer are friends, so e3 should be before e2
         assert stream.index(e3) < stream.index(e2)
 
+    def test_group_comment_event_visibility(self):
+        _, account1 = self.create_account(username="1")
+        _, viewer = self.create_account(username="viewer")
+        group_normal = create_group(quietened=False, public=True)
+        group_quiet = create_group(quietened=True, public=True)
+        group_private = create_group(public=False)
+        group_normal.add_user(account1)
+        group_quiet.add_user(account1)
+        group_private.add_user(account1)
+
+        group_normal.add_comment(author=account1, message="Hello")
+        group_quiet.add_comment(author=account1, message="Hello")
+        group_private.add_comment(author=account1, message="Hello")
+
+        comment_events = [
+            e for e in Event.objects.for_dashboard("en", account=viewer) if e.event_type == EventType.NEW_COMMENT
+        ]
+        assert len(comment_events) == 1  # Just the public, non-quiet group
+        assert [e.group for e in comment_events] == [group_normal]
+
     def test_comment_on_group_event(self):
         """
         Test that a comment created on an event that relates to a group

@@ -85,6 +85,36 @@
 
   </div>
 
+  {% block moderation %}
+
+    {% if request_account.is_moderator %}
+      <div id="id-group-moderation">
+        <h2>Moderation</h2>
+
+        <div class="actionset">
+          <form
+            action=""
+            method="POST"
+            hx-post="."
+            hx-vals='{"use_block": "moderation"}'
+            hx-target="#id-group-moderation"
+            hx-swap="outerHTML"
+          >
+            {% csrf_token %}
+            {% if group.quietened %}
+              <button type="submit" name="unquieten" class="btn">Unquieten group</button>
+            {% else %}
+              <button type="submit" name="quieten" class="btn">Quieten group</button>
+            {% endif %}
+          </form>
+          <p>As a moderator, you can quieten a group to exclude it from the general
+            news feed for other users. This group is currently: {% if group.quietened %}Quietened{% else %}Unquietened{% endif %}
+          </p>
+
+        </div>
+      </div>
+    {% endif %}
+  {% endblock %}
 
   <h2>{% ftlmsg 'groups-details-members-subtitle' %}</h2>
 

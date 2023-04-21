@@ -289,7 +289,7 @@ def preferences(request):
     return TemplateResponse(request, "learnscripture/preferences.html", ctx)
 
 
-def account_from_request(request):
+def account_from_request(request) -> Account | None:
     if hasattr(request, "identity"):
         return request.identity.account
     else:
@@ -1558,12 +1558,13 @@ def group_list(request):
     )
 
 
-def group_by_slug(request, slug):
+def group_by_slug(request, slug) -> Group:
     groups = groups_visible_for_request(request)
     return get_object_or_404(groups, slug=slug)
 
 
-def group(request, slug):
+@for_htmx(use_block_from_params=True)
+def group(request: HttpRequest, slug: str) -> HttpResponse:
     group = group_by_slug(request, slug)
     account = account_from_request(request)
 
@@ -1580,6 +1581,12 @@ def group(request, slug):
                 group.add_user(account)
                 messages.info(request, t("groups-added-to-group", dict(name=group.name)))
             return HttpResponseRedirect(request.get_full_path())
+
+        if account.is_moderator:
+            if "quieten" in request.POST:
+                group.quieten(by=account)
+            elif "unquieten" in request.POST:
+                group.unquieten(by=account)
 
     if account is not None:
         in_group = group.members.filter(id=account.id).exists()

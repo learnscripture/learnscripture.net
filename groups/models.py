@@ -65,6 +65,7 @@ class Group(models.Model):
         choices=settings.LANGUAGES,
         default=settings.LANGUAGE_CODE,
     )
+    quietened = models.BooleanField(default=False, help_text="A quietened group will be less visible on news feeds")
 
     objects = GroupQuerySet.as_manager()
 
@@ -137,6 +138,14 @@ class Group(models.Model):
         if account is None or not account.is_hellbanned:
             qs = qs.exclude(author__is_hellbanned=True)
         return qs
+
+    def quieten(self, *, by: Account):
+        self.quietened = True
+        self.save()
+
+    def unquieten(self, *, by: Account):
+        self.quietened = False
+        self.save()
 
 
 class Membership(models.Model):
