@@ -69,12 +69,6 @@ groups-search = Grupları ara
 # $name is name of group
 groups-group-page-title = Grup: { $name }
 
-# Notice displayed after being removed from a group (at user's request),
-# $name is group name
-groups-removed-from-group = { $name } sizi gruptan çıkardı
-
-# Notice displayed after being added to a group (at user's request)
-groups-added-to-group = { $name } sizi gruba ekledi
 
 # Link that will show other groups
 groups-other-groups-link = Diğer Gruplar

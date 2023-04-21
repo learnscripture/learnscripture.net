@@ -72,12 +72,6 @@ groups-search = Buscar
 # $name is name of group
 groups-group-page-title = Grupo: { $name }
 
-# Notice displayed after being removed from a group (at user's request),
-# $name is group name
-groups-removed-from-group = Has sido eliminado del grupo { $name }
-
-# Notice displayed after being added to a group (at user's request)
-groups-added-to-group = Has sido añadido al grupo { $name }
 
 # Link that will show other groups
 groups-other-groups-link = Otros grupos

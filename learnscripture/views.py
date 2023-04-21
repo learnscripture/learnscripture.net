@@ -1574,13 +1574,9 @@ def group(request: HttpRequest, slug: str) -> HttpResponse:
 
         if "leave" in request.POST:
             group.remove_user(account)
-            messages.info(request, t("groups-removed-from-group", dict(name=group.name)))
-            return HttpResponseRedirect(request.get_full_path())
         if "join" in request.POST:
             if group.can_join(account):
                 group.add_user(account)
-                messages.info(request, t("groups-added-to-group", dict(name=group.name)))
-            return HttpResponseRedirect(request.get_full_path())
 
         if account.is_moderator:
             if "quieten" in request.POST:

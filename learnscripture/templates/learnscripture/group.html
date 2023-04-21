@@ -49,41 +49,59 @@
   </ul>
 
 
-  <h2>{% ftlmsg 'groups-details-your-status-subtitle' %}</h2>
+  {% block your-membership-status %}
+    <div id="id-group-membership-status">
+      <h2>{% ftlmsg 'groups-details-your-status-subtitle' %}</h2>
 
-  <div class="actionset">
-    {% if in_group %}
+      <div class="actionset">
+        {% if in_group %}
 
-      <form action="" method="POST">
-        {% csrf_token %}
-        <button type="submit" name="leave" class="btn">{% ftlmsg 'groups-details-leave-button' %}</button>
-      </form>
-      <p>{% ftlmsg 'groups-details-status-member' %}</p>
+          <form
+            action=""
+            method="POST"
+            hx-post="."
+            hx-vals='{"use_block": "your-membership-status"}'
+            hx-target="#id-group-membership-status"
+            hx-swap="outerHTML"
+          >
+            {% csrf_token %}
+            <button type="submit" name="leave" class="btn">{% ftlmsg 'groups-details-leave-button' %}</button>
+          </form>
+          <p>{% ftlmsg 'groups-details-status-member' %}</p>
 
-    {% else %}
-      {% if can_join %}
-        <form action="" method="POST">
-          {% csrf_token %}
-          {% if group.public %}
-            <i title="{% ftlmsg 'site-public-action' %}" class="icon-public icon-replace"></i>
+        {% else %}
+          {% if can_join %}
+            <form
+              action=""
+              method="POST"
+              hx-post="."
+              hx-vals='{"use_block": "your-membership-status"}'
+              hx-target="#id-group-membership-status"
+              hx-swap="outerHTML"
+            >
+              {% csrf_token %}
+              {% if group.public %}
+                <i title="{% ftlmsg 'site-public-action' %}" class="icon-public icon-replace"></i>
+              {% endif %}
+
+              <button type="submit" name="join" class="primary btn join-group-btn needs-account">{% ftlmsg 'groups-details-join-button' %}</button>
+            </form>
+
           {% endif %}
 
-          <button type="submit" name="join" class="primary btn join-group-btn needs-account">{% ftlmsg 'groups-details-join-button' %}</button>
-        </form>
+          <p>{% ftlmsg 'groups-details-status-not-member' %}</p>
 
-      {% endif %}
+          {% if can_join %}
+            <p>{% ftlmsg 'groups-details-join-explanation-html' %}</p>
 
-      <p>{% ftlmsg 'groups-details-status-not-member' %}</p>
+            <p>{% ftlmsg 'groups-details-join-privacy-note' %}</p>
+          {% endif %}
 
-      {% if can_join %}
-        <p>{% ftlmsg 'groups-details-join-explanation-html' %}</p>
+        {% endif %}
 
-        <p>{% ftlmsg 'groups-details-join-privacy-note' %}</p>
-      {% endif %}
-
-    {% endif %}
-
-  </div>
+      </div>
+    </div>
+  {% endblock %}
 
   {% block moderation %}
 
