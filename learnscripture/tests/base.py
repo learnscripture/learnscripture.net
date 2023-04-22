@@ -44,6 +44,7 @@ def create_account(
     testing_method=None,
     is_tester=False,
     is_active=True,
+    is_moderator=False,
 ) -> tuple[Identity, Account]:
     """
     Creates an account, returning (identity, account) tuple
@@ -54,6 +55,7 @@ def create_account(
         last_login=timezone.now(),
         is_active=is_active,
         is_tester=is_tester,
+        is_moderator=is_moderator,
     )
     account.set_password("password")
     account.save()
@@ -308,6 +310,11 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         time.sleep(0.1)
         self.wait_until(
             lambda driver: driver.execute_script('return (typeof(jQuery) == "undefined" || jQuery.active == 0)')
+        )
+        self.wait_until(
+            lambda _: not self.is_element_present(".htmx-request")
+            and not self.is_element_present(".htmx-swapping")
+            and not self.is_element_present(".htmx-settling")
         )
 
     @contextlib.contextmanager

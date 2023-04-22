@@ -8,7 +8,7 @@ from comments.models import Comment
 from events.models import Event, EventType, GroupJoinedEvent
 from groups.models import Group
 
-from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase, get_or_create_any_account
+from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase, create_account, get_or_create_any_account
 from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
@@ -52,7 +52,7 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
 
         self.assertUrlsEqual(reverse("group", args=("another-group",)))
 
-        self.submit('[name="join"]')
+        self.submit('[name="join"]', wait_for_reload=False)
         assert public_group.members.filter(id=account.id).exists()
 
         assert Event.objects.filter(event_type=EventType.GROUP_JOINED).count() == 1
@@ -68,9 +68,24 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
         self.submit('[name="join"]')
 
         self.fill_in_account_form()
-        self.submit('[name="join"]')
+        self.submit('[name="join"]', wait_for_reload=False)
 
         self.assertTextPresent("You are a member of this group")
+
+    def test_quieten(self):
+        group = create_group(public=True, quietened=False)
+        _, moderator = create_account(is_moderator=True)
+        self.login(moderator)
+        self.get_url("group", group.slug)
+        self.submit("[name=quieten]", wait_for_reload=False)
+        group.refresh_from_db()
+        assert group.quietened
+        assert group.moderation_actions.exists()
+        assert group.moderation_actions.get().action_by == moderator
+
+        self.submit("[name=unquieten]", wait_for_reload=False)
+        group.refresh_from_db()
+        assert not group.quietened
 
 
 class GroupPageTestsFB(GroupPageTestsBase, FullBrowserTest):

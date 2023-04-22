@@ -279,6 +279,7 @@ INSTALLED_APPS = [
     "groups",
     "comments",
     "cms",
+    "moderation",
     # Third party
     "mptt",
     "compressor",  # for cms

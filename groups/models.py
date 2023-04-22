@@ -140,12 +140,18 @@ class Group(models.Model):
         return qs
 
     def quieten(self, *, by: Account):
+        from moderation.models import ModerationActionType
+
         self.quietened = True
         self.save()
+        self.moderation_actions.create(action_by=by, action_type=ModerationActionType.GROUP_QUIETENED)
 
     def unquieten(self, *, by: Account):
+        from moderation.models import ModerationActionType
+
         self.quietened = False
         self.save()
+        self.moderation_actions.create(action_by=by, action_type=ModerationActionType.GROUP_UNQUIETENED)
 
 
 class Membership(models.Model):
