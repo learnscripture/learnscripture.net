@@ -11,3 +11,6 @@ multi_line_output = 3
 known_third_party = ["pykov", "autoslug", "jsonfield", "mock", "parsy", "aldjemy", "django_ftl", "fluent", "django"]
 skip_glob = ["**/migrations/*.py", "node_modules/*", "**/elm-stuff/*", ".*", "config/trac/*"]
 skip = ["settings.py", "node_modules", ".git", "learnscripture/static/elm" ]
+
+[tool.ruff]
+line-length = 120
