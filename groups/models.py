@@ -139,19 +139,13 @@ class Group(models.Model):
             qs = qs.exclude(author__is_hellbanned=True)
         return qs
 
-    def quieten(self, *, by: Account):
-        from moderation.models import ModerationActionType
-
+    def quieten(self):
         self.quietened = True
         self.save()
-        self.moderation_actions.create(action_by=by, action_type=ModerationActionType.GROUP_QUIETENED)
 
-    def unquieten(self, *, by: Account):
-        from moderation.models import ModerationActionType
-
+    def unquieten(self):
         self.quietened = False
         self.save()
-        self.moderation_actions.create(action_by=by, action_type=ModerationActionType.GROUP_UNQUIETENED)
 
 
 class Membership(models.Model):

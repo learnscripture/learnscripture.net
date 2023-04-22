@@ -84,6 +84,7 @@ from learnscripture.forms import (
     VerseSetSearchForm,
 )
 from learnscripture.ftl_bundles import t
+from moderation import models as moderation
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts
 
@@ -1580,9 +1581,9 @@ def group(request: HttpRequest, slug: str) -> HttpResponse:
 
         if account.is_moderator:
             if "quieten" in request.POST:
-                group.quieten(by=account)
+                moderation.quieten_group(group, account)
             elif "unquieten" in request.POST:
-                group.unquieten(by=account)
+                moderation.unquieten_group(group, account)
 
     if account is not None:
         in_group = group.members.filter(id=account.id).exists()
