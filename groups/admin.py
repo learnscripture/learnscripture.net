@@ -5,6 +5,7 @@ from .models import Group, Invitation, Membership
 
 class GroupAdmin(admin.ModelAdmin):
     list_display = ["name", "created", "public", "open"]
+    autocomplete_fields = ["created_by"]
     readonly_fields = ["slug"]
     search_fields = ["name"]
 

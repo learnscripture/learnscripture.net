@@ -51,18 +51,28 @@ class ModerationAction(models.Model):
     action_by = models.ForeignKey(Account, related_name="moderation_actions_taken", on_delete=models.CASCADE)
     action_type = models.CharField(max_length=50, choices=ModerationActionType.choices)
 
-    # Only one of the following should be non-null:
+    # Target: Only one of the following should be non-null:
     group = models.ForeignKey(Group, null=True, blank=True, related_name="moderation_actions", on_delete=models.CASCADE)
     user = models.ForeignKey(
         Account, null=True, blank=True, related_name="moderation_actions", on_delete=models.CASCADE
     )
 
     done_at = models.DateTimeField(default=timezone.now)
-    duration = models.DurationField(default=None, null=True)  # None for indefinite
-    reversed_at = models.DateTimeField(null=True, default=None)  # Set when reversal done
+    duration = models.DurationField(default=None, null=True, blank=True)  # None for indefinite
+    reversed_at = models.DateTimeField(null=True, default=None, blank=True)  # Set when reversal done
     reversal_cancelled = models.BooleanField(default=False)  # Set True if reversal is cancelled
 
     objects = models.Manager.from_queryset(ModerationActionQuerySet)()
+
+    def __str__(self):
+        return f"Moderation {self.id}, {self.get_action_type_display()}: {self.target}"
+
+    @property
+    def target(self) -> Account | Group:
+        if self.group_id is not None:
+            return self.group
+        elif self.user_id is not None:
+            return self.user
 
     @cached_property  # cached_property enables setting, so it works with annotate above
     def reversal_due_at(self):
