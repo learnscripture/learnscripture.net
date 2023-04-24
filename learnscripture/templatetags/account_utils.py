@@ -3,8 +3,9 @@ import logging
 from django.template import Library
 from django.urls import reverse
 
+from accounts.models import Account
 from common.utils.html import link
-from groups.utils import group_link
+from groups.models import group_link
 
 from ..utils.urls import build_login_url, build_preferences_url, build_signup_url
 
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @register.filter
-def account_link(account):
+def account_link(account: Account):
     if account.is_erased:
         return "[deleted]"
     return link(

@@ -3,8 +3,8 @@ from django.dispatch import receiver
 
 import accounts.tasks
 from comments.signals import new_comment
+from groups.models import group_link
 from groups.signals import invitation_created
-from groups.utils import group_link
 from learnscripture.ftl_bundles import t
 from learnscripture.templatetags.account_utils import account_link
 

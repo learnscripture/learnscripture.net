@@ -7,6 +7,8 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from accounts.models import Account
+from comments.models import Comment
+from comments.models import hide_comment as comments_hide_comment
 from groups.models import Group
 
 
@@ -15,6 +17,7 @@ class ModerationActionType(TextChoices):
     GROUP_UNQUIETENED = "group_unquietened", "Group unquietened"
     USER_HELLBANNED = "user_hellbanned", "User hellbanned"
     USER_UNHELLBANNED = "user_unhellbanned", "User unhellbanned"
+    COMMENT_HIDDEN = "comment_hidden", "Comment hidden"
 
 
 class ModerationActionQuerySet(models.QuerySet):
@@ -56,6 +59,9 @@ class ModerationAction(models.Model):
     user = models.ForeignKey(
         Account, null=True, blank=True, related_name="moderation_actions", on_delete=models.CASCADE
     )
+    comment = models.ForeignKey(
+        Comment, null=True, blank=True, related_name="moderation_actions", on_delete=models.CASCADE
+    )
 
     done_at = models.DateTimeField(default=timezone.now)
     duration = models.DurationField(default=None, null=True, blank=True)  # None for indefinite
@@ -73,6 +79,8 @@ class ModerationAction(models.Model):
             return self.group
         elif self.user_id is not None:
             return self.user
+        elif self.comment_id is not None:
+            return self.comment
 
     @cached_property  # cached_property enables setting, so it works with annotate above
     def reversal_due_at(self):
@@ -112,6 +120,14 @@ def hellban_user(user: Account, *, by: Account, duration: None | timedelta):
 def unhellban_user(user: Account, *, by: Account):
     user.unhellban()
     user.moderation_actions.create(action_by=by, action_type=ModerationActionType.USER_UNHELLBANNED)
+
+
+@atomic
+def hide_comment(comment_id: int, *, by: Account):
+    comments_hide_comment(comment_id)
+    ModerationAction.objects.create(
+        comment_id=comment_id, action_by=by, action_type=ModerationActionType.COMMENT_HIDDEN
+    )
 
 
 def run_moderation_adjustments():

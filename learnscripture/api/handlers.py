@@ -33,7 +33,6 @@ from bibleverses.models import (
     make_verse_set_passage_id,
     quick_find,
 )
-from comments.models import hide_comment
 from events.models import Event
 from groups.models import Group
 from learnscripture import session
@@ -41,6 +40,7 @@ from learnscripture.decorators import require_identity_method
 from learnscripture.ftl_bundles import t
 from learnscripture.utils.templates import render_to_string_ftl
 from learnscripture.views import bible_versions_for_request, todays_stats, verse_sets_visible_for_request
+from moderation import models as moderation
 from scores.models import get_verses_started_per_day, get_verses_tested_per_day
 
 
@@ -552,7 +552,7 @@ class HideComment(ApiView):
     def post(self, request):
         if not request.identity.account.is_moderator:
             return rc.FORBIDDEN("Moderator account required")
-        hide_comment(int(request.POST["comment_id"]))
+        moderation.hide_comment(int(request.POST["comment_id"]), by=request.identity.account)
         return {}
 
 

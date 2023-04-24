@@ -16,6 +16,7 @@ class CommentForm(forms.ModelForm):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ["message", "author", "created", "hidden"]
     autocomplete_fields = ["author", "group"]
+    search_fields = ["id"]
     raw_id_fields = ["event"]
     form = CommentForm
 

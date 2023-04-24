@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.core import mail
 from django.db import models, transaction
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from fluent_compiler import types as fluent_types
@@ -155,6 +156,9 @@ class Account(AbstractBaseUser):
             return retval
         else:
             return super().save(**kwargs)
+
+    def get_absolute_url(self):
+        return reverse("user_stats", args=(self.username,))
 
     @transaction.atomic
     def erase(self):

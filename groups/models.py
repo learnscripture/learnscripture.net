@@ -2,9 +2,11 @@ from autoslug import AutoSlugField
 from django.conf import settings
 from django.db import models
 from django.db.models import Count
+from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Account, clear_friendship_weight_cache
+from common.utils.html import link
 from learnscripture.ftl_bundles import t_lazy
 
 
@@ -71,6 +73,9 @@ class Group(models.Model):
 
     class Meta:
         ordering = ["name"]
+
+    def get_absolute_url(self):
+        return group_url(self)
 
     def can_join(self, account):
         if self.open:
@@ -146,6 +151,14 @@ class Group(models.Model):
     def unquieten(self):
         self.quietened = False
         self.save()
+
+
+def group_url(group: Group):
+    return reverse("group", args=(group.slug,))
+
+
+def group_link(group: Group):
+    return link(group_url(group), group.name)
 
 
 class Membership(models.Model):
