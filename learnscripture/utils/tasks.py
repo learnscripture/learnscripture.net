@@ -11,7 +11,7 @@ from django_q.tasks import async_task
 
 def task(func):
     # This decorator returns the same function object as passed in, but with
-    # methods attached. The seems the easiest way to satisfy the way django-q
+    # methods attached. This seems the easiest way to satisfy the way django-q
     # expects to pickle/unpickle function objects.
 
     if settings.TASKS_EAGER:
@@ -26,8 +26,6 @@ def task(func):
             # significantly different environment, and especially without
             # request isolation. So we add some things here try to improve
             # isolation from main web request.
-
-            # Simulate not having django_ftl.activate()
             with django_ftl.override(None):
                 func(*args)
 
