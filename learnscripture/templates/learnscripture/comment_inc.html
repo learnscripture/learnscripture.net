@@ -18,7 +18,14 @@
   {% endif %}
   {% if request_account.is_moderator %}
     <span class="commentmoderation">
-      <a href="#" title="{% ftlmsg 'comments-moderate-comment-button' %}" class="moderate-comment"><i class="icon-moderate"></i></a>
+      <a href="#"
+         title="Remove comment"
+         hx-confirm="Remove this comment?"
+         hx-post="{% url 'hide_comment' comment_id=comment.id %}"
+         hx-target="closest .comment"
+         hx-swap="outerHTML"
+         class="moderate-comment"
+      ><i class="icon-moderate"></i></a>
     </span>
   {% endif %}
   <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>

@@ -85,6 +85,8 @@ urlpatterns = [
     path("edit-group/<slug:slug>/", learnscripture.views.edit_group, name="edit_group"),
     path("group-select-list/", learnscripture.views.group_select_list, name="group_select_list"),
     path("account-autocomplete/", accounts.lookups.AccountAutocomplete.as_view(), name="account_autocomplete"),
+    # Comments
+    path("hide-comment/<int:comment_id>/", learnscripture.views.hide_comment, name="hide_comment"),
     # CMS
     path("api/cms/", include("cms.rest_api.urls")),
     # Other

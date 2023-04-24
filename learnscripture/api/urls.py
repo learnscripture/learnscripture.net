@@ -30,7 +30,6 @@ urlpatterns = [
     path("versefind/", handlers.VerseFind.as_view(), name="learnscripture.api.versefind"),
     path("deletenotice/", handlers.DeleteNotice.as_view(), name="learnscripture.api.deletenotice"),
     path("addcomment/", handlers.AddComment.as_view(), name="learnscripture.api.addcomment"),
-    path("hidecomment/", handlers.HideComment.as_view(), name="learnscripture.api.hidecomment"),
     path("savemiscpreferences/", handlers.SaveMiscPreferences.as_view(), name="learnscripture.api.savemiscpreferences"),
     path("usertimelinestats/", handlers.UserTimelineStats.as_view(), name="learnscripture.api.usertimelinestats"),
 ]

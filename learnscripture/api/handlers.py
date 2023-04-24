@@ -40,7 +40,6 @@ from learnscripture.decorators import require_identity_method
 from learnscripture.ftl_bundles import t
 from learnscripture.utils.templates import render_to_string_ftl
 from learnscripture.views import bible_versions_for_request, todays_stats, verse_sets_visible_for_request
-from moderation import models as moderation
 from scores.models import get_verses_started_per_day, get_verses_tested_per_day
 
 
@@ -545,15 +544,6 @@ class AddComment(ApiView):
             comment = group.add_comment(author=account, message=message)
 
         return {"html": render_to_string_ftl("learnscripture/comment_inc.html", {"comment": comment}, request=request)}
-
-
-class HideComment(ApiView):
-    @require_preexisting_account_m
-    def post(self, request):
-        if not request.identity.account.is_moderator:
-            return rc.FORBIDDEN("Moderator account required")
-        moderation.hide_comment(int(request.POST["comment_id"]), by=request.identity.account)
-        return {}
 
 
 class SaveMiscPreferences(ApiView):

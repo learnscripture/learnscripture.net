@@ -91,26 +91,6 @@ var setupCommentControls = function() {
         showAddComment(div);
     })
 
-    $('body').on('click', '.moderate-comment', function(ev) {
-        ev.preventDefault();
-        if (window.confirm("Remove this comment?")) {
-            var commentDiv = $(this).closest('.comment');
-            var commentId = commentDiv.data().commentId;
-            $.ajax({
-                url: '/api/learnscripture/v1/hidecomment/?format=json',
-                dataType: 'json',
-                type: 'POST',
-                data: {
-                    'comment_id': commentId,
-                },
-                success: function(data) {
-                    commentDiv.remove();
-                },
-                error: ajaxFailed
-            });
-        }
-    });
-
 };
 
 $(document).ready(function() {

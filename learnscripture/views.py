@@ -14,7 +14,7 @@ from django.db import IntegrityError
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.http.request import HttpRequest
-from django.http.response import HttpResponseBadRequest
+from django.http.response import HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -1932,3 +1932,12 @@ def add_verse_to_queue(request):
     identity.add_verse_choice(ref, version=version)
     results, _ = quick_find(ref, version=version, allow_searches=False, identity=identity)
     return TemplateResponse(request, "learnscripture/choose_individual_result_inc.html", {"result": results[0]})
+
+
+@require_account
+@require_POST
+def hide_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
+    if not request.identity.account.is_moderator:
+        return HttpResponseForbidden("Moderator account required")
+    moderation.hide_comment(comment_id, by=request.identity.account)
+    return HttpResponse("")  # htmx

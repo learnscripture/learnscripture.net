@@ -1,7 +1,7 @@
 from typing import Optional
 
 from django.http import HttpResponseRedirect
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
@@ -56,12 +56,16 @@ def require_preferences(view_func):
 
 def require_account(view_func):
     """
-    Redirects to / if there is no account active
+    Redirects to / if there is no account active.
+
+    For htmx, returns 403 instead (since redirects are not going to work in htmx context)
     """
     # NB this doesn't create an account.
     @wraps(view_func)
     def view(request, *args, **kwargs):
         if not hasattr(request, "identity") or request.identity.account_id is None:
+            if request.headers.get("Hx-Request", False):
+                return HttpResponseForbidden("Account required")
             return HttpResponseRedirect("/")
         return view_func(request, *args, **kwargs)
 
@@ -77,6 +81,8 @@ def require_account_with_redirect(view_func):
     @wraps(view_func)
     def view(request, *args, **kwargs):
         if not hasattr(request, "identity") or request.identity.account_id is None:
+            if request.headers.get("Hx-Request", False):
+                return HttpResponseForbidden("Account required")
             response = render(
                 request,
                 "learnscripture/login_and_redirect.html",

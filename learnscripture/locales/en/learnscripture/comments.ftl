@@ -12,9 +12,6 @@ comments-add-comment-link = Add comment
 # $item_title is the title of a news item, (e.g. "SomeUser joined group Some Group")
 comments-event-title-html = on news item “{ $item_title }”:
 
-# Button to moderate/hide a comment, used only by moderators
-comments-moderate-comment-button = Moderate comment
-
 # Tooltip on link that goes to comments
 comments-view-or-add-comments-tooltip = View/add comments
 
