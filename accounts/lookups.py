@@ -8,7 +8,7 @@ class AccountAutocomplete(autocomplete.Select2QuerySetView):
         from learnscripture.views import account_from_request
 
         account = account_from_request(self.request)
-        qs = Account.objects.visible_for_account(account)
+        qs = Account.objects.visible_for_account(account, exclude_hellbanned=True)
 
         if self.q:
             qs = (

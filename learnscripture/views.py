@@ -1126,6 +1126,16 @@ def user_stats(request, username):
         if "unfollow" in request.POST:
             viewer.unfollow_user(account)
 
+        if viewer.is_moderator:
+            if "hellban-48hours" in request.POST:
+                moderation.hellban_user(account, by=viewer, duration=timedelta(hours=48))
+            if "hellban-1week" in request.POST:
+                moderation.hellban_user(account, by=viewer, duration=timedelta(days=7))
+            if "hellban-indefinite" in request.POST:
+                moderation.hellban_user(account, by=viewer, duration=None)
+            if "unhellban" in request.POST:
+                moderation.unhellban_user(account, by=viewer)
+
     one_week_ago = timezone.now() - timedelta(7)
     ctx = {
         "account": account,

@@ -569,8 +569,9 @@ class QAPair(models.Model):
 class VerseSetQuerySet(models.QuerySet):
     def visible_for_account(self, account):
         qs = self.public()
-        if account is None or not account.is_hellbanned:
-            qs = qs.exclude(created_by__is_hellbanned=True)
+
+        # We don't exclude verse sets created by hellbanned users to
+        # avoid affecting users that already started learning them
 
         if account is not None:
             qs = qs | account.verse_sets_created.all()

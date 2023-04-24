@@ -7,6 +7,9 @@ LS_MANAGE=%(SRC_ROOT)s/manage.py
 # Temporarily disabled
 #*/5        *    * * *  %(PROJECT_USER)s $LS_PYTHON $LS_MANAGE adjust_stored_texts
 
+01         *    * * *  %(PROJECT_USER)s $LS_PYTHON $LS_MANAGE run_moderation_adjustments
+
+
 51         3    * * *  root          letsencrypt renew --agree-tos
 # nginx won't pick up the new certificate created above until we restart it:
 57         3    * * *  root          /usr/sbin/service nginx restart

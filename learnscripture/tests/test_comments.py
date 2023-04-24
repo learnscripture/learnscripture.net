@@ -58,7 +58,6 @@ class CommentPageTests(FullBrowserTest):
         assert len(c.message) == COMMENT_MAX_LENGTH
 
     def test_no_event_from_hellbanned_users(self):
-
         self.account.is_hellbanned = True
         self.account.save()
         message = "This is my comment"

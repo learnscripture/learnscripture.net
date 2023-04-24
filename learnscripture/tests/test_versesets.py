@@ -29,13 +29,6 @@ class VerseSetTests(BibleVersesMixin, AccountTestMixin, TestBase):
         # public sets are visible
         assert vs in VerseSet.objects.visible_for_account(viewer)
 
-        # hellbanned users
-        creator.is_hellbanned = True
-        creator.save()
-
-        # Shouldn't be visible to others
-        assert vs not in VerseSet.objects.visible_for_account(viewer)
-
     def test_smart_name(self):
         vs1 = VerseSet(name="Psalm 23", language_code="en", set_type=VerseSetType.PASSAGE)
         assert vs1.smart_name("en") == "Psalm 23"

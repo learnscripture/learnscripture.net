@@ -1,7 +1,9 @@
 import contextlib
+import itertools
 import os
 import time
 from functools import wraps
+from typing import Any, Callable, Generator, TypeVar
 from unittest.case import _UnexpectedSuccess
 
 import pytest
@@ -36,22 +38,50 @@ class FuzzyInt(int):
         return "[%d..%d]" % (self.lowest, self.highest)
 
 
+T = TypeVar("T")
+
+
+def sequence(func: Callable[[int], T]) -> Generator[T, None, None]:
+    """
+    Generates a sequence of values from a sequence of integers starting at zero,
+    passed through the callable, which must take an integer argument.
+    """
+    return (func(n) for n in itertools.count())
+
+
+ACCOUNT_EMAIL_SEQUENCE = (f"test{n}@test.com" for n in itertools.count(1))
+ACCOUNT_USERNAME_SEQUENCE = (f"tëst{n}" for n in itertools.count(1))
+
+
+class _Auto:
+    """
+    Sentinel value indicating an automatic default will be used.
+    """
+
+    def __bool__(self):
+        # Allow `Auto` to be used like `None` or `False` in boolean expressions
+        return False
+
+
+Auto: Any = _Auto()
+
+
 def create_account(
-    version_slug="KJV",
-    email="test1@test.com",
-    username="tëst1",
-    seen_help_tour=True,
+    version_slug: str = "KJV",
+    email: str = Auto,
+    username: str = Auto,
+    seen_help_tour: bool = True,
     testing_method=None,
-    is_tester=False,
-    is_active=True,
-    is_moderator=False,
+    is_tester: bool = False,
+    is_active: bool = True,
+    is_moderator: bool = False,
 ) -> tuple[Identity, Account]:
     """
     Creates an account, returning (identity, account) tuple
     """
     account = Account.objects.create(
-        email=email,
-        username=username,
+        email=email or next(ACCOUNT_EMAIL_SEQUENCE),
+        username=username or next(ACCOUNT_USERNAME_SEQUENCE),
         last_login=timezone.now(),
         is_active=is_active,
         is_tester=is_tester,

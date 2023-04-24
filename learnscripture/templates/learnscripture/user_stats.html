@@ -131,6 +131,59 @@
     <p>{% ftlmsg 'user-stats-following-explanation' %}</p>
   {% endif %}
 
+  {% block moderation %}
+    {% if request_account.is_moderator %}
+      <div id="id-user-moderation">
+        <h2>Moderation</h2>
+
+        <div class="actionset">
+          <form
+            action=""
+            method="POST"
+            hx-post="."
+            hx-vals='{"use_block": "moderation"}'
+            hx-target="#id-user-moderation"
+            hx-swap="outerHTML"
+          >
+            {% csrf_token %}
+            {% if account.is_hellbanned %}
+              <button type="submit" name="unhellban" class="btn">Remove shadow ban</button>
+            {% else %}
+              <button type="submit" name="hellban-48hours" class="btn">Shadow ban for 48 hours</button>
+              <br>
+              <button type="submit" name="hellban-1week" class="btn">Shadow ban for 1 week</button>
+              <br>
+              <button type="submit" name="hellban-indefinite" class="btn">Shadow ban indefinitely</button>
+            {% endif %}
+          </form>
+          <p>As a moderator, you can "shadow ban" a user. This has the following effects:</p>
+          <ul>
+            <li>Almost all their interactions (such as comments by the user)
+              become invisble to other users (except to other shadow-banned users)</li>
+            <li>They are removed from leaderboards as seen by other users (except other shadow-banned users)</li>
+            <li>Other effects designed to reduce their visible presence on the site</li>
+          </ul>
+          <p>However, their own use of the site is not blocked, and they are not
+            informed that they have been shadow banned. The intention is to reduce
+            the impact of users who are being a nuisance, while not reducing their beneficial use of the site.</p>
+
+          <p>Current status:
+            {% if account.is_hellbanned %}<b>Shadow-banned.</b>
+              {% if account.hellban_will_reverse_at %}
+                This will revert automatically at {{ account.hellban_will_reverse_at }}
+              {% else %}
+                This is indefinite
+              {% endif %}
+            {% else %}Not shadow-banned
+            {% endif %}
+          </p>
+
+        </div>
+      </div>
+    {% endif %}
+  {% endblock %}
+
+
   {% if events %}
 
     <h2>{% ftlmsg 'user-stats-activity-title' %}</h2>

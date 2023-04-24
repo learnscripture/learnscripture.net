@@ -5,6 +5,7 @@ from django.contrib.admin import SimpleListFilter
 from django.urls import reverse
 
 from common.utils.html import link
+from moderation import models as moderation
 
 from .models import Account, Identity, Notice
 
@@ -66,10 +67,11 @@ class IdentityAdmin(admin.ModelAdmin):
 
 
 def hellban_account(modeladmin, request, queryset):
-    queryset.update(is_hellbanned=True)
+    for user in queryset:
+        moderation.hellban_user(user, by=request.user, duration=None)
 
 
-hellban_account.short_description = "Hell-ban selected accounts"  # noqa: E305
+hellban_account.short_description = "Shadow-ban selected accounts"  # noqa: E305
 
 
 def make_tester(ModelAdmin, request, queryset):

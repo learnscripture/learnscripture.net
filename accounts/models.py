@@ -91,10 +91,12 @@ DELETED_SUFFIX = "]"
 
 
 class AccountManager(UserManager):
-    def visible_for_account(self, account):
+    def visible_for_account(self, account, *, exclude_hellbanned=False):
         qs = self.active()
-        if account is None or not account.is_hellbanned:
-            # Only hellbanned users see each other
+        if exclude_hellbanned and (account is None or not account.is_hellbanned):
+            # Hellbanned users are sometimes made less visible (exclude_hellbanned=True), but
+            # not completely hidden.
+            # Hellbanned users still see each other
             qs = qs.exclude(is_hellbanned=True)
         return qs
 
@@ -187,6 +189,20 @@ class Account(AbstractBaseUser):
     @property
     def is_erased(self):
         return self.username.startswith(DELETED_PREFIX)
+
+    def hellban(self):
+        self.is_hellbanned = True
+        self.save()
+
+    def unhellban(self):
+        self.is_hellbanned = False
+        self.save()
+
+    @cached_property
+    def hellban_will_reverse_at(self):
+        hellban_action = self.moderation_actions.hellbans().reversible().first()
+        if hellban_action:
+            return hellban_action.reversal_due_at
 
     @property
     def default_language_code(self):

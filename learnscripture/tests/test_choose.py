@@ -44,6 +44,7 @@ class ChooseTestsBase(RequireExampleVerseSetsMixin, SearchTestsMixin, FuncBaseMi
         self.assertUrlsEqual(reverse("create_passage_set") + "?ref=BOOK48+2")
         if self.is_full_browser_test:
             # Should have already loaded the verses into the page:
+            self.wait_for_ajax()
             self.assertTextPresent("Ephesians 2:8")
             self.assertTextPresent("Ephesians 2:9")
             self.assertTextPresent("For by grace are ye saved")
