@@ -75,6 +75,7 @@ def create_account(
     is_tester: bool = False,
     is_active: bool = True,
     is_moderator: bool = False,
+    is_hellbanned: bool = False,
 ) -> tuple[Identity, Account]:
     """
     Creates an account, returning (identity, account) tuple
@@ -86,6 +87,7 @@ def create_account(
         is_active=is_active,
         is_tester=is_tester,
         is_moderator=is_moderator,
+        is_hellbanned=is_hellbanned,
     )
     account.set_password("password")
     account.save()

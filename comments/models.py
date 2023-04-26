@@ -17,10 +17,15 @@ COMMENT_MAX_LENGTH = 10000
 
 class CommentQuerySet(models.QuerySet):
     def visible_for_account(self, account: Account):
+        # See also Comment.is_visible_for_account
         qs = self.exclude(hidden=True).select_related("author")
         if account is None or not account.is_hellbanned:
             qs = qs.exclude(author__is_hellbanned=True)
         return qs
+
+
+class CommentManager(models.Manager.from_queryset(CommentQuerySet)):
+    pass
 
 
 class Comment(models.Model):
@@ -33,7 +38,7 @@ class Comment(models.Model):
     message = models.CharField(max_length=COMMENT_MAX_LENGTH)
     hidden = models.BooleanField(default=False, blank=True)
 
-    objects = models.Manager.from_queryset(CommentQuerySet)()
+    objects = CommentManager()
 
     @property
     def message_formatted(self):
@@ -47,6 +52,15 @@ class Comment(models.Model):
             return get_absolute_url_for_event_comment(self.event, self.id)
         else:
             return get_absolute_url_for_group_comment(self.event, self.id, self.group.slug)
+
+    def is_visible_for_account(self, account: Account) -> bool:
+        # See also CommentQuerySet.visible_for_account
+        if self.hidden:
+            return False
+        if account is None or not account.is_hellbanned:
+            if self.author.is_hellbanned:
+                return False
+        return True
 
 
 def hide_comment(comment_id):

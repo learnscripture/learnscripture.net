@@ -432,8 +432,6 @@ class EventManager(models.Manager):
             .exclude(event_type=EventType.NEW_COMMENT, account=account)
             .annotate(comment_count=models.Count("comments"))
         )
-        if account is None or not account.is_hellbanned:
-            events = events.exclude(account__is_hellbanned=True)
         events = list(events)
         # Avoid repeated messages. Events with the same event type, account id
         # and data will produce the same message.
@@ -472,7 +470,7 @@ class EventManager(models.Manager):
         )
 
         if viewer is not None:
-            # Re-add events from groups
+            # Re-add events from viewer's groups
             qs_2 = qs_base.filter(group__isnull=False, group__in=viewer.groups.all())
             qs = qs_1 | qs_2
         else:

@@ -1,29 +1,42 @@
 import time
 
+from accounts.models import Account, Identity
 from comments.models import COMMENT_MAX_LENGTH, Comment, hide_comment
 from events.models import Event, EventType, PointsMilestoneEvent
+from groups.models import Group
+from moderation import models as moderation
 
-from .base import AccountTestMixin, FullBrowserTest, TestBase
+from .base import AccountTestMixin, Auto, FullBrowserTest, TestBase, create_account
 from .test_groups import create_group
 
 
+def create_commentable_event() -> tuple[Event, Identity]:
+    event_identity, event_account = create_account(username="eventaccount", email="eventaccount@a.com")
+    event = PointsMilestoneEvent(account=event_account, points=1000).save()
+    event_identity.notices.all().delete()
+    return event, event_identity
+
+
+def create_comment(
+    *, author: Account, event: Event = Auto, group: Group = Auto, message="This is a comment", hidden=False
+) -> Comment:
+    if event:
+        create = event.comments.create
+    elif group:
+        create = group.comments.create
+    else:
+        raise AssertionError("Must pass event or group")
+    return create(author=author, message=message, hidden=hidden)
+
+
 class CommentPageTests(FullBrowserTest):
-    def setUp(self):
-        super().setUp()
-        self.event_identity, self.event_account = self.create_account(
-            username="eventaccount", email="eventaccount@a.com"
-        )
-        self.identity, self.account = self.create_account()
-        self.event = PointsMilestoneEvent(account=self.event_account, points=1000).save()
-
     def test_add_comment(self):
-        self.event_identity.notices.all().delete()
-
-        message = "This is my comment"
-        self.login(self.account)
+        event, event_identity = create_commentable_event()
+        _, account = create_account()
+        self.login(account)
         self.get_url("activity_stream")
         self.click(".show-add-comment")
-        self.fill({".commentblock .comment-box": message})
+        self.fill({".commentblock .comment-box": (message := "This is my comment")})
         self.click(".commentblock .add-comment-btn")
         self.wait_for_ajax()
 
@@ -32,66 +45,55 @@ class CommentPageTests(FullBrowserTest):
 
         # Test db
         c = Comment.objects.get()
-        assert c.author == self.account
-        assert c.message == "This is my comment"
+        assert c.author == account
+        assert c.message == message
 
         # Test event created
-        assert (
-            Event.objects.filter(
-                parent_event=self.event, event_type=EventType.NEW_COMMENT, account=self.account
-            ).count()
-            == 1
-        )
+        assert Event.objects.filter(parent_event=event, event_type=EventType.NEW_COMMENT, account=account).count() == 1
 
         # Test notice created
-        assert self.event_identity.notices.filter(related_event=self.event).count() == 1
+        assert event_identity.notices.filter(related_event=event).count() == 1
 
     def test_long_comments_truncated(self):
-        self.login(self.account)
+        event, _ = create_commentable_event()
+        _, account = create_account()
+        self.login(account)
         self.get_url("activity_stream")
         self.click(".show-add-comment")
-        self.fill({".commentblock .comment-box": "0123456789" * 1001})
+        self.fill({".commentblock .comment-box": "0123456789 " * 1001})
         self.click(".commentblock .add-comment-btn")
         self.wait_for_ajax()
         c = Comment.objects.get()
-        assert c.author == self.account
+        assert c.author == account
         assert len(c.message) == COMMENT_MAX_LENGTH
 
     def test_no_event_from_hellbanned_users(self):
-        self.account.is_hellbanned = True
-        self.account.save()
-        message = "This is my comment"
-        self.login(self.account)
+        event, _ = create_commentable_event()
+        _, account = create_account(is_hellbanned=True)
+        self.login(account)
         self.get_url("activity_stream")
         self.click(".show-add-comment")
-        self.fill({".commentblock .comment-box": message})
+        self.fill({".commentblock .comment-box": (message := "This is my comment")})
         self.click(".commentblock .add-comment-btn")
         time.sleep(1)
 
         # Test db - user should be able to see own message
-        c = Comment.objects.get()
-        assert c.author == self.account
-        assert c.message == "This is my comment"
+        c = Comment.objects.visible_for_account(account).get()
+        assert c.author == account
+        assert c.message == message
 
         # Test event NOT created
-        assert (
-            Event.objects.filter(
-                parent_event=self.event, event_type=EventType.NEW_COMMENT, account=self.account
-            ).count()
-            == 0
-        )
+        assert Event.objects.filter(parent_event=event, event_type=EventType.NEW_COMMENT, account=account).count() == 0
 
     def test_moderate_comment(self):
-        other_identity, other_account = self.create_account(username="other", email="other@other.com")
-        self.account.is_moderator = True
-        self.account.save()
-        c1 = self.event.comments.create(
-            message="This is a naughty message",
-            author=other_account,
-        )
-        self.event.comments.create(message="This is already hidden", author=other_account, hidden=True)
+        event, _ = create_commentable_event()
+        _, account = create_account(is_moderator=True)
+        _, other_account = self.create_account(username="other", email="other@other.com")
 
-        self.login(self.account)
+        c1 = create_comment(author=other_account, event=event, message="This is a naughty message")
+        create_comment(author=other_account, event=event, message="This is already hidden", hidden=True)
+
+        self.login(account)
         self.get_url("activity_stream")
 
         self.assertTextPresent("This is a naughty message")
@@ -103,21 +105,21 @@ class CommentPageTests(FullBrowserTest):
         self.assertTextAbsent("This is a naughty message")
 
         # Test DB
-        assert self.event.comments.get(id=c1.id).hidden
+        assert event.comments.get(id=c1.id).hidden
 
 
 class CommentTests(AccountTestMixin, TestBase):
     def test_get_absolute_url(self):
         _, account = self.create_account()
         group = create_group()
-        comment = Comment.objects.create(author=account, message="Hello", group=group)
+        comment = create_comment(author=account, group=group)
 
         assert comment.get_absolute_url() == f"/groups/my-group/wall/?comment={comment.id}"
 
     def test_delete_wall_comment(self):
         _, account = self.create_account()
         group = create_group()
-        comment = Comment.objects.create(author=account, message="Hello", group=group)
+        comment = create_comment(author=account, group=group)
         related_events = [e for e in Event.objects.all() if e.get_comment() == comment]
         assert len(related_events) == 1
 
@@ -130,12 +132,34 @@ class CommentTests(AccountTestMixin, TestBase):
         group = create_group(created_by=group_creator)
 
         _, account = self.create_account()
-        comment = Comment.objects.create(author=account, message="Hello", group=group)
+        comment = create_comment(author=account, group=group)
 
         events = [e for e in Event.objects.all() if e.get_comment() == comment]
         assert len(events) == 1
         (event,) = events
 
         hide_comment(comment.id)
-
         assert len([e for e in Event.objects.all() if e.get_comment() == comment]) == 0
+
+    def test_visibility_for_hiding(self):
+        event, _ = create_commentable_event()
+        _, account = create_account()
+        c = create_comment(event=event, author=account)
+
+        moderation.hide_comment(c.id, by=create_account(is_moderator=True)[1])
+        c.refresh_from_db()
+
+        assert c not in Comment.objects.visible_for_account(account)
+        assert not c.is_visible_for_account(account)
+
+    def test_visibility_for_hellbanning(self):
+        event, _ = create_commentable_event()
+        _, hellbanned_account = create_account(is_hellbanned=True)
+        c = create_comment(event=event, author=hellbanned_account)
+
+        assert c in Comment.objects.visible_for_account(hellbanned_account)
+        _, other_account = create_account(is_hellbanned=False)
+        assert c not in Comment.objects.visible_for_account(other_account)
+
+        assert c.is_visible_for_account(hellbanned_account)
+        assert not c.is_visible_for_account(other_account)
