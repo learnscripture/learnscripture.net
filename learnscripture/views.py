@@ -1610,7 +1610,7 @@ def group(request: HttpRequest, slug: str) -> HttpResponse:
             "can_join": group.can_join(account),
             "can_edit": group.can_edit(account),
             "include_referral_links": True,
-            "comments": group.comments_visible_for_account(account).order_by("-created")[:GROUP_COMMENTS_SHORT_CUTOFF],
+            "comments": group.comments.visible_for_account(account).order_by("-created")[:GROUP_COMMENTS_SHORT_CUTOFF],
         },
     )
 
@@ -1627,7 +1627,7 @@ def group_wall(request, slug):
     except (KeyError, ValueError):
         selected_comment_id = None
 
-    comments = group.comments_visible_for_account(account)
+    comments = group.comments.visible_for_account(account)
     filter_form = GroupWallFilterForm.from_request_data(request.GET)
     sort_order = filter_form.cleaned_data["order"]
     if sort_order == GROUP_WALL_ORDER_OLDEST_FIRST:

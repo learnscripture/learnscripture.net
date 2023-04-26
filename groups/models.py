@@ -138,12 +138,6 @@ class Group(models.Model):
 
         return self.comments.create(author=author, message=message[0:COMMENT_MAX_LENGTH])
 
-    def comments_visible_for_account(self, account):
-        qs = self.comments.exclude(hidden=True).select_related("author")
-        if account is None or not account.is_hellbanned:
-            qs = qs.exclude(author__is_hellbanned=True)
-        return qs
-
     def quieten(self):
         self.quietened = True
         self.save()

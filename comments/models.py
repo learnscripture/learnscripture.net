@@ -15,6 +15,14 @@ def format_comment_message(message):
 COMMENT_MAX_LENGTH = 10000
 
 
+class CommentQuerySet(models.QuerySet):
+    def visible_for_account(self, account: Account):
+        qs = self.exclude(hidden=True).select_related("author")
+        if account is None or not account.is_hellbanned:
+            qs = qs.exclude(author__is_hellbanned=True)
+        return qs
+
+
 class Comment(models.Model):
     author = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="comments")
     # NB - this is the event the comment is attached to, if any,
@@ -24,6 +32,8 @@ class Comment(models.Model):
     created = models.DateTimeField(default=timezone.now)
     message = models.CharField(max_length=COMMENT_MAX_LENGTH)
     hidden = models.BooleanField(default=False, blank=True)
+
+    objects = models.Manager.from_queryset(CommentQuerySet)()
 
     @property
     def message_formatted(self):
