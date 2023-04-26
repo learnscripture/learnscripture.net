@@ -16,11 +16,16 @@ COMMENT_MAX_LENGTH = 10000
 
 
 class CommentQuerySet(models.QuerySet):
+    def create(self, *, author: Account, **kwargs):
+        if author.is_hellbanned:
+            kwargs["author_was_hellbanned"] = True
+        return super().create(author=author, **kwargs)
+
     def visible_for_account(self, account: Account):
         # See also Comment.is_visible_for_account
         qs = self.exclude(hidden=True).select_related("author")
         if account is None or not account.is_hellbanned:
-            qs = qs.exclude(author__is_hellbanned=True)
+            qs = qs.exclude(author_was_hellbanned=True)
         return qs
 
 
@@ -37,6 +42,7 @@ class Comment(models.Model):
     created = models.DateTimeField(default=timezone.now)
     message = models.CharField(max_length=COMMENT_MAX_LENGTH)
     hidden = models.BooleanField(default=False, blank=True)
+    author_was_hellbanned = models.BooleanField(default=False)
 
     objects = CommentManager()
 
@@ -58,7 +64,7 @@ class Comment(models.Model):
         if self.hidden:
             return False
         if account is None or not account.is_hellbanned:
-            if self.author.is_hellbanned:
+            if self.author_was_hellbanned:
                 return False
         return True
 

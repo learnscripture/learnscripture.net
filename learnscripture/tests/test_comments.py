@@ -64,10 +64,11 @@ class CommentPageTests(FullBrowserTest):
         self.click(".commentblock .add-comment-btn")
         time.sleep(1)
 
-        # Test db - user should be able to see own message
+        # Test db - user should be able to see own message, so it must exist in DB
         c = Comment.objects.visible_for_account(account).get()
         assert c.author == account
         assert c.message == message
+        assert c.author_was_hellbanned
 
         # Test event NOT created
         assert Event.objects.filter(parent_event=event, event_type=EventType.NEW_COMMENT, account=account).count() == 0
@@ -141,12 +142,41 @@ class CommentTests(AccountTestMixin, TestBase):
 
     def test_visibility_for_hellbanning(self):
         event, _ = create_commentable_event()
-        _, hellbanned_account = create_account(is_hellbanned=True)
-        c = create_comment(event=event, author=hellbanned_account)
+        _, account = create_account()
+        _, viewer_account = create_account()
+        _, moderator = create_account(is_moderator=True)
 
-        assert c in Comment.objects.visible_for_account(hellbanned_account)
-        _, other_account = create_account(is_hellbanned=False)
-        assert c not in Comment.objects.visible_for_account(other_account)
+        c_before_hellbanning = create_comment(event=event, author=account)
 
-        assert c.is_visible_for_account(hellbanned_account)
-        assert not c.is_visible_for_account(other_account)
+        moderation.hellban_user(account, by=moderator, duration=None)
+        account.refresh_from_db()
+
+        c_while_hellbanned = create_comment(event=event, author=account)
+
+        # Comments before hellbanning are visible to all
+        assert c_before_hellbanning in Comment.objects.visible_for_account(account)
+        assert c_before_hellbanning in Comment.objects.visible_for_account(viewer_account)
+        assert c_before_hellbanning.is_visible_for_account(account)
+        assert c_before_hellbanning.is_visible_for_account(viewer_account)
+
+        # Comments while hellbanned are visible only to the hellbanned
+        assert c_while_hellbanned in Comment.objects.visible_for_account(account)
+        assert c_while_hellbanned not in Comment.objects.visible_for_account(viewer_account)
+        assert c_while_hellbanned.is_visible_for_account(account)
+        assert not c_while_hellbanned.is_visible_for_account(viewer_account)
+
+        # After hellbanning is lifted:
+        moderation.unhellban_user(account, by=moderator)
+        account.refresh_from_db()
+
+        # ...comments made while hellbanned remain invisible to others
+        assert c_while_hellbanned not in Comment.objects.visible_for_account(viewer_account)
+        assert not c_while_hellbanned.is_visible_for_account(viewer_account)
+
+        # New comments remain visible to all:
+        c_after_hellbanned = create_comment(event=event, author=account)
+
+        assert c_after_hellbanned in Comment.objects.visible_for_account(account)
+        assert c_after_hellbanned in Comment.objects.visible_for_account(viewer_account)
+        assert c_after_hellbanned.is_visible_for_account(account)
+        assert c_after_hellbanned.is_visible_for_account(viewer_account)
