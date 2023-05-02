@@ -4,17 +4,6 @@ def chunks(sliceable, n):
         yield sliceable[i : i + n]
 
 
-def intersperse(iterable, delimiter):
-    it = iter(iterable)
-    try:
-        yield next(it)
-    except StopIteration:
-        return
-    for x in it:
-        yield delimiter
-        yield x
-
-
 def chunked_queryset(qs, batch_size, index="id"):
     """
     Yields a QuerySet split into batches of exact size 'batch_size'

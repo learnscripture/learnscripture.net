@@ -18,7 +18,6 @@ from django.utils.functional import cached_property
 from accounts import memorymodel
 from learnscripture.datastructures import lazy_dict_like
 from learnscripture.ftl_bundles import t, t_lazy
-from learnscripture.utils.iterators import intersperse
 
 from .books import get_bible_book_name
 from .fields import VectorField
@@ -290,10 +289,6 @@ class VerseSearchResult(ComboVerse):
         self.already_learning = False
 
 
-SEARCH_OPERATORS = {"&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":", "\\", "("}
-SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
-
-
 # See '\dF' command in psql for list of available builtin configurations.
 POSTGRES_SEARCH_CONFIGURATIONS = {
     LANG.EN: "english",
@@ -308,16 +303,6 @@ class VerseManager(models.Manager):
         return self.get(version__slug=version_slug, localized_reference=localized_reference)
 
     def text_search(self, query, version, limit=10, offset=0):
-        # First remove anything recognized by postgres as an operator.
-        for s in SEARCH_CHARS:
-            query = query.replace(s, " ")
-        words = query.split(" ")
-        words = [w for w in words if (w and w not in SEARCH_OPERATORS)]
-        if not words:
-            return self.none()
-        # Do an 'AND' on all terms.
-        word_params = list(intersperse(words, " & "))
-        search_clause = " || ".join(["%s"] * len(word_params))
         search_config = POSTGRES_SEARCH_CONFIGURATIONS[version.language_code]
         return models.Manager.raw(
             self,
@@ -326,9 +311,7 @@ class VerseManager(models.Manager):
                  ts_headline(text_saved, query, 'StartSel = **, StopSel = **, HighlightAll=TRUE') as highlighted_text,
                  book_number, chapter_number, first_verse_number, last_verse_number,
                  bible_verse_number, gapless_bible_verse_number, ts_rank(text_tsv, query) as rank
-          FROM bibleverses_verse, to_tsquery(%s, """
-            + search_clause
-            + """) query
+          FROM bibleverses_verse, plainto_tsquery(%s, %s) query
           WHERE
              query @@ text_tsv
              AND version_id = %s
@@ -336,7 +319,7 @@ class VerseManager(models.Manager):
           LIMIT %s
           OFFSET %s;
 """,
-            [search_config] + word_params + [version.id, limit, offset],
+            [search_config, query, version.id, limit, offset],
         )
 
 
@@ -1487,7 +1470,6 @@ def quick_find(
         returned_results = [VerseSearchResult(result_ref, verse_list, parsed_ref=parsed_result_ref)]
         more_results = False
     else:
-
         if not allow_searches:
             raise InvalidVerseReference(t("bibleverses-verse-reference-not-recognized"))
 
