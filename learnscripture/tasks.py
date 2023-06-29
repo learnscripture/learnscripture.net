@@ -6,7 +6,7 @@ logger = logging.getLogger("task_queue_debug")
 
 
 @task
-def message(message):
+def message(message: str):
     logger.debug("Message %s", message)
     if message == "crash":
         raise AssertionError("Crashed!")

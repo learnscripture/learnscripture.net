@@ -6,7 +6,7 @@ from .models import Page
 
 
 @staff_member_required
-def page_move_up(request, id):
+def page_move_up(request, id: int):
     # TODO - should be POST only
     page = Page.objects.get(pk=id)
 
@@ -19,7 +19,7 @@ def page_move_up(request, id):
 
 
 @staff_member_required
-def page_move_down(request, id):
+def page_move_down(request, id: int):
     # TODO - should be POST only
     page = Page.objects.get(pk=id)
 

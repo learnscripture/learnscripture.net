@@ -1,7 +1,7 @@
 PyVirtualDisplay==2.2
 compare-locales==8.2.0
 coverage==6.1.2
-django-debug-toolbar==3.2.2
+django-debug-toolbar==4.2.0
 django-extensions==3.2.1
 django-functest==1.5.3
 elm-fluent==0.6.0
@@ -22,3 +22,4 @@ fabric==3.0.0
 texttable==1.6.7
 git+https://github.com/learnscripture/fabutils.git@67e9a529f90616312e6374de25bcf394e24d135f#fabutils
 filelock==3.4.0
+git+https://github.com/spookylukey/django-urlconfchecks@c10984a1d0b3bcc7367a1b8ee147e55a7d201f58#django-urlconfchecks

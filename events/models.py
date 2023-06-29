@@ -459,7 +459,7 @@ class EventManager(models.Manager):
         events.sort(key=lambda e: e.created, reverse=True)
         return events
 
-    def for_viewer(self, viewer):
+    def for_viewer(self, viewer: Account | None):
         qs_base = Event.objects.order_by("-created").select_related("account").exclude(account__is_active=False)
         if viewer is None or not viewer.is_hellbanned:
             qs_base = qs_base.exclude(account__is_hellbanned=True)
@@ -478,7 +478,7 @@ class EventManager(models.Manager):
 
         return qs
 
-    def for_activity_stream(self, viewer=None, event_by=None):
+    def for_activity_stream(self, *, viewer: Account | None, event_by: Account | None = None):
         qs = self.for_viewer(viewer)
         if event_by is None:
             # On the main activity stream, comments on parent events are

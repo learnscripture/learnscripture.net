@@ -125,7 +125,7 @@ GROUP_COMMENTS_SHORT_CUTOFF = 5
 GROUP_COMMENTS_PAGINATE_BY = 40
 
 
-def missing(request, message, status_code=404):
+def missing(request, message: str, status_code=404):
     response = TemplateResponse(request, "404.html", {"message": message})
     response.status_code = status_code
     return response
@@ -405,7 +405,6 @@ def dashboard(request):
                 "practisepassagesection",
             ]
         ):
-
             # Some of these are sent via the verse_options.html template,
             # not from the dashboard.
 
@@ -782,7 +781,7 @@ def view_catechism_list(request):
     return TemplateResponse(request, "learnscripture/catechisms.html", ctx)
 
 
-def view_catechism(request, slug):
+def view_catechism(request, slug: str):
     try:
         catechism = TextVersion.objects.get(slug=slug)
     except TextVersion.DoesNotExist:
@@ -877,7 +876,7 @@ def get_verse_set_verse_list(version, verse_set):
     return verse_list
 
 
-def view_verse_set(request, slug):
+def view_verse_set(request, slug: str):
     verse_set = get_object_or_404(verse_sets_visible_for_request(request), slug=slug)
     ctx = {"include_referral_links": verse_set.public}
 
@@ -945,22 +944,22 @@ def add_passage_breaks(verse_list, breaks):
 
 
 @require_preferences
-def create_selection_set(request, slug=None):
-    return create_or_edit_set(request, set_type=VerseSetType.SELECTION, slug=slug)
+def create_selection_set(request):
+    return create_or_edit_set(request, set_type=VerseSetType.SELECTION)
 
 
 @require_preferences
-def create_passage_set(request, slug=None):
-    return create_or_edit_set(request, set_type=VerseSetType.PASSAGE, slug=slug)
+def create_passage_set(request):
+    return create_or_edit_set(request, set_type=VerseSetType.PASSAGE)
 
 
 @require_preferences
-def edit_set(request, slug=None):
+def edit_set(request, slug: str):
     return create_or_edit_set(request, slug=slug)
 
 
 @require_account_with_redirect
-def create_or_edit_set(request, set_type=None, slug=None):
+def create_or_edit_set(request, set_type=None, slug: str | None = None):
     form_class = VerseSetForm
 
     version = request.identity.default_bible_version
@@ -1109,7 +1108,7 @@ def get_hellbanned_mode(request):
 
 
 @for_htmx(use_block_from_params=True)
-def user_stats(request, username):
+def user_stats(request, username: str):
     viewer = account_from_request(request)
     account = get_object_or_404(
         Account.objects.visible_for_account(viewer).select_related("total_score", "identity"), username=username
@@ -1266,7 +1265,7 @@ def password_reset_complete(request):
 # Copy and paste from django.contrib.auth.views, followed by customizations.
 @sensitive_post_parameters()
 @never_cache
-def password_reset_confirm(request, uidb64=None, token=None):
+def password_reset_confirm(request, uidb64: str, token: str):
     """
     View that checks the hash in a password reset link and presents a
     form for entering a new password.
@@ -1485,7 +1484,7 @@ def awards(request):
     )
 
 
-def award(request, slug):
+def award(request, slug: str):
     award_name = slug.replace("-", "_").upper()
     try:
         award_type = AwardType(award_name)
@@ -1616,7 +1615,7 @@ def group(request: HttpRequest, slug: str) -> HttpResponse:
 
 
 @for_htmx(use_block_from_params=True)
-def group_wall(request, slug):
+def group_wall(request, slug: str):
     account = account_from_request(request)
     group = group_by_slug(request, slug)
 
@@ -1653,7 +1652,7 @@ def group_wall(request, slug):
 @for_htmx(
     if_hx_target="id-more-results-container", use_template="learnscripture/leaderboard_results_table_body_inc.html"
 )
-def group_leaderboard(request, slug):
+def group_leaderboard(request, slug: str):
     PAGE_SIZE = 30
     from_item = get_request_from_item(request)
     leaderboard_filter_form = LeaderboardFilterForm.from_request_data(request.GET)
@@ -1720,7 +1719,7 @@ def create_group(request):
 
 
 @require_account_with_redirect
-def edit_group(request, slug):
+def edit_group(request, slug: str):
     group = get_object_or_404(groups_editable_for_request(request).filter(slug=slug))
     return _create_or_edit_group(request, group=group)
 
@@ -1829,7 +1828,7 @@ def activity_stream(request):
     )
 
 
-def _user_events(for_account, viewer):
+def _user_events(for_account: Account, viewer: Account | None):
     return Event.objects.for_activity_stream(
         viewer=viewer,
         event_by=for_account,
@@ -1837,7 +1836,7 @@ def _user_events(for_account, viewer):
 
 
 @for_htmx(use_template="learnscripture/activity_stream_results_inc.html")
-def user_activity_stream(request, username):
+def user_activity_stream(request, username: str):
     account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request)), username=username)
     events = _user_events(account, account_from_request(request))
     return TemplateResponse(
@@ -1851,7 +1850,7 @@ def user_activity_stream(request, username):
     )
 
 
-def activity_item(request, event_id):
+def activity_item(request, event_id: int):
     event = get_object_or_404(
         Event.objects.for_activity_stream(viewer=account_from_request(request)).prefetch_related("comments__author"),
         id=int(event_id),

@@ -308,6 +308,7 @@ if DEVBOX:
 if DEBUG:
     INSTALLED_APPS.append("debug_toolbar")
     INSTALLED_APPS.append("django_extensions")  # For runserver_plus
+    INSTALLED_APPS.append("django_urlconfchecks")
 
 
 LOGGING = {
@@ -568,3 +569,12 @@ if DEBUG:
         20:
     ]:
         os.unlink(f)
+
+
+URLCONFCHECKS_SILENCED_VIEWS = {
+    "*.View.as_view": "W001",  # CBVs
+    "django.views.generic.base.RedirectView": "W001",
+    "django.contrib.*": "W003",  # admin etc.
+    "rest_framework.views.*": "W001",
+    "django.views.static.serve": "W003",
+}
