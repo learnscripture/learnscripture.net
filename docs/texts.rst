@@ -7,11 +7,12 @@ permission problems.
 
 As a result, and due to the fact that they sometimes come from different sources
 (e.g. ESV via its web API), the process for adding them is not fully automated.
-Some old scripts that were used (and probably won't run now) are found in
-``scripts/``. The texts themselves are deliberately not stored in the repo
-because of copyright, and because they would be large. Some of the texts are
-available in the learnscripture-texts repo, where there are not copyright
-issues.
+
+The texts themselves are deliberately not stored in the repo because of
+copyright, and because they would be large. Some of the texts are available in
+the learnscripture-texts repo, where there are not copyright issues. That repo
+also contains scripts used to convert from various formats and import into the
+database.
 
 A further constraint is the need to generate 'suggestions' for any text
 (used in the 'on screen testing' method). This is done using Markov chain
@@ -27,7 +28,8 @@ languages, generating plausible word suggestions for the on-screen testing
 method would be a bigger challenge. Agglutinative languages such as Turkish
 present particular problems for Markov chain analysis, due the 'sparsity
 problem'. For this reason the word suggestion method of testing is only
-available for some languages.
+available for some languages. See also
+https://github.com/learnscripture/learnscripture.net/issues/200
 
 New texts and catechisms
 ========================
