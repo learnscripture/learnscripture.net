@@ -1940,3 +1940,10 @@ def hide_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
         return HttpResponseForbidden("Moderator account required")
     moderation.hide_comment(comment_id, by=request.identity.account)
     return HttpResponse("")  # htmx
+
+
+@require_account
+@require_POST
+def delete_notice(request: HttpRequest, notice_id: int) -> HttpResponse:
+    request.identity.notices.filter(id=notice_id).delete()
+    return HttpResponse("")  # htmx

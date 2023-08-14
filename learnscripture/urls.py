@@ -90,6 +90,7 @@ urlpatterns = [
     # CMS
     path("api/cms/", include("cms.rest_api.urls")),
     # Other
+    path("delete-notice/<int:notice_id>", learnscripture.views.delete_notice, name="delete_notice"),
     path("contact/", learnscripture.views.contact, name="contact"),
     path("terms-of-service/", learnscripture.views.terms_of_service, name="terms_of_service"),
     path("referral-program/", learnscripture.views.referral_program, name="referral_program"),

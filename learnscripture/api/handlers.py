@@ -378,7 +378,6 @@ class SessionStats(ApiView):
 
 
 class ActionLogs(ApiView):
-
     fields = [
         "id",  # used for uniqueness tests
         "points",
@@ -493,12 +492,6 @@ def duplicate_passage_check(request, language_code, start_internal_reference, en
     else:
         context = {"verse_sets": verse_sets, "language_code": language_code}
         return render_to_string_ftl("learnscripture/duplicate_passage_warning_inc.html", context, request=request)
-
-
-class DeleteNotice(ApiView):
-    @require_preexisting_identity_m
-    def post(self, request):
-        request.identity.notices.filter(id=int(request.POST["id"])).delete()
 
 
 class AddComment(ApiView):

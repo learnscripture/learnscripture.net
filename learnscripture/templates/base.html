@@ -110,7 +110,12 @@
             <div class="message-container">
               {% for notice in notices %}
                 <div class="notice">
-                  <a class="close" title="{% ftlmsg 'site-messages-clear-this' %}" href="#" data-notice-id="{{ notice.id }}">×</a>
+                  <a class="close" title="{% ftlmsg 'site-messages-clear-this' %}" href="#"
+                     hx-post="{% url 'delete_notice' notice_id=notice.id %}"
+                     hx-swap="outerHTML"
+                     hx-target="closest .notice"
+                     hx-indicator="closest .notice"
+                  >×</a>
                   {{ notice.message_html|safe }}
                 </div>
               {% endfor %}

@@ -51,8 +51,17 @@
         }
     }
 }
+
 .clearnotices {
     text-align: right;
+    display: none;
+}
+// Hide the .clearnotices div if there are no notices left:
+.clearnotices {
+    display: none;
+}
+.notice ~ .clearnotices {
+    display: block;
 }
 
 ul.messagelist {
