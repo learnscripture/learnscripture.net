@@ -4,51 +4,29 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: '4.0.1'
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.267
     hooks:
-      - id: flake8
-        language_version: python3.9
-  - repo: https://github.com/pre-commit/mirrors-isort
-    rev: 'v5.7.0'
-    hooks:
-      - id: isort
-        language_version: python3.9
+      - id: ruff
+        args: [ --fix, --exit-non-zero-on-fix ]
   - repo: https://github.com/rtts/djhtml
     rev: 3.0.6
     hooks:
       - id: djhtml
         entry: djhtml -t 2
-        language_version: python3.9
+        language_version: python3.10
   - repo: https://github.com/ikamensh/flynt/
-    rev: '0.69'
+    rev: '1.0.1'
     hooks:
       - id: flynt
-        language_version: python3.9
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v2.26.0
+        language_version: python3.10
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: '1.14.0'
     hooks:
-      - id: pyupgrade
-        entry: pyupgrade --py3-plus --py36-plus --py37-plus --py38-plus --py39-plus --keep-runtime-typing
-        language_version: python3.9
-  - repo: https://github.com/myint/autoflake
-    rev: 'v1.4'
-    hooks:
-      - id: autoflake
-        args: ['--remove-all-unused-imports', '-i']
-        language_version: python3.9
-  - repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: 'v1.5.7'
-    hooks:
-      - id: autopep8
-        language_version: python3.9
+      - id: django-upgrade
+        args: [--target-version, "4.1"]
   - repo: https://github.com/psf/black
     rev: 22.6.0
     hooks:
       - id: black
         language_version: python3.10
-  - repo: https://github.com/adamchainz/django-upgrade
-    rev: '1.4.0'
-    hooks:
-      - id: django-upgrade
-        args: [--target-version, "3.2"]

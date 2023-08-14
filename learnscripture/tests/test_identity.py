@@ -741,7 +741,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         # verse outside the context of the passage.
         assert i.verse_statuses.filter(localized_reference="Psalm 23:1").count() == 2
 
-        assert not (0.0 in [uvs.strength for uvs in i.verse_statuses.filter(localized_reference="Psalm 23:1")])
+        assert 0.0 not in [uvs.strength for uvs in i.verse_statuses.filter(localized_reference="Psalm 23:1")]
 
     def test_verses_started_milestone_event(self):
         # This reproduces a bit of the logic from ActionCompleteHandler in order

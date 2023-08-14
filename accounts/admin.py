@@ -47,6 +47,7 @@ class IdentityForm(forms.ModelForm):
         }
 
 
+@admin.register(Identity)
 class IdentityAdmin(admin.ModelAdmin):
     form = IdentityForm
     list_display = [
@@ -66,26 +67,20 @@ class IdentityAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related("account", "referred_by")
 
 
+@admin.action(description="Shadow-ban selected accounts")
 def hellban_account(modeladmin, request, queryset):
     for user in queryset:
         moderation.hellban_user(user, by=request.user, duration=None)
 
 
-hellban_account.short_description = "Shadow-ban selected accounts"  # noqa: E305
-
-
+@admin.action(description="Make selected accounts into testers")
 def make_tester(ModelAdmin, request, queryset):
     queryset.update(is_tester=True)
 
 
-make_tester.short_description = "Make selected accounts into testers"  # noqa: E305
-
-
+@admin.action(description="Make selected accounts into non-testers")
 def unmake_tester(ModelAdmin, request, queryset):
     queryset.update(is_tester=False)
-
-
-unmake_tester.short_description = "Make selected accounts into non-testers"  # noqa: E305
 
 
 class IdentityInline(admin.StackedInline):
@@ -120,6 +115,7 @@ class AccountForm(forms.ModelForm):
         }
 
 
+@admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
     form = AccountForm
 
@@ -161,13 +157,9 @@ class AccountAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related("identity__referred_by")
 
 
+@admin.register(Notice)
 class NoticeAdmin(admin.ModelAdmin):
     raw_id_fields = ["for_identity", "related_event"]
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("for_identity", "for_identity__account")
-
-
-admin.site.register(Identity, IdentityAdmin)
-admin.site.register(Account, AccountAdmin)
-admin.site.register(Notice, NoticeAdmin)

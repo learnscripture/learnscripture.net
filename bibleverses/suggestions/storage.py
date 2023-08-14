@@ -4,9 +4,9 @@ Handles stored analysis
 import hashlib
 import logging
 import os.path
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
 from .constants import (
     FIRST_WORD_FREQUENCY_ANALYSIS,

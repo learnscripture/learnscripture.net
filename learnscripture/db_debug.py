@@ -296,7 +296,7 @@ def safe_repr(obj):
     # A repr that tries to ensure we don't do anything that might
     # trigger extra work or DB queries, otherwise we'll be in trouble.
     # For certain objects we try to include additional info we need.
-    if isinstance(obj, (str, int, float)):
+    if isinstance(obj, str | int | float):
         return repr(obj)
     if isinstance(obj, types.MethodType):
         return repr(obj.__func__)

@@ -4,13 +4,12 @@ line-length = 120
 target-version = ["py38"]
 
 
-[tool.isort]
-line_length = 120
-profile = "black"
-multi_line_output = 3
-known_third_party = ["pykov", "autoslug", "jsonfield", "mock", "parsy", "aldjemy", "django_ftl", "fluent", "django"]
-skip_glob = ["**/migrations/*.py", "node_modules/*", "**/elm-stuff/*", ".*", "config/trac/*"]
-skip = ["settings.py", "node_modules", ".git", "learnscripture/static/elm" ]
-
 [tool.ruff]
 line-length = 120
+extend-select = [
+  "UP",  # enable pyupgrade
+  "I",  # enable isort
+  "FLY", # enable flynt
+]
+target-version = 'py310'
+ignore = ["E501","E731"]

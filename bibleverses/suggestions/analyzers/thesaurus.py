@@ -1,7 +1,7 @@
 import gzip
 import logging
 import os.path
-from typing import Callable
+from collections.abc import Callable
 
 from django.conf import settings
 

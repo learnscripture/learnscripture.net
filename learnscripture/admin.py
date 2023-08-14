@@ -24,6 +24,7 @@ convert_to_individual_notices_accounts = make_convert_to_individual_notices(
 )
 
 
+@admin.register(SiteNotice)
 class SiteNoticeAdmin(admin.ModelAdmin):
     list_display = [
         "message_html",
@@ -36,6 +37,3 @@ class SiteNoticeAdmin(admin.ModelAdmin):
         convert_to_individual_notices_identities,
         convert_to_individual_notices_accounts,
     ]
-
-
-admin.site.register(SiteNotice, SiteNoticeAdmin)

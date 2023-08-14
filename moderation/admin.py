@@ -7,6 +7,7 @@ from common.utils.html import link
 from .models import ModerationAction
 
 
+@admin.register(ModerationAction)
 class ModerationActionAdmin(admin.ModelAdmin):
     def target(action: ModerationAction):
         obj = action.target
@@ -21,6 +22,3 @@ class ModerationActionAdmin(admin.ModelAdmin):
 
     def get_queryset(self, *args, **kwargs):
         return super().get_queryset(*args, **kwargs).select_related("user", "group", "comment")
-
-
-admin.site.register(ModerationAction, ModerationActionAdmin)

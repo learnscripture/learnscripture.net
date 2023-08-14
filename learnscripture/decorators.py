@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.http import HttpResponseRedirect
 from django.http.response import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render
@@ -99,9 +97,9 @@ def require_account_with_redirect(view_func):
 
 def for_htmx(
     *,
-    if_hx_target: Optional[str] = None,
-    use_template: Optional[str] = None,
-    use_block: Optional[str] = None,
+    if_hx_target: str | None = None,
+    use_template: str | None = None,
+    use_block: str | None = None,
     use_block_from_params: bool = False,
 ):
     """

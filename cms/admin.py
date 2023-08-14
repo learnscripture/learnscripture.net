@@ -19,6 +19,7 @@ class ContentInline(admin.StackedInline):
     min_num = 1
 
 
+@admin.register(ContentItem)
 class ContentItemAdmin(admin.ModelAdmin):
     list_display = ["id", "name", "used"]
     list_display_links = ["id", "name"]
@@ -29,10 +30,9 @@ class ContentItemAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(used=Exists("page_content_items"))
 
+    @admin.display(boolean=True)
     def used(self, obj):
         return obj.used
-
-    used.boolean = True
 
 
 class PageContentItemInline(admin.TabularInline):
@@ -49,6 +49,7 @@ class PageTitleInline(admin.TabularInline):
     min_num = 1
 
 
+@admin.register(Page)
 class PageAdmin(MPTTModelAdmin):
 
     form = forms.PageForm
@@ -72,6 +73,7 @@ class PageAdmin(MPTTModelAdmin):
     list_per_page = 1000
     search_fields = ("url", "titles__title")
 
+    @admin.display(description="")
     def view_on_site_link(self, page):
         absolute_url = page.get_absolute_url()
         if not absolute_url:
@@ -84,9 +86,7 @@ class PageAdmin(MPTTModelAdmin):
             "View on site",
         )
 
-    view_on_site_link.short_description = ""
-    view_on_site_link.allow_tags = True
-
+    @admin.display(description="Actions")
     def action_links(self, page):
         actions = []
 
@@ -139,8 +139,6 @@ class PageAdmin(MPTTModelAdmin):
 
         return format_html('<span class="nobr">{0}</span>', format_html_join("", "{0}", ((a,) for a in actions)))
 
-    action_links.short_description = "Actions"
-
     def save_model(self, request, obj, form, change):
         """
         - Optionally positions a Page `obj` before or beneath another page, based on POST data.
@@ -158,6 +156,7 @@ class PageAdmin(MPTTModelAdmin):
         super().save_model(request, obj, form, change)
 
 
+@admin.register(File)
 class FileAdmin(admin.ModelAdmin):
     list_display = (
         "__str__",
@@ -176,6 +175,7 @@ class FileAdmin(admin.ModelAdmin):
             ]  # the original delete selected action doesn't remove associated files, because .delete() is never called
         return actions
 
+    @admin.action(description="Delete selected files")
     def really_delete_selected(self, request, queryset):
         deleted_count = 0
 
@@ -195,9 +195,8 @@ class FileAdmin(admin.ModelAdmin):
                 % {"count": deleted_count, "items": model_ngettext(self.opts, deleted_count)},
             )
 
-    really_delete_selected.short_description = "Delete selected files"
 
-
+@admin.register(Image)
 class ImageAdmin(FileAdmin):
     list_display = (
         "preview",
@@ -234,9 +233,3 @@ class ImageAdmin(FileAdmin):
             kwargs["widget"] = AdminImageWidgetWithPreview
             return db_field.formfield(**kwargs)
         return super().formfield_for_dbfield(db_field, **kwargs)
-
-
-admin.site.register(ContentItem, ContentItemAdmin)
-admin.site.register(Image, ImageAdmin)
-admin.site.register(File, FileAdmin)
-admin.site.register(Page, PageAdmin)

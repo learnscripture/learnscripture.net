@@ -1,9 +1,9 @@
 import os
 import time
 import urllib.parse
+from collections.abc import Callable
 from datetime import datetime
 from importlib import import_module
-from typing import Callable
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
@@ -177,7 +177,7 @@ def paypal_debug_middleware(get_response):
         if "paypal/ipn/" in request.path:
             open(
                 os.path.join(os.environ["HOME"], f"learnscripture-paypal-request-{datetime.now().isoformat()}"), "wb"
-            ).write(request.META.get("CONTENT_TYPE", "") + "\n\n" + request.body)
+            ).write(request.headers.get("content-type", "") + "\n\n" + request.body)
 
         return get_response(request)
 

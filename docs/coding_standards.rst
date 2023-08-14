@@ -18,17 +18,11 @@ See also the file ``../.editorconfig`` which must match this, and see
 http://editorconfig.org/ which may have a plugin for your editor to
 automatically use this.
 
-If possible, please set up your editor to use 'flake8' to check code as you go.
+If possible, please set up your editor to use 'ruff' to check code as you go.
 This can help avoid a lot of errors, as well as keeping coding style consistent.
-You should ensure that you are using the right copy of flake8,
-and that flake8 is respecting the settings in setup.cfg.
-
-Imports should be sorted as per the isort command. See
-https://github.com/timothycrosley/isort/wiki/isort-Plugins for editor plugins
-for isort.
 
 Using `pre-commit <https://pre-commit.com/>`_ will allow you to automate these
-checks before checking in to git.
+linting checks and formatting before checking in to git.
 
 Identifiers
 -----------

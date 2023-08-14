@@ -130,7 +130,7 @@ def instance_to_dict(instance, fields):
 def make_serializable(value, fields=[]):
     if value is None:
         return value
-    if isinstance(value, (str, int, float, datetime.date, datetime.datetime)):
+    if isinstance(value, str | int | float | datetime.date | datetime.datetime):
         return value
     if isinstance(value, dict):
         return {k: make_serializable(v) for k, v in value.items()}

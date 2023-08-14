@@ -1,5 +1,5 @@
 # Utility functions for importing Bible texts
-from typing import Generator
+from collections.abc import Generator
 
 from bibleverses.constants import _BIBLE_BOOKS_FOR_LANG, BIBLE_BOOK_INFO
 from bibleverses.languages import LANG

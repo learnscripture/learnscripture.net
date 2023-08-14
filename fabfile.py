@@ -392,8 +392,7 @@ def code_quality_checks(c: Connection, skip_selenium: bool = False, allow_missin
     Run code quality checks, including tests.
     """
     # Quicker tests first
-    c.run("flake8 .", echo=True)
-    c.run("isort -c .", echo=True)
+    c.run("ruff .", echo=True)
     check_ftl(c, allow_missing_ftl=allow_missing_ftl)
     run_ftl2elm(c)
     with c.cd("learnscripture/static/elm"):

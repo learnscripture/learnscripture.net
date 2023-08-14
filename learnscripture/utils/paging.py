@@ -1,5 +1,3 @@
-from typing import Optional
-
 import attr
 import furl
 
@@ -11,7 +9,7 @@ class Page:
     shown_count: int
     more: bool
     more_link: str
-    total: Optional[int] = None
+    total: int | None = None
 
     @property
     def empty(self):

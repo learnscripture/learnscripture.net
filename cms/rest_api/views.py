@@ -89,8 +89,7 @@ class FileDetail(generics.RetrieveUpdateDestroyAPIView):
             delete_response = f"Successfully deleted {file_name}."
         except ProtectedError:
             delete_response = (
-                "%(file_name)s is not deleted, because that would require deleting protected related objects."
-                % {"file_name": file_name}
+                f"{file_name} is not deleted, because that would require deleting protected related objects."
             )
 
         return Response(delete_response, status=200)
@@ -155,8 +154,7 @@ class ImageDetail(generics.RetrieveUpdateDestroyAPIView):
             delete_response = f"Successfully deleted {file_name}."
         except ProtectedError:
             delete_response = (
-                "%(file_name)s is not deleted, because that would require deleting protected related objects."
-                % {"file_name": file_name}
+                f"{file_name} is not deleted, because that would require deleting protected related objects."
             )
 
         return Response(delete_response, status=200)

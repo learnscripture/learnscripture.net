@@ -2,7 +2,6 @@ import json
 import math
 import os.path
 from datetime import timedelta
-from typing import Optional
 
 # The whole of this model is also reproduced in Elm code, to allow client side code
 # to estimate when something is next due without a server round trip. All changes
@@ -137,7 +136,7 @@ class MemoryModel:
 
     # Given an old strength, a new test score, and the number of seconds elapsed,
     # we need to calculate the new strength estimate.
-    def strength_estimate(self, old_strength: float, test_accuracy: float, time_elapsed: Optional[float]):
+    def strength_estimate(self, old_strength: float, test_accuracy: float, time_elapsed: float | None):
         # We first have to convert between 'test accuracy' and some notion of
         # 'test strength'. It was found that achieving 100% is actually pretty
         # easy, and a score as high as 60% shows pretty low knowledge in reality

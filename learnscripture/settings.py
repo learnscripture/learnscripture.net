@@ -50,7 +50,7 @@ if LIVEBOX:
 
     DATABASES = {
         DB_LABEL_DEFAULT: {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": secrets["PRODUCTION_DB_NAME"],
             "USER": secrets["PRODUCTION_DB_USER"],
             "PASSWORD": secrets["PRODUCTION_DB_PASSWORD"],
@@ -60,7 +60,7 @@ if LIVEBOX:
             "CONN_MAX_AGE": 120,
         },
         DB_LABEL_WORDSUGGESTIONS: {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": secrets["PRODUCTION_DB_NAME_WS"],
             "USER": secrets["PRODUCTION_DB_USER"],
             "PASSWORD": secrets["PRODUCTION_DB_PASSWORD"],
@@ -82,7 +82,7 @@ else:
 
     DATABASES = {
         DB_LABEL_DEFAULT: {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": "learnscripture",
             "USER": "learnscripture",
             "PASSWORD": "learnscripture",
@@ -92,7 +92,7 @@ else:
             "CONN_MAX_AGE": 120,
         },
         DB_LABEL_WORDSUGGESTIONS: {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": "learnscripture_wordsuggestions",
             "USER": "learnscripture",
             "PASSWORD": "learnscripture",
@@ -173,7 +173,6 @@ LANGUAGE_CODES = [c for c, n in LANGUAGES]
 SITE_ID = 1
 
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 # Sync with fabfile

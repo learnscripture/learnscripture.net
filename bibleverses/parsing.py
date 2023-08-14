@@ -1,7 +1,6 @@
 import dataclasses
 import re
 from dataclasses import dataclass
-from typing import Optional
 
 from parsy import ParseError, char_from, generate, regex, string, string_from, whitespace
 
@@ -25,8 +24,8 @@ class ParsedReference:
     book_name: str  # Always canonical form
     start_chapter: int
     start_verse: int
-    end_chapter: Optional[int] = None
-    end_verse: Optional[int] = None
+    end_chapter: int | None = None
+    end_verse: int | None = None
 
     def __post_init__(self):
         self.book_number = get_bible_book_number(self.language_code, self.book_name)

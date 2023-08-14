@@ -7,6 +7,7 @@ from .models import QAPair, TextVersion, UserVerseStatus, Verse, VerseChoice, Ve
 from .parsing import InvalidVerseReference, parse_validated_internal_reference
 
 
+@admin.register(TextVersion)
 class TextVersionAdmin(admin.ModelAdmin):
     list_display = ["short_name", "slug", "full_name", "text_type", "url"]
     list_filter = ["language_code"]
@@ -40,6 +41,7 @@ class VerseSetForm(forms.ModelForm):
         }
 
 
+@admin.register(VerseSet)
 class VerseSetAdmin(admin.ModelAdmin):
     list_display = ["name", "set_type", "date_added", "slug", "created_by", "description", "additional_info"]
     list_filter = ["set_type", "public", "language_code"]
@@ -48,14 +50,13 @@ class VerseSetAdmin(admin.ModelAdmin):
     inlines = [VerseChoiceInline]
 
 
+@admin.action(description="Mark selected verses as missing")
 def mark_missing(modeladmin, request, queryset):
     for v in queryset:
         v.mark_missing()
 
 
-mark_missing.short_description = "Mark selected verses as missing"  # noqa: E305
-
-
+@admin.register(Verse)
 class VerseAdmin(admin.ModelAdmin):
     search_fields = ["localized_reference"]
     list_display = ["localized_reference", "version", "missing"]
@@ -67,6 +68,7 @@ class VerseAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related("version")
 
 
+@admin.register(QAPair)
 class QAPairAdmin(admin.ModelAdmin):
     search_fields = ["localized_reference", "question"]
     list_display = ["localized_reference", "question", "catechism"]
@@ -77,6 +79,7 @@ class QAPairAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related("catechism")
 
 
+@admin.register(UserVerseStatus)
 class UserVerseStatusAdmin(admin.ModelAdmin):
     search_fields = ["for_identity__account__username"]
     list_filter = ["ignored"]
@@ -89,10 +92,3 @@ class UserVerseStatusAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("for_identity__account")
-
-
-admin.site.register(TextVersion, TextVersionAdmin)
-admin.site.register(VerseSet, VerseSetAdmin)
-admin.site.register(Verse, VerseAdmin)
-admin.site.register(QAPair, QAPairAdmin)
-admin.site.register(UserVerseStatus, UserVerseStatusAdmin)

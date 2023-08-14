@@ -1,6 +1,5 @@
 # Training texts:
 import logging
-from typing import Optional
 
 from bibleverses.models import TextVersion
 
@@ -24,12 +23,10 @@ class TrainingTexts:
     that is used by an analysis.
     """
 
-    def __init__(
-        self, text_version: Optional[TextVersion] = None, text_slug: Optional[str] = None, disallow_loading=False
-    ):
+    def __init__(self, text_version: TextVersion | None = None, text_slug: str | None = None, disallow_loading=False):
         self._keys = []
         self._values = {}
-        self.text_version: Optional[TextVersion] = text_version
+        self.text_version: TextVersion | None = text_version
         if text_version is not None:
             text_slug = text_version.slug
         self.text_slug: str = text_slug

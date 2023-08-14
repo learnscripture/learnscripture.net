@@ -41,12 +41,12 @@ then they said among the nations,
 @pytest.mark.skip(reason="ESV v2 is discontinued")
 class TestEsvSearch(SetupEsvMixin, TestBase):
     def test_search(self):
-        l, more_results = search_esv_v2(self.esv, "God loved world gave", 0, 10)
-        assert len(l) == 1
-        v = l[0]
-        assert v.localized_reference == "John 3:16"
+        results, more_results = search_esv_v2(self.esv, "God loved world gave", 0, 10)
+        assert len(results) == 1
+        verse = results[0]
+        assert verse.localized_reference == "John 3:16"
         assert not more_results
         assert (
             "“For **God** so **loved** the **world**, that he **gave** his only Son, that whoever believes in him should"
-            in v.verses[0].text_saved
+            in verse.verses[0].text_saved
         )
