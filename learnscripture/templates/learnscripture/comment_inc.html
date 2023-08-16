@@ -9,30 +9,32 @@
            "
      id="comment-{{ comment.id }}"
      data-comment-id="{{ comment.id }}">
-  <span class="commentauthor">
-    {{ comment.author|account_link }}
-  </span>
-  {% if show_as_related_comment %}
-    {% capture as item_title silent %}<b>{{ comment.event.render_html_dict|lookup:default_language_code }}</b>{% endcapture %}
-    — {% ftlmsg 'comments-event-title-html' item_title=item_title %}
-  {% endif %}
-  {% if request_account.is_moderator %}
-    <span class="commentmoderation">
-      <a href="#"
-         title="Remove comment"
-         hx-confirm="Remove this comment?"
-         hx-post="{% url 'hide_comment' comment_id=comment.id %}"
-         hx-target="closest .comment"
-         hx-swap="outerHTML"
-         class="moderate-comment"
-      ><i class="icon-moderate"></i></a>
+  <div class="comment__inner">
+    <span class="commentauthor">
+      {{ comment.author|account_link }}
     </span>
-  {% endif %}
-  <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
-  <div class="commentmessage">
-    {{ comment.message_formatted }}
+    {% if show_as_related_comment %}
+      {% capture as item_title silent %}<b>{{ comment.event.render_html_dict|lookup:default_language_code }}</b>{% endcapture %}
+      — {% ftlmsg 'comments-event-title-html' item_title=item_title %}
+    {% endif %}
+    {% if request_account.is_moderator %}
+      <span class="commentmoderation">
+        <a href="#"
+           title="Remove comment"
+           hx-confirm="Remove this comment?"
+           hx-post="{% url 'hide_comment' comment_id=comment.id %}"
+           hx-target="closest .comment"
+           hx-swap="outerHTML"
+           class="moderate-comment"
+        ><i class="icon-moderate"></i></a>
+      </span>
+    {% endif %}
+    <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
+    <div class="commentmessage">
+      {{ comment.message_formatted }}
+    </div>
+    {% if show_as_related_comment %}
+      <div class="relatedaddcomment"><a href="{{ comment.get_absolute_url }}"><i class="icon-comment"></i> {% ftlmsg 'comments-add-comment-link' %}</a></div>
+    {% endif %}
   </div>
-  {% if show_as_related_comment %}
-    <div class="relatedaddcomment"><a href="{{ comment.get_absolute_url }}"><i class="icon-comment"></i> {% ftlmsg 'comments-add-comment-link' %}</a></div>
-  {% endif %}
 </div>

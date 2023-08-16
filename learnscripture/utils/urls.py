@@ -19,7 +19,13 @@ def get_next_url_for_request(request):
     if "next" in request.GET:
         return request.GET["next"]
     else:
-        current_full_url = request.get_full_path()
+        # For partials responding to htmx requests, we should use
+        # the browser URL, not the request URL, which conveniently
+        # if passed in HX-Current-URL
+        if hx_current_url := request.headers.get("HX-Current-URL", None):
+            current_full_url = furl(hx_current_url).path
+        else:
+            current_full_url = request.get_full_path()
         current_path = furl(current_full_url).path
 
         if str(current_path) not in [

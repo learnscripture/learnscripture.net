@@ -2,7 +2,7 @@ PyVirtualDisplay==2.2
 compare-locales==8.2.0
 coverage==6.1.2
 django-debug-toolbar==4.2.0
-django-extensions==3.2.1
+django-extensions==3.2.3
 django-functest==1.5.3
 elm-fluent==0.6.0
 ipython==8.11

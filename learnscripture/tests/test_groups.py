@@ -89,7 +89,6 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
 
 
 class GroupPageTestsFB(GroupPageTestsBase, FullBrowserTest):
-
     # Additional Selenium only test
 
     def test_add_comment(self):

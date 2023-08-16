@@ -13,9 +13,6 @@ comments-event-title-html = “{ $item_title }” bildirisne ekle:
 # Tooltip on link that goes to comments
 comments-view-or-add-comments-tooltip = Yorum ekle/görüntüle
 
-# Validation error message displayed if user tries to post a comment without a message
-comments-message-missing-validation = İletinin girilmesi gerek
-
 # Validation error message displayed if user tries to post a comment when they are not a member of the group
 comments-not-member-of-group = Bir iletiyi eklemek için gruba üye olmanız gerek.
 

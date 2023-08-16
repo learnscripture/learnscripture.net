@@ -16,9 +16,6 @@ comments-event-title-html = en la noticia “{ $item_title }”:
 comments-view-or-add-comments-tooltip = Ver o añadir comentarios
 
 
-# Validation error message displayed if user tries to post a comment without a message
-comments-message-missing-validation = Debes escribir un mensaje
-
 # Validation error message displayed if user tries to post a comment when they are not a member of the group
 comments-not-member-of-group = Debes ser miembro del grupo para añadir comentarios
 

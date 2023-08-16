@@ -146,4 +146,13 @@ $(document).ready(function() {
     window.addEventListener('beforeunload', function(ev) {
         $('#id-unloader').addClass('shown');
     });
+
+});
+
+
+document.body.addEventListener("htmx:afterSettle", function(detail) {
+    for (const elem of (detail.target as Element).querySelectorAll('[data-js-onload-focus]')) {
+        const input: HTMLElement = elem as HTMLElement;
+        input.focus();
+    };
 });

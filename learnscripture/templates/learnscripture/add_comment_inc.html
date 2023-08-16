@@ -1,0 +1,57 @@
+{% load ftl %}
+{% load capture_tags %}
+{% load account_utils %}
+
+{# If displaying a new comment, we will also be displaying the 'Add comment' link #}
+{# and we want that to be the before/after the new comment, depending on the position #}
+{% if new_comment and new_comment_position == "bottom" %}
+  {% include "learnscripture/comment_inc.html" with comment=new_comment %}
+{% endif %}
+
+
+<div class="add-comment-container">
+  {% if show_comment_form %}
+    <div class="comment-box-wrapper">
+      {% if request_account %}
+        {% if request_account.enable_commenting %}
+          <form
+            hx-post="{% url 'add_comment' model=comment_model instance_id=comment_instance_id new_comment_position=new_comment_position %}"
+            hx-target="closest .add-comment-container"
+            hx-swap="outerHTML"
+          >
+
+            <div class="comment-form-row">
+              <textarea name="message" required class="comment-box" rows="1" data-js-onload-focus></textarea>
+              <div>
+                <button type="submit" class="btn primary add-comment-btn" name="add">
+                  {% ftlmsg 'comments-post-button' %} <i class="icon-public icon-replace" title="{% ftlmsg 'site-public-action' %}"></i>
+                </button><button type="submit" class="btn cancel-comment-btn" name="cancel" formnovalidate>
+                  {% ftlmsg 'comments-cancel-button' %}
+                </button>
+              </div>
+            </div>
+            {% if validation_error %}
+              <div class="validation-error">{{ validation_error }}</div>
+            {% endif %}
+            <div class="warning-note">
+              {% ftlmsg 'comments-public-message-warning' %}
+            </div>
+          </form>
+        {% endif %}
+      {% else %}
+        {% capture as login_and_redirect_url silent %}{% make_login_url %}{% endcapture %}
+        <div>{% ftlmsg 'comments-login-to-add-comments-html' login_url=login_and_redirect_url %}</div>
+      {% endif %}
+    </div>
+  {% else %}
+    <a href="#" class="show-add-comment"
+       hx-get="{% url 'add_comment' model=comment_model instance_id=comment_instance_id new_comment_position=new_comment_position %}"
+       hx-target="closest .add-comment-container"
+       hx-swap="outerHTML"
+    >{% ftlmsg 'comments-add-comment-link' %}</a>
+  {% endif %}
+</div>
+
+{% if new_comment and new_comment_position == "top" %}
+  {% include "learnscripture/comment_inc.html" with comment=new_comment %}
+{% endif %}

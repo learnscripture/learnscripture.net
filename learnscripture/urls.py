@@ -87,6 +87,11 @@ urlpatterns = [
     path("account-autocomplete/", accounts.lookups.AccountAutocomplete.as_view(), name="account_autocomplete"),
     # Comments
     path("hide-comment/<int:comment_id>/", learnscripture.views.hide_comment, name="hide_comment"),
+    path(
+        "add-comment/<str:model>/<int:instance_id>/<str:new_comment_position>/",
+        learnscripture.views.add_comment,
+        name="add_comment",
+    ),
     # CMS
     path("api/cms/", include("cms.rest_api.urls")),
     # Other

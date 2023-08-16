@@ -28,7 +28,6 @@ import './viewset';
 import './dashboard';
 import './versepopup';
 import './groups';
-import './comment';
 import './sw_setup';
 import './learn_setup';
 

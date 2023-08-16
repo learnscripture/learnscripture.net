@@ -1,7 +1,5 @@
 {% load ftl %}
 
 {% if request_account.enable_commenting or not request_account %}
-  <div class="commentboxlocator">
-    <a href="#" class="show-add-comment">{% ftlmsg 'comments-add-comment-link' %}</a>
-  </div>
+  {% include "learnscripture/add_comment_inc.html" with comment_model="group" comment_instance_id=group.id new_comment_position=new_comment_position %}
 {% endif %}

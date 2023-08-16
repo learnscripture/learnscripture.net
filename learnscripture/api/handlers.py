@@ -33,8 +33,6 @@ from bibleverses.models import (
     make_verse_set_passage_id,
     quick_find,
 )
-from events.models import Event
-from groups.models import Group
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.ftl_bundles import t
@@ -492,51 +490,6 @@ def duplicate_passage_check(request, language_code, start_internal_reference, en
     else:
         context = {"verse_sets": verse_sets, "language_code": language_code}
         return render_to_string_ftl("learnscripture/duplicate_passage_warning_inc.html", context, request=request)
-
-
-class AddComment(ApiView):
-    @require_preexisting_account_m
-    def post(self, request):
-        account = request.identity.account
-
-        if not account.enable_commenting:
-            return {}
-
-        message = request.POST.get("message", "").strip()
-        if message == "":
-            return validation_error_response({"message": t("comments-message-missing-validation")})
-
-        comment = None
-        if "event_id" in request.POST:
-            try:
-                event_id = int(request.POST["event_id"])
-            except ValueError:
-                return rc.BAD_REQUEST("Integer event_id required")
-
-            try:
-                event = Event.objects.get(id=event_id)
-            except Event.DoesNotExist:
-                return rc.BAD_REQUEST("Existing event_id required")
-
-            comment = event.add_comment(author=account, message=message)
-
-        elif "group_id" in request.POST:
-            try:
-                group_id = int(request.POST["group_id"])
-            except ValueError:
-                return rc.BAD_REQUEST("Integer group_id required")
-
-            try:
-                group = Group.objects.visible_for_account(account).get(id=group_id)
-            except Group.DoesNotExist:
-                return rc.BAD_REQUEST("Existing group_id required")
-
-            if not group.accepts_comments_from(account):
-                return validation_error_response({"message": t("comments-not-member-of-group")})
-
-            comment = group.add_comment(author=account, message=message)
-
-        return {"html": render_to_string_ftl("learnscripture/comment_inc.html", {"comment": comment}, request=request)}
 
 
 class SaveMiscPreferences(ApiView):

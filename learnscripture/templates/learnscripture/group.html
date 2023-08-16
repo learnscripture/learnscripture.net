@@ -19,16 +19,12 @@
     <div class="commentblock"
          data-new-comments-position="top"
     >
-      {% include "learnscripture/group_wall_add_comment_inc.html" %}
+      {% include "learnscripture/group_wall_add_comment_inc.html" with new_comment_position="top" %}
       {% for comment in comments %}
-        {% with show_as_related_comment=comment.event %}
-          {% include "learnscripture/comment_inc.html" %}
-        {% endwith %}
+        {% include "learnscripture/comment_inc.html" with show_as_related_comment=comment.event %}
       {% endfor %}
     </div>
   </div>
-
-  {% include "learnscripture/comment_common_inc.html" %}
 
   <h2>{% ftlmsg 'groups-details-group-info-subtitle' %}</h2>
 

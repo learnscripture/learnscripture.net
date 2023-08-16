@@ -1,19 +1,21 @@
+.commentblock {
+    > * + * {
+        padding-top: @activityItemPadding;
+    }
+    > *:first-child {
+        padding-top: @activityItemPadding;
+    }
+    > *:last-child {
+        padding-bottom: @activityItemPadding;
+    }
+    > * {
+        padding-left: @activityItemPadding;
+        padding-right: @activityItemPadding;
+    }
+}
+
+
 .comment {
-
-    &:first-child {
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-    }
-    &:last-child {
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-    }
-
-    background-color: var(--baseBackgroundColor);
-    padding: @activityItemPadding;
-    border-radius: @actionsetBorderRadius;
-    margin-bottom: 3px;
-    overflow: auto;
 
     .timestamp {
         font-style: italic;
@@ -35,6 +37,13 @@
 
     &.selectedcomment {
         background-color: #ffffc0;
+    }
+
+    .comment__inner {
+        background-color: var(--baseBackgroundColor);
+        padding: @activityItemPadding;
+        border-radius: 4px;
+        overflow: auto;
     }
 }
 

@@ -32,9 +32,6 @@
         margin-right: @activityItemPadding;
     }
 
-    .commentblock {
-        padding: @activityItemPadding;
-    }
 
     .commentauthor {
     }
@@ -46,6 +43,17 @@
 
 }
 
-.activityitem .commentblock {
-    border-top: 1px solid var(--bgBorderColor);
+.activityitem {
+    .commentblock > *:first-child {
+        border-top: 1px solid var(--bgBorderColor);
+    }
+
+    // Only show the initial 'add comment' link if there is already at least one
+    // comment:
+    .event-show-add-comment-container {
+        display: none;
+    }
+    .comment ~ .event-show-add-comment-container {
+        display: block;
+    }
 }

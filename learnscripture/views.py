@@ -11,6 +11,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetView as AuthPasswordResetView
 from django.contrib.sites.models import Site
 from django.db import IntegrityError
+from django.db.models import ObjectDoesNotExist
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.http.request import HttpRequest
@@ -1947,3 +1948,45 @@ def hide_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 def delete_notice(request: HttpRequest, notice_id: int) -> HttpResponse:
     request.identity.notices.filter(id=notice_id).delete()
     return HttpResponse("")  # htmx
+
+
+def add_comment(request: HttpRequest, model: str, instance_id: int, new_comment_position: str) -> HttpResponse:
+    account = account_from_request(request)
+    validation_error = None
+    comment = None
+    show_comment_form = True
+    if request.method == "POST" and account is not None and account.enable_commenting:
+        message = request.POST.get("message", "").strip()
+        if "cancel" in request.POST:
+            show_comment_form = False
+        elif "add" in request.POST and message:
+            COMMENTABLE_GETTERS = {
+                "group": lambda instance_id: Group.objects.visible_for_account(account).get(id=instance_id),
+                "event": lambda instance_id: Event.objects.get(id=instance_id),
+            }
+            try:
+                getter = COMMENTABLE_GETTERS[model]
+                commentable: Group | Event = getter(instance_id)
+            except (KeyError, ObjectDoesNotExist):
+                return HttpResponseBadRequest("Invalid model/instance_id values")
+            if isinstance(commentable, Group) and not commentable.accepts_comments_from(account):
+                validation_error = t("comments-not-member-of-group")
+            else:
+                comment = commentable.add_comment(author=account, message=message)
+                show_comment_form = False
+    else:
+        show_comment_form = True
+    return TemplateResponse(
+        request,
+        "learnscripture/add_comment_inc.html",
+        {
+            # Parameters also passed via include and are propagated via the URL:
+            "comment_model": model,
+            "comment_instance_id": instance_id,
+            "new_comment_position": new_comment_position,
+            # Parameters passed only from this view:
+            "show_comment_form": show_comment_form,
+            "validation_error": validation_error,
+            "new_comment": comment,
+        },
+    )
