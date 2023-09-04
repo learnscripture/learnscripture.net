@@ -2,6 +2,7 @@
 
 {% load form_rendering %}
 {% load ftl %}
+{% load humanize %}
 
 {% block body_extra_class %}leaderboard-page{% endblock %}
 
@@ -9,10 +10,12 @@
   <p><a href="{% url 'group' group.slug %}">{% ftlmsg 'groups-details-group-info-subtitle' %}</a></p>
 
   <form action="." method="GET"
+        data-trigger-on-input-change="true"
         hx-get="."
         hx-target="#id-leaderboard-results-table-body"
+        hx-swap="innerHTML"
+        hx-vals='{"use_block": "results"}'
         hx-indicator="#id-leaderboard-results-table-body"
-        data-trigger-on-input-change="true"
   >
     {{ leaderboard_filter_form|render_form }}
   </form>
@@ -31,7 +34,38 @@
       </tr>
     </thead>
     <tbody id="id-leaderboard-results-table-body">
-      {% include "learnscripture/leaderboard_results_table_body_inc.html" %}
+      {% block results %}
+        {% for account in results.items %}
+          <tr>
+            <td><a href="{% url 'user_stats' account.username %}">{{ account.username }}</a></td>
+            <td>{{ account.points|intcomma }}</td>
+            <td>{{ account.rank|intcomma }}</td>
+            <td>{{ account.num_verses|intcomma }}</td>
+          </tr>
+        {% endfor %}
+
+        {% if results.empty %}
+          <tr>
+            <td colspan="4">{% ftlmsg 'leaderboards-no-users-found' %}</td>
+          </tr>
+        {% else %}
+          <tr id="id-more-results-container">
+            <td colspan="4">
+              {% if results.more %}
+                <div class="paging">
+                  <span class="paging-part">{% ftlmsg 'leaderboards-showing-user-count' user_count=results.shown_count %}</span>
+                  <span class="paging-part"><a href="{{ results.more_link }}"
+                                               hx-get="{{ results.more_link }}"
+                                               hx-target="#id-more-results-container"
+                                               hx-vals='{"use_block":"results"}'
+                                               hx-indicator="#id-more-results-container .paging"
+                                               hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
+                </div>
+              {% endif %}
+            </td>
+          </tr>
+        {% endif %}
+      {% endblock %}
     </tbody>
   </table>
 

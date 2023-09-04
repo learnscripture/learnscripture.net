@@ -1646,13 +1646,7 @@ def group_wall(request, slug: str):
     return TemplateResponse(request, "learnscripture/group_wall.html", ctx)
 
 
-@for_htmx(
-    if_hx_target="id-leaderboard-results-table-body",
-    use_template="learnscripture/leaderboard_results_table_body_inc.html",
-)
-@for_htmx(
-    if_hx_target="id-more-results-container", use_template="learnscripture/leaderboard_results_table_body_inc.html"
-)
+@for_htmx(use_block_from_params=True)
 def group_leaderboard(request, slug: str):
     PAGE_SIZE = 30
     from_item = get_request_from_item(request)
