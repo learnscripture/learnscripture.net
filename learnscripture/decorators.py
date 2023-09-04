@@ -58,6 +58,7 @@ def require_account(view_func):
 
     For htmx, returns 403 instead (since redirects are not going to work in htmx context)
     """
+
     # NB this doesn't create an account.
     @wraps(view_func)
     def view(request, *args, **kwargs):
@@ -97,7 +98,6 @@ def require_account_with_redirect(view_func):
 
 def for_htmx(
     *,
-    if_hx_target: str | None = None,
     use_template: str | None = None,
     use_block: str | None = None,
     use_block_from_params: bool = False,
@@ -108,9 +108,6 @@ def for_htmx(
     - the block specified in `use_block` param
     - the block specified in GET/POST parameter "use_block", if `use_block_from_params=True` is passed
 
-    If the optional `if_hx_target` parameter is supplied, the
-    hx-target header must match the supplied value as well in order
-    for this decorator to be applied.
     """
     if len([p for p in [use_block, use_template, use_block_from_params] if p]) != 1:
         raise ValueError("You must pass exactly one of 'use_template', 'use_block' or 'use_block_from_params'")
@@ -120,26 +117,25 @@ def for_htmx(
         def _view(request, *args, **kwargs):
             resp = view(request, *args, **kwargs)
             if request.headers.get("Hx-Request", False):
-                if if_hx_target is None or request.headers.get("Hx-Target", None) == if_hx_target:
-                    block_to_use = use_block
-                    if not hasattr(resp, "render"):
-                        raise ValueError("Cannot modify a response that isn't a TemplateResponse")
-                    if resp.is_rendered:
-                        raise ValueError("Cannot modify a response that has already been rendered")
+                block_to_use = use_block
+                if not hasattr(resp, "render"):
+                    raise ValueError("Cannot modify a response that isn't a TemplateResponse")
+                if resp.is_rendered:
+                    raise ValueError("Cannot modify a response that has already been rendered")
 
-                    if use_block_from_params:
-                        use_block_from_params_val = _get_param_from_request(request, "use_block")
+                if use_block_from_params:
+                    use_block_from_params_val = _get_param_from_request(request, "use_block")
 
-                        block_to_use = use_block_from_params_val
+                    block_to_use = use_block_from_params_val
 
-                    if use_template is not None:
-                        resp.template_name = use_template
-                    elif block_to_use is not None:
-                        rendered_block = render_block_to_string(
-                            resp.template_name, block_to_use, context=resp.context_data, request=request
-                        )
-                        # Create new simple HttpResponse as replacement
-                        resp = HttpResponse(content=rendered_block, status=resp.status_code, headers=resp.headers)
+                if use_template is not None:
+                    resp.template_name = use_template
+                elif block_to_use is not None:
+                    rendered_block = render_block_to_string(
+                        resp.template_name, block_to_use, context=resp.context_data, request=request
+                    )
+                    # Create new simple HttpResponse as replacement
+                    resp = HttpResponse(content=rendered_block, status=resp.status_code, headers=resp.headers)
 
             return resp
 
