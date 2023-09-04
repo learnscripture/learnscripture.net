@@ -3,6 +3,8 @@
 {% load form_rendering %}
 {% load ftl %}
 {% load markup_tags %}
+{% load dict_utils %}
+{% load markup_tags %}
 
 {% block body_extra_class %}choose-page{% endblock %}
 
@@ -15,6 +17,7 @@
         <form action="." method="GET"
               hx-get="."
               hx-target="#id-choose-verseset-results"
+              hx-vals='{"use_block": "results-container"}'
               data-trigger-on-input-change="true"
               hx-indicator="#id-choose-verseset-results"
               id="id-choose-verseset-form"
@@ -36,7 +39,70 @@
         </form>
 
         <div id="id-choose-verseset-results">
-          {% include "learnscripture/choose_verseset_inc.html" %}
+          {% block results-container %}
+
+            {% if verseset_search_form.cleaned_data.query %}
+              <h2>{% ftlmsg 'choose-verseset-search-results-title-html' query=verseset_search_form.cleaned_data.query %}</h2>
+            {% endif %}
+
+            {% if not results.items %}
+              <p>{% ftlmsg 'choose-verseset-search-no-results' %}</p>
+            {% endif %}
+
+            {% if create_passage_set_prompt %}
+              {% url 'create_passage_set' as create_passage_url %}
+              <p>{% ftlmsg 'choose-create-passage-set-prompt-html' url=create_passage_url urlref=create_passage_set_prompt.internal_reference|urlencode passage_ref=create_passage_set_prompt.localized_reference %}</p>
+            {% endif %}
+
+            {% block results %}
+              {% for vs in results.items %}
+                <div class="verseset">
+                  <form action="{% url 'handle_choose_set' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="verseset_id" value="{{ vs.id }}">
+                    <i class="icon-public" title="{% ftlmsg 'choose-learn-verset-public-notice' %}"></i>
+                    <input type="submit" class="btn primary needs-preferences" value="{% ftlmsg 'choose-learn-button' %}" id="id-learn-verseset-btn-{{ vs.id }}">
+                  </form>
+                  <h3><a href="{{ vs.get_absolute_url }}">{{ vs.smart_name_dict|lookup:verseset_language_code }}</a></h3>
+                  {% if vs.description %}
+                    <p>{{ vs.description|apply_markup:"restructuredtext" }}</p>
+                  {% endif %}
+                  {% if not vs.is_passage and vs.verse_choices.all %}
+                    <p>{% ftlmsg 'choose-verseset-includes-verses' total=vs.verse_choices.all|length %}<br/>
+                      {% for vc in vs.verse_choices.all|slice:"0:10" %}
+                        {{ vc.localized_reference_dict|lookup:verseset_language_code }}{% if not forloop.last %}, {% endif %}
+                      {% endfor %}
+                      {% if vs.verse_choices.all|length > 10 %}…{% endif %}
+                    </p>
+                  {% endif %}
+                  {% if vs.is_passage and vs.breaks %}
+                    <p>{% ftlmsg 'choose-verseset-section-breaks' break_list=vs.breaks_formatted %}</p>
+                  {% endif %}
+                </div>
+              {% endfor %}
+
+              {% if results.items %}
+                <div id="id-more-results-container">
+                  <div class="paging">
+                    <span class="paging-part">
+                      {% ftlmsg 'pagination-showing-shown-of-total' shown=results.shown_count total=results.total %}
+                    </span>
+                    {% if results.more %}
+                      <span class="paging-part"><a href="{{ results.more_link }}"
+                                                   hx-get="{{ results.more_link }}"
+                                                   hx-target="#id-more-results-container"
+                                                   hx-vals='{"use_block": "results"}'
+                                                   hx-indicator="#id-more-results-container"
+                                                   hx-swap="outerHTML"
+                        >{% ftlmsg 'pagination-show-more' %}</a></span>
+                    {% endif %}
+                    <span class="paging-part"><a href="#id-choose-verseset">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
+                  </div>
+                </div>
+              {% endif %}
+            {% endblock %}
+
+          {% endblock %}
         </div>
       </div>
 

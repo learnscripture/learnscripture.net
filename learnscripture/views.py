@@ -542,8 +542,7 @@ def default_bible_version_for_request(request):
 # page and the linked pages unhindered, for SEO.
 
 
-@for_htmx(if_hx_target="id-choose-verseset-results", use_template="learnscripture/choose_verseset_inc.html")
-@for_htmx(if_hx_target="id-more-results-container", use_template="learnscripture/choose_verseset_results_inc.html")
+@for_htmx(use_block_from_params=True)
 def choose(request):
     """
     Choose a verse or verse set
@@ -552,7 +551,7 @@ def choose(request):
     verse_sets = verse_sets_visible_for_request(request)
 
     # Searching for verse sets is done via this view. But looking up individual
-    # verses is done by AJAX, so is missing here.
+    # verses is done by choose_individual_verse_find, so is missing here.
 
     active_section = None
     verseset_search_form = VerseSetSearchForm.from_request_data(
