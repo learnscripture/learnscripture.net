@@ -203,7 +203,7 @@ MIDDLEWARE = [
     for b, m in [
         (True, "learnscripture.middleware.htmx_middleware"),
         (True, "django.middleware.security.SecurityMiddleware"),
-        (DEBUG, "debug_toolbar.middleware.DebugToolbarMiddleware"),
+        (False, "debug_toolbar.middleware.DebugToolbarMiddleware"),  # causes significant slowdowns
         (True, "django.contrib.sessions.middleware.SessionMiddleware"),
         (True, "learnscripture.middleware.pwa_tracker_middleware"),
         (True, "django.middleware.common.CommonMiddleware"),
@@ -305,7 +305,7 @@ if DEVBOX:
     )
 
 if DEBUG:
-    INSTALLED_APPS.append("debug_toolbar")
+    # INSTALLED_APPS.append("debug_toolbar")
     INSTALLED_APPS.append("django_extensions")  # For runserver_plus
     INSTALLED_APPS.append("django_urlconfchecks")
 
