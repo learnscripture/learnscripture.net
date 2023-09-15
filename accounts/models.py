@@ -1,8 +1,9 @@
 import itertools
 import math
 import operator
-from collections import OrderedDict, defaultdict, namedtuple
-from datetime import timedelta
+from collections import OrderedDict, defaultdict
+from dataclasses import dataclass
+from datetime import date, timedelta
 from functools import reduce
 
 import attr
@@ -1472,27 +1473,35 @@ WHERE t2.d2 IS NULL;
     return {i: max(intervals) + 1 for i, intervals in interval_dict.items()}
 
 
-AccountStat = namedtuple("AccountStat", "date new_accounts active_accounts verses_started verses_tested")
+@dataclass
+class AccountStat:
+    date: date
+    new_accounts: int
+    monthly_active_users: int
+    daily_active_users: int
+    verses_started: int
+    verses_tested: int
 
 
 def get_account_stats(start_datetime, end_datetime) -> list[AccountStat]:
     from learnscripture.utils.sqla import default_engine
 
-    active_account_span_size = 14
+    monthly_span_size = 30
     start_date = start_datetime.date()
     end_date = end_datetime.date()
     # We trim the query to be within (query_start, query_end), in multiple
     # places, to reduce the work load. However, to get the 'active_accounts'
     # correct at the beginning, we have to adjust the beginning date to further
     # back than we need
-    query_start = start_date - timedelta(days=active_account_span_size)
+    query_start = start_date - timedelta(days=monthly_span_size)
     query_end = end_date + timedelta(days=1)  # end of day = beginning of next day
 
     sql = sqla_text(
         """
     SELECT gs.dte,
         COALESCE(acc.new_accounts, 0),
-        COALESCE(al1.active_accounts, 0),
+        COALESCE(al1m.active_accounts, 0),
+        COALESCE(al1d.active_accounts, 0),
         COALESCE(al2.verses_started, 0),
         COALESCE(al2.verses_tested, 0)
       FROM generate_series(:query_start, :query_end, interval '1 day') gs(dte)
@@ -1504,9 +1513,14 @@ def get_account_stats(start_datetime, end_datetime) -> list[AccountStat]:
         ) acc ON gs.dte = acc.joined_trunc
       LEFT JOIN LATERAL (
          SELECT count(distinct al.account_id) as active_accounts FROM scores_actionlog al
-           WHERE al.created >= gs.dte - (:active_account_span_size - 1) * interval '1 day'
+           WHERE al.created >= gs.dte - (:monthly_span_size - 1) * interval '1 day'
              AND al.created < gs.dte + interval '1 day'
-      ) al1 ON 1=1
+      ) al1m ON 1=1
+      LEFT JOIN LATERAL (
+         SELECT count(distinct al.account_id) as active_accounts FROM scores_actionlog al
+           WHERE al.created >= gs.dte
+             AND al.created < gs.dte + interval '1 day'
+      ) al1d ON 1=1
       LEFT JOIN LATERAL (
          SELECT
            date_trunc('day', created) AS created_trunc,
@@ -1523,7 +1537,7 @@ def get_account_stats(start_datetime, end_datetime) -> list[AccountStat]:
         {
             "query_start": query_start,
             "query_end": query_end,
-            "active_account_span_size": active_account_span_size,
+            "monthly_span_size": monthly_span_size,
             "reason_started": ScoreReason.VERSE_FIRST_TESTED,
             "reason_tested": ScoreReason.VERSE_REVIEWED,
         },

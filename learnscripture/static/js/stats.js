@@ -36,8 +36,13 @@ $(function() {
                 yaxis: 1
             },
             {
-                label: "Active accounts",
-                data: stats.active_accounts,
+                label: "Monthly Active Users",
+                data: stats.monthly_active_users,
+                yaxis: 2
+            },
+            {
+                label: "Daily Active Users",
+                data: stats.daily_active_users,
                 yaxis: 2
             },
         ],

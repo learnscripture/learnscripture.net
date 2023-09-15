@@ -1377,7 +1377,7 @@ def stats(request):
 
     # Build the stats dict template is expecting (see stats.html)
     stats_dict = {}
-    for stat in ["new_accounts", "active_accounts", "verses_started", "verses_tested"]:
+    for stat in ["new_accounts", "monthly_active_users", "daily_active_users", "verses_started", "verses_tested"]:
         stats_dict[stat] = []
         for account_stat in stats_raw:
             stats_dict[stat].append((date_to_js_ts(account_stat.date), getattr(account_stat, stat)))
