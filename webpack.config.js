@@ -18,7 +18,10 @@ module.exports = (env) => {
         mode: (mode == "tests" ? "development" : mode),
         context: __dirname,
         target: "web",
-        entry: './learnscripture/static/js/index',
+        entry: {
+            main: './learnscripture/static/js/index',
+            stats: './learnscripture/static/js/stats',
+        },
         output: {
             path: path.resolve(__dirname, 'learnscripture/static/webpack_bundles'),
             filename: "[name]-[fullhash]." + filenameSuffix + ".js",
