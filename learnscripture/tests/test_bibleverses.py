@@ -741,6 +741,44 @@ class VerseUtilsTests(unittest.TestCase):
             "él",
         ]
 
+    def test_split_into_words_for_suggestions_smart_punctuation(self):
+        text = """You turn man back into dust
+And say, “Return, O children of men.” """
+        assert split_into_words_for_suggestions(text) == [
+            "you",
+            "turn",
+            "man",
+            "back",
+            "into",
+            "dust",
+            "and",
+            "say",
+            "return",
+            "o",
+            "children",
+            "of",
+            "men",
+        ]
+
+        # Some issues found:
+        text = " word—  60,500 well-beloved workmen’s words?—"
+        assert split_into_words_for_suggestions(text) == [
+            "word",
+            "60,500",
+            "well-beloved",
+            "workmen’s",
+            "words",
+        ]
+        text = "concerning Israel. \n {\nThus} declares the LORD "
+        assert split_into_words_for_suggestions(text) == [
+            "concerning",
+            "israel",
+            "thus",
+            "declares",
+            "the",
+            "lord",
+        ]
+
 
 class SetupEsvMixin:
     def setUp(self):
