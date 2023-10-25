@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  # Runs the Python server process:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: development
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app:cached
+      - /app/src/node_modules
+      - /app/src/learnscripture/static/elm/elm-stuff
+      - /app/src/learnscripture/static/elm/tests/elm-stuff
+    ports:
+      - '8000:8000'
+    stdin_open: true
+    tty: true
+    # Wait for Postgres DB to be ready before running server
+    command:
+      bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done;
+      sleep infinity'
+
+  # Runs the database process:
+  postgres:
+    image: postgres:12.9
+    environment:
+      POSTGRES_USER: learnscripture # Matches the user in settings.py
+      POSTGRES_PASSWORD: learnscripture # Matches the password in settings.py
+    volumes:
+      - ./postgres:/var/lib/postgresql/data:delegated

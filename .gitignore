@@ -18,3 +18,4 @@ Ftl/
 *.aur
 settings_local.py
 .pytest-xdist*
+postgres/
