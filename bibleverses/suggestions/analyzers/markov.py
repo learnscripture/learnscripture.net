@@ -2,6 +2,8 @@ import logging
 
 import pykov
 
+from bibleverses.suggestions.trainingtexts import TrainingTexts
+
 from ..constants import markov_analysis_name_for_size
 from ..utils.numbers import sum_matrices
 from ..utils.pickling import cache_results_with_pickle
@@ -36,7 +38,7 @@ def build_summed_markov_chains_for_texts(training_texts, keys, size):
 
 
 @cache_results_with_pickle("markov")
-def build_markov_chains_for_text(training_texts, key, size):
+def build_markov_chains_for_text(training_texts: TrainingTexts, key, size):
     text = training_texts[key]
     sentences = text.split(".")
     v_accum, c_accum = pykov.maximum_likelihood_probabilities([])
