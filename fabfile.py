@@ -534,13 +534,30 @@ def check_ftl(c: Connection, allow_missing_ftl: bool = False):
 def _check_missing_ftl_messages():
     s = subprocess.check_output(["compare-locales", "l10n.toml", ".", "--json", "-"]).decode("utf-8")
     data = json.loads(s)[0]
-    files = data["details"]
+    details = data["details"]
     output = []
-    for filename, problems in sorted(files.items()):
-        output.append(f"- File: {filename}")
-        for item in problems:
-            if "missingEntity" in item:
-                output.append(" - Missing: " + item["missingEntity"])
+    for path, path_data in details.items():
+        # Helpfully, the JSON has a different structure if there is a single
+        # FTL with a problem compared to multiple files (!)
+
+        # So we normalise back to the case for multiple here
+        if isinstance(path_data, dict):
+            base_path = path
+            problem_files = path_data
+        elif isinstance(path_data, list):
+            base_path = os.path.dirname(path)
+            problem_files = {os.path.basename(path): path_data}
+        else:
+            raise NotImplementedError(f"Not expecting {path_data}")
+
+        for filename, problems in sorted(problem_files.items()):
+            full_path = base_path + "/" + filename
+            output.append(f"- File: {full_path}")
+            for item in problems:
+                if "missingEntity" in item:
+                    output.append(" - Missing: " + item["missingEntity"])
+                if "obsoleteEntity" in item:
+                    output.append(" - Obsolete: " + item["obsoleteEntity"])
 
     return "\n".join(output)
 

@@ -33,3 +33,11 @@ Main things needed:
 - update ``LANGUAGES`` in settings.py
 - do translations of page content in the CMS: https://learnscripture.net/admin/cms/
 - update l10n.toml
+
+
+Checks
+------
+
+Various checks are run as part of deployment, and can be run manually::
+
+  fab check-ftl
