@@ -6,6 +6,7 @@ locales = [
     "en",
     "tr",
     "es",
+    "nl",
 ]
 
 [[paths]]
@@ -15,4 +16,5 @@ l10n = "learnscripture/locales/{locale}/**/*.ftl"
 locales = [
     "tr",
     "es",
+    "nl",
 ]
