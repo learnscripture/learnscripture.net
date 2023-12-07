@@ -48,5 +48,4 @@ def get_bible_book_name(language_code, number):
 
 
 def is_single_chapter_book(book_number):
-    assert type(book_number) == int
     return book_number in _SINGLE_CHAPTER_BOOK_NUMBERS
