@@ -169,6 +169,7 @@ class VersesToLearnHandler(ApiView):
                 # added in get_verse_statuses:
                 "version_slug",
                 "scoring_text_words",
+                "test_text_words",
                 "title_text",
                 "learn_order",
             ],

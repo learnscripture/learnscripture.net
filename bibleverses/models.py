@@ -97,7 +97,7 @@ class TextVersion(models.Model):
     full_name = models.CharField(max_length=255, unique=True)
     url = models.URLField(default="", blank=True)
     text_type = models.CharField(max_length=20, choices=TextType.choices, default=TextType.BIBLE)
-    language_code = models.CharField(max_length=2, blank=False, choices=LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE.code)
+    language_code = models.CharField(max_length=10, blank=False, choices=LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE.code)
     description = models.TextField(blank=True)
 
     public = models.BooleanField(default=True)
@@ -295,6 +295,8 @@ POSTGRES_SEARCH_CONFIGURATIONS = {
     LANG.NL: "dutch",
     LANG.TR: "turkish",
     LANG.ES: "spanish",
+    LANG.ZH_HANT: "simple",  # PostgreSQL doesn't have built-in Chinese; use 'simple' for basic indexing
+    LANG.ZH_HANS: "simple",  # Simplified Chinese
 }
 
 
@@ -677,7 +679,7 @@ class VerseSet(models.Model):
 
     language_code = models.CharField(
         t_lazy("versesets-language"),
-        max_length=2,
+        max_length=10,
         blank=False,
         help_text=t_lazy("versesets-language.help-text"),
         choices=LANGUAGE_CHOICES,
@@ -1003,6 +1005,12 @@ class UserVerseStatus(models.Model):
     @property
     def scoring_text_words(self):
         return split_into_words(self.scoring_text)
+
+    @property
+    def test_text_words(self):
+        # For Chinese text, converts to pinyin first letters for testing
+        from bibleverses.textutils import words_to_test_strings
+        return words_to_test_strings(self.scoring_text_words)
 
     @cached_property
     def short_title(self):
