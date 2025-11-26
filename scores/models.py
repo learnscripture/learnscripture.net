@@ -55,6 +55,8 @@ class Scores:
         languages.LANG.TR: 34,
         languages.LANG.NL: 19,
         languages.LANG.ES: 21,
+        languages.LANG.ZH_HANT: 16,  # Chinese Traditional - 930,059 words, char-by-char splitting (751460/930059*20=16.16)
+        languages.LANG.ZH_HANS: 16,  # Chinese Simplified (same as Traditional)
     }
 
     @classmethod

@@ -21,6 +21,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("comments", "0006_comment_author_was_hellbanned"),
+        ("moderation", "0005_moderationaction_comment_and_more"),
     ]
 
     operations = [migrations.RunPython(forwards, backwards)]

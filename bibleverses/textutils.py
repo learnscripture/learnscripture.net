@@ -1,7 +1,12 @@
 import re
 
+from pypinyin import lazy_pinyin, Style
+
 ALPHANUMERIC_RE = re.compile(r"\w")
 WORD_SPLITTER = re.compile(r"( |\n)")
+# Chinese character ranges (CJK Unified Ideographs)
+CHINESE_CHAR_RE = re.compile(r"[\u4e00-\u9fff]")
+
 
 
 def is_punctuation(text):
@@ -10,6 +15,13 @@ def is_punctuation(text):
 
 def is_newline(text):
     return text == "\n"
+
+
+def is_chinese_text(text):
+    """Check if text contains significant Chinese characters."""
+    # Consider text Chinese if it has at least some Chinese characters
+    chinese_chars = CHINESE_CHAR_RE.findall(text)
+    return len(chinese_chars) > len(text) * 0.3  # At least 30% Chinese characters
 
 
 def split_into_words(text, fix_punctuation_whitespace=True):
@@ -30,6 +42,37 @@ def split_into_words(text, fix_punctuation_whitespace=True):
     # This is used by bibleverses.suggestions, therefore needs to match
     # the way that Learn.elm splits words up.
 
+    # Handle Chinese text with character-by-character splitting
+    if is_chinese_text(text):
+        # For Chinese, treat each character as a word for learning purposes
+        # This avoids incorrect word segmentation and makes testing simpler
+        t = text.replace("\r\n", "\n").strip(" ")
+
+        # Split by newlines first to preserve them
+        lines = t.split("\n")
+        words = []
+
+        for i, line in enumerate(lines):
+            if line:
+                # Split line into individual characters
+                for char in line:
+                    words.append(char)
+
+            # Add newline back (except after last line)
+            if i < len(lines) - 1:
+                if words:
+                    words[-1] += "\n"
+                else:
+                    words.append("\n")
+
+        if fix_punctuation_whitespace:
+            # Merge punctuation-only items with neighboring words
+            words = merge_items_left(words, is_punctuation)
+            words = merge_items_right(words, is_punctuation)
+
+        return words
+
+    # Non-Chinese text: use original whitespace-based splitting
     # We need to cope with things like Gen 3:22
     #    and live forever--"'
     # and Gen 1:16
@@ -75,3 +118,95 @@ def merge_items_right(words, predicate):
 
 def count_words(text):
     return len(split_into_words(text))
+
+
+def chinese_word_to_test_string(word):
+    """
+    Convert a Chinese word to a test string.
+
+    For Chinese characters, returns the Pinyin first letter.
+    This supports 'FirstLetter' testing mode.
+    Chinese punctuation is stripped from test strings.
+
+    Examples:
+        "神" -> "s" (shen -> s)
+        "愛" -> "a" (ai -> a)
+        "人！" -> "r" (ren -> r, punctuation removed)
+    """
+    # pypinyin converts Chinese characters to pinyin and leaves non-Chinese
+    # characters (like punctuation) as-is
+    # Style.NORMAL gives pinyin without tone marks
+    pinyin_list = lazy_pinyin(word, style=Style.NORMAL)
+
+    # Common Chinese punctuation marks to strip from test strings
+    chinese_punctuation = '，。、；：！？（）【】《》「」『』'
+
+    # Collect test string characters
+    test_chars = []
+
+    for i, py in enumerate(pinyin_list):
+        if py and len(py) > 0:
+            # Check if this is a Chinese character's pinyin (all alphabetic)
+            # or punctuation/other (returned as-is by pypinyin)
+            if py.isalpha():
+                is_chinese_char = False
+                # Mapping back to original word is tricky if pypinyin split differently than chars.
+                # But for standard Chinese text, split_into_words has likely already
+                # split it into single chars (or short sequences).
+                # To be safe, we check if the pinyin looks different from the source
+                # OR if the source was Chinese.
+
+                # However, strict mapping index `i` to `word[i]` is only valid if
+                # pypinyin output maps 1-to-1 with input chars.
+                # lazy_pinyin documentation says it does for Chinese chars.
+                # But English words are kept as single items.
+
+                # If we assume `word` is passed from `split_into_words` which splits
+                # Chinese into single chars, then `word` is likely 1 char long (plus optional punct).
+
+                # Let's rely on pinyin result.
+                test_chars.append(py[0])
+
+            elif py not in chinese_punctuation:
+                # It's non-Chinese punctuation - keep as-is
+                # (e.g., English punctuation like quotes or dashes)
+                test_chars.append(py)
+            # Chinese punctuation is skipped (not appended)
+
+    return ''.join(test_chars)
+
+
+def words_to_test_strings(words):
+    """
+    Convert a list of words to their test strings.
+
+    For Chinese words, converts to pinyin first letters.
+    For punctuation-only words, returns empty string (so they're skipped during input).
+
+    Args:
+        words: List of word strings
+
+    Returns:
+        List of test strings (same length as input)
+    """
+    result = []
+    for word in words:
+        # Strip whitespace to check the actual content
+        word_stripped = word.rstrip('\n').strip()
+
+        # Check if word contains any Chinese characters
+        if is_chinese_text(word_stripped):
+            # Convert Chinese word to pinyin first letters
+            test_str = chinese_word_to_test_string(word_stripped)
+            # Preserve trailing newline if present
+            if word.endswith('\n'):
+                test_str += '\n'
+            result.append(test_str)
+        elif is_punctuation(word_stripped) or word_stripped == '':
+            # Punctuation-only or empty: return the word as-is for display
+            # but frontend will skip it because it has no alphanumeric characters
+            result.append(word)
+        else:
+            # Non-Chinese text: use the word itself
+            result.append(word)
+    return result

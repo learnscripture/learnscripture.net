@@ -282,6 +282,142 @@ _BIBLE_BOOKS_FOR_LANG = {
         "Judas",
         "Apocalipsis",
     ],
+    LANG.ZH_HANT: [
+        "創世紀",
+        "出埃及記",
+        "利未記",
+        "民數記",
+        "申命記",
+        "約書亞記",
+        "士師記",
+        "路得記",
+        "撒母耳記上",
+        "撒母耳記下",
+        "列王紀上",
+        "列王紀下",
+        "歷代志上",
+        "歷代志下",
+        "以斯拉記",
+        "尼希米記",
+        "以斯帖記",
+        "約伯記",
+        "詩篇",
+        "箴言",
+        "傳道書",
+        "雅歌",
+        "以賽亞書",
+        "耶利米書",
+        "耶利米哀歌",
+        "以西結書",
+        "但以理書",
+        "何西阿書",
+        "約珥書",
+        "阿摩司書",
+        "俄巴底亞書",
+        "約拿書",
+        "彌迦書",
+        "那鴻書",
+        "哈巴谷書",
+        "西番雅書",
+        "哈該書",
+        "撒迦利亞書",
+        "瑪拉基書",
+        "馬太福音",
+        "馬可福音",
+        "路加福音",
+        "約翰福音",
+        "使徒行傳",
+        "羅馬書",
+        "哥林多前書",
+        "哥林多後書",
+        "加拉太書",
+        "以弗所書",
+        "腓利比書",
+        "歌羅西書",
+        "帖撒羅尼迦前書",
+        "帖撒羅尼迦後書",
+        "提摩太前書",
+        "提摩太後書",
+        "提多書",
+        "腓利門書",
+        "希伯來書",
+        "雅各書",
+        "彼得前書",
+        "彼得後書",
+        "約翰壹書",
+        "約翰貳書",
+        "約翰參書",
+        "猶大書",
+        "啟示錄",
+    ],
+    LANG.ZH_HANS: [
+        "创世纪",
+        "出埃及记",
+        "利未记",
+        "民数记",
+        "申命记",
+        "约书亚记",
+        "士师记",
+        "路得记",
+        "撒母耳记上",
+        "撒母耳记下",
+        "列王纪上",
+        "列王纪下",
+        "历代志上",
+        "历代志下",
+        "以斯拉记",
+        "尼希米记",
+        "以斯帖记",
+        "约伯记",
+        "诗篇",
+        "箴言",
+        "传道书",
+        "雅歌",
+        "以赛亚书",
+        "耶利米书",
+        "耶利米哀歌",
+        "以西结书",
+        "但以理书",
+        "何西阿书",
+        "约珥书",
+        "阿摩司书",
+        "俄巴底亚书",
+        "约拿书",
+        "弥迦书",
+        "那鸿书",
+        "哈巴谷书",
+        "西番雅书",
+        "哈该书",
+        "撒迦利亚书",
+        "玛拉基书",
+        "马太福音",
+        "马可福音",
+        "路加福音",
+        "约翰福音",
+        "使徒行传",
+        "罗马书",
+        "哥林多前书",
+        "哥林多后书",
+        "加拉太书",
+        "以弗所书",
+        "腓利比书",
+        "歌罗西书",
+        "帖撒罗尼迦前书",
+        "帖撒罗尼迦后书",
+        "提摩太前书",
+        "提摩太后书",
+        "提多书",
+        "腓利门书",
+        "希伯来书",
+        "雅各书",
+        "彼得前书",
+        "彼得后书",
+        "约翰壹书",
+        "约翰贰书",
+        "约翰参书",
+        "犹大书",
+        "启示录",
+    ],
     LANG.INTERNAL: ["BOOK" + str(i) for i in range(0, BIBLE_BOOK_COUNT)],
 }
 
@@ -3229,6 +3365,547 @@ Apocalipsis
     Apoc
 """
 
+# Chinese abbreviations based on https://springbible.fhl.net/Bible2/cgic201/Doc/abbreviation.html
+# Traditional Chinese
+ZH_HANT_EXTRA_BOOK_NAMES = """
+創世紀
+    Gen
+    创
+
+出埃及記
+    Exo
+    出
+
+利未記
+    Lev
+    利
+
+民數記
+    Num
+    民
+
+申命記
+    Deu
+    申
+
+約書亞記
+    Jos
+    书
+
+士師記
+    Jug
+    士
+
+路得記
+    Rut
+    得
+
+撒母耳記上
+    1Sa
+    撒上
+
+撒母耳記下
+    2Sa
+    撒下
+
+列王紀上
+    1Ki
+    王上
+
+列王紀下
+    2Ki
+    王下
+
+歷代志上
+    1Ch
+    代上
+
+歷代志下
+    2Ch
+    代下
+
+以斯拉記
+    Ezr
+    拉
+
+尼希米記
+    Neh
+    尼
+
+以斯帖記
+    Est
+    斯
+
+約伯記
+    Job
+    伯
+
+詩篇
+    Psm
+    Ps
+    诗
+
+箴言
+    Pro
+    Prv
+    箴
+
+傳道書
+    Ecc
+    传
+
+雅歌
+    Son
+    歌
+
+以賽亞書
+    Isa
+    赛
+
+耶利米書
+    Jer
+    耶
+
+耶利米哀歌
+    Lam
+    哀
+
+以西結書
+    Eze
+    结
+
+但以理書
+    Dan
+    但
+
+何西阿書
+    Hos
+    何
+
+約珥書
+    Joe
+    珥
+
+阿摩司書
+    Amo
+    摩
+
+俄巴底亞書
+    Oba
+    俄
+
+約拿書
+    Jon
+    拿
+
+彌迦書
+    Mic
+    弥
+
+那鴻書
+    Nah
+    鸿
+
+哈巴谷書
+    Hab
+    哈
+
+西番雅書
+    Zep
+    番
+
+哈該書
+    Hag
+    该
+
+撒迦利亞書
+    Zec
+    亚
+
+瑪拉基書
+    Mal
+    玛
+
+馬太福音
+    Mat
+    太
+
+馬可福音
+    Mak
+    可
+
+路加福音
+    Luk
+    路
+
+約翰福音
+    Jhn
+    约
+
+使徒行傳
+    Act
+    徒
+
+羅馬書
+    Rom
+    罗
+
+哥林多前書
+    1Co
+    林前
+
+哥林多後書
+    2Co
+    林后
+
+加拉太書
+    Gal
+    加
+
+以弗所書
+    Eph
+    弗
+
+腓利比書
+    Phl
+    Phil
+    腓
+
+歌羅西書
+    Col
+    西
+
+帖撒羅尼迦前書
+    1Ts
+    帖前
+
+帖撒羅尼迦後書
+    2Ts
+    帖后
+
+提摩太前書
+    1Ti
+    提前
+
+提摩太後書
+    2Ti
+    提后
+
+提多書
+    Tit
+    多
+
+腓利門書
+    Phm
+    门
+
+希伯來書
+    Heb
+    来
+
+雅各書
+    Jas
+    雅
+
+彼得前書
+    1Pe
+    彼前
+
+彼得後書
+    2Pe
+    彼后
+
+約翰壹書
+    1Jn
+    约壹
+
+約翰貳書
+    2Jn
+    约贰
+
+約翰參書
+    3Jn
+    约叁
+
+猶大書
+    Jud
+    犹
+
+啟示錄
+    Rev
+    启
+"""
+
+# Simplified Chinese
+ZH_HANS_EXTRA_BOOK_NAMES = """
+创世纪
+    Gen
+    创
+
+出埃及记
+    Exo
+    出
+
+利未记
+    Lev
+    利
+
+民数记
+    Num
+    民
+
+申命记
+    Deu
+    申
+
+约书亚记
+    Jos
+    书
+
+士师记
+    Jug
+    士
+
+路得记
+    Rut
+    得
+
+撒母耳记上
+    1Sa
+    撒上
+
+撒母耳记下
+    2Sa
+    撒下
+
+列王纪上
+    1Ki
+    王上
+
+列王纪下
+    2Ki
+    王下
+
+历代志上
+    1Ch
+    代上
+
+历代志下
+    2Ch
+    代下
+
+以斯拉记
+    Ezr
+    拉
+
+尼希米记
+    Neh
+    尼
+
+以斯帖记
+    Est
+    斯
+
+约伯记
+    Job
+    伯
+
+诗篇
+    Psm
+    Ps
+    诗
+
+箴言
+    Pro
+    Prv
+    箴
+
+传道书
+    Ecc
+    传
+
+雅歌
+    Son
+    歌
+
+以赛亚书
+    Isa
+    赛
+
+耶利米书
+    Jer
+    耶
+
+耶利米哀歌
+    Lam
+    哀
+
+以西结书
+    Eze
+    结
+
+但以理书
+    Dan
+    但
+
+何西阿书
+    Hos
+    何
+
+约珥书
+    Joe
+    珥
+
+阿摩司书
+    Amo
+    摩
+
+俄巴底亚书
+    Oba
+    俄
+
+约拿书
+    Jon
+    拿
+
+弥迦书
+    Mic
+    弥
+
+那鸿书
+    Nah
+    鸿
+
+哈巴谷书
+    Hab
+    哈
+
+西番雅书
+    Zep
+    番
+
+哈该书
+    Hag
+    该
+
+撒迦利亚书
+    Zec
+    亚
+
+玛拉基书
+    Mal
+    玛
+
+马太福音
+    Mat
+    太
+
+马可福音
+    Mak
+    可
+
+路加福音
+    Luk
+    路
+
+约翰福音
+    Jhn
+    约
+
+使徒行传
+    Act
+    徒
+
+罗马书
+    Rom
+    罗
+
+哥林多前书
+    1Co
+    林前
+
+哥林多后书
+    2Co
+    林后
+
+加拉太书
+    Gal
+    加
+
+以弗所书
+    Eph
+    弗
+
+腓利比书
+    Phl
+    Phil
+    腓
+
+歌罗西书
+    Col
+    西
+
+帖撒罗尼迦前书
+    1Ts
+    帖前
+
+帖撒罗尼迦后书
+    2Ts
+    帖后
+
+提摩太前书
+    1Ti
+    提前
+
+提摩太后书
+    2Ti
+    提后
+
+提多书
+    Tit
+    多
+
+腓利门书
+    Phm
+    门
+
+希伯来书
+    Heb
+    来
+
+雅各书
+    Jas
+    雅
+
+彼得前书
+    1Pe
+    彼前
+
+彼得后书
+    2Pe
+    彼后
+
+约翰壹书
+    1Jn
+    约壹
+
+约翰贰书
+    2Jn
+    约贰
+
+约翰参书
+    3Jn
+    约叁
+
+犹大书
+    Jud
+    犹
+
+启示录
+    Rev
+    启
+"""
+
 
 def parse_abbrev_def(abbrev_def):
     # -- Parser for the above format:
@@ -3246,6 +3923,8 @@ def make_bible_book_abbreviations():
         (LANG.TR, TR_EXTRA_BOOK_NAMES),
         (LANG.NL, NL_EXTRA_BOOK_NAMES),
         (LANG.ES, ES_EXTRA_BOOK_NAMES),
+        (LANG.ZH_HANT, ZH_HANT_EXTRA_BOOK_NAMES),
+        (LANG.ZH_HANS, ZH_HANS_EXTRA_BOOK_NAMES),
     ]:
         parsed = parse_abbrev_def(abbrev_def)
         _BIBLE_BOOK_ALTERNATIVES_FOR_LANG[code] = {}
@@ -3269,6 +3948,15 @@ def make_bible_book_abbreviations():
                     else:
                         raise AssertionError(f"Duplicate for abbreviation {abbrev}")
                 _BIBLE_BOOK_ALTERNATIVES_FOR_LANG[code][abbrev] = book_name
+
+    # Add Traditional Chinese book names as alternatives for Simplified Chinese
+    # This allows users to type Traditional book names when using CUVS
+    if LANG.ZH_HANS in _BIBLE_BOOK_ALTERNATIVES_FOR_LANG and LANG.ZH_HANT in _BIBLE_BOOKS_FOR_LANG:
+        for i, simp_name in enumerate(_BIBLE_BOOKS_FOR_LANG[LANG.ZH_HANS]):
+            trad_name = _BIBLE_BOOKS_FOR_LANG[LANG.ZH_HANT][i]
+            if trad_name != simp_name:  # Only add if they're different
+                normalized_trad = normalize_reference_input(LANG.ZH_HANS, trad_name)
+                _BIBLE_BOOK_ALTERNATIVES_FOR_LANG[LANG.ZH_HANS][normalized_trad] = simp_name
 
 
 def checks():

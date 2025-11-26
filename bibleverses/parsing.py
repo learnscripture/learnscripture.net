@@ -377,8 +377,13 @@ def parse_validated_localized_reference(language_code, localized_reference):
     for Bible references that already conform to the correct
     format).
     """
+    from .languages import LANG
+
+    # Use loose parsing for Chinese to accept both Traditional and Simplified book names
+    strict = language_code not in [LANG.ZH_HANT, LANG.ZH_HANS]
+
     try:
-        return bible_reference_parser_for_lang(language_code, True).parse(localized_reference)
+        return bible_reference_parser_for_lang(language_code, strict).parse(localized_reference)
     except ParseError as e:
         raise InvalidVerseReference(f"Could not parse '{localized_reference}' as bible reference - {str(e)}")
 
