@@ -19,3 +19,4 @@ Ftl/
 settings_local.py
 .pytest-xdist*
 .env
+.devbox

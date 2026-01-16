@@ -1,0 +1,118 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "resolved": "github:NixOS/nixpkgs/13868c071cc73a5e9f610c47d7bb08e5da64fdd5?lastModified=1768395095&narHash=sha256-ZhuYJbwbZT32QA95tSkXd9zXHcdZj90EzHpEXBMabaw%3D"
+    },
+    "glibcLocales@latest": {
+      "last_modified": "2025-12-31T03:27:36Z",
+      "resolved": "github:NixOS/nixpkgs/f665af0cdb70ed27e1bd8f9fdfecaf451260fc55#glibcLocales",
+      "source": "devbox-search",
+      "version": "2.40-66",
+      "systems": {
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/0mrra8k6h7dvs6dmq3f4ilsm0v33d01z-glibc-locales-2.40-66",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/0mrra8k6h7dvs6dmq3f4ilsm0v33d01z-glibc-locales-2.40-66"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/wmwyf3bxrhg5ssd477dp99986wh4mzmm-glibc-locales-2.40-66",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/wmwyf3bxrhg5ssd477dp99986wh4mzmm-glibc-locales-2.40-66"
+        }
+      }
+    },
+    "postgresql@13": {
+      "last_modified": "2022-05-18T02:28:07Z",
+      "plugin_version": "0.0.2",
+      "resolved": "github:NixOS/nixpkgs/52dc75a4fee3fdbcb792cb6fba009876b912bfe0#postgresql",
+      "source": "devbox-search",
+      "version": "13.6",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/881zgzrp4i9n94299yq459c5w51828r0-postgresql-13.6",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/jrmk1xagi4zsgrcb4b4yz6i3wqgkhbjh-postgresql-13.6-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/5m1pw4kcfy1961y36kbljwqc0w4s2r5z-postgresql-13.6-doc"
+            },
+            {
+              "name": "lib",
+              "path": "/nix/store/bjr2vakf641zfgj4f4pd0xslmznpapqb-postgresql-13.6-lib"
+            }
+          ],
+          "store_path": "/nix/store/881zgzrp4i9n94299yq459c5w51828r0-postgresql-13.6"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/dxxs5ydqi4a627ssl4699qfwlv3g7yfy-postgresql-13.6",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/alh0cdp8g5s4bbsb55hqg2h6fmhw8b67-postgresql-13.6-man",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/5rf3fhbgk9falby02f7kpmbrkg3pa315-postgresql-13.6-debug"
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/xgymb5bmk22flqk6lacf9sxpfmz40lk1-postgresql-13.6-doc"
+            },
+            {
+              "name": "lib",
+              "path": "/nix/store/5x341ym80yssjg9a1j767g2i8jkgpxhh-postgresql-13.6-lib"
+            }
+          ],
+          "store_path": "/nix/store/dxxs5ydqi4a627ssl4699qfwlv3g7yfy-postgresql-13.6"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/9likd3n1ph8ixmzn79l5sxafi0zxyq8m-postgresql-13.6",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/lhfcmg8gxvvsrb2sc2r5q5dlb34livhy-postgresql-13.6-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/61xw9lxy9si32alnil2i7ksg5skj2qdv-postgresql-13.6-doc"
+            },
+            {
+              "name": "lib",
+              "path": "/nix/store/k0gcvrd1by4260glsi85msc8x0jrf1yc-postgresql-13.6-lib"
+            }
+          ],
+          "store_path": "/nix/store/9likd3n1ph8ixmzn79l5sxafi0zxyq8m-postgresql-13.6"
+        }
+      }
+    }
+  }
+}

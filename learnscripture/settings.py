@@ -83,9 +83,9 @@ else:
     DATABASES = {
         DB_LABEL_DEFAULT: {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "learnscripture",
-            "USER": "learnscripture",
-            "PASSWORD": "learnscripture",
+            "NAME": "learnscripture_dev",
+            "USER": "learnscripture_dev",
+            "PASSWORD": "learnscripture_dev",
             "HOST": "localhost",
             "PORT": 5432,
             "ATOMIC_REQUESTS": False,
@@ -93,9 +93,9 @@ else:
         },
         DB_LABEL_WORDSUGGESTIONS: {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "learnscripture_wordsuggestions",
-            "USER": "learnscripture",
-            "PASSWORD": "learnscripture",
+            "NAME": "learnscripture_wordsuggestions_dev",
+            "USER": "learnscripture_dev",
+            "PASSWORD": "learnscripture_dev",
             "HOST": "localhost",
             "PORT": 5432,
             "ATOMIC_REQUESTS": False,

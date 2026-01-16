@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.13.5/.schema/devbox.schema.json",
+  "packages": [
+    "postgresql@13",
+    "glibcLocales@latest",
+  ],
+  "shell": {
+    "init_hook": [
+      "echo 'Welcome to devbox!' > /dev/null"
+    ],
+    "scripts": {
+      "init_db": [
+        "initdb"
+      ],
+      "create_dev_db": [
+        "dropdb --if-exists learnscripture_dev",
+        "dropdb --if-exists learnscripture_wordsuggestions_dev",
+        "createdb learnscripture_dev",
+        "createdb learnscripture_wordsuggestions_dev",
+        "psql -d template1 < ./scripts/setup_postgres_dev_db.sql"
+      ]
+    }
+  }
+}

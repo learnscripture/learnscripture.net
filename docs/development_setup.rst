@@ -5,56 +5,77 @@ Development setup
 Since there has only ever been one developer on the project to date, these
 instructions may not work completely, but they should be a start.
 
-These instructions assume you are working in a Linux or Unix like environment
-(Mac should work, or a Ubuntu 20.04 virtual machine), with Python 3.9 and Git
-installed.
 
-1. Create a directory 'learnscripture.net' and cd into it.
+This assumes a Linux machine, but Windows/Mac may work.
 
-2. Checkout the sources from central VCS into a folder called 'src'.
-   Currently central VCS is held on github.com::
+First, install:
+
+- `uv <https://docs.astral.sh/uv/>`_. This will be used to install Python and manage all Python dependencies
+- `Nix <https://nix.dev/>`_
+- `Devbox <https://www.jetify.com/docs/devbox/>`_. Devbox (which relies on Nix) will install all other “system” dependencies.
+
+- Optionally, install `direnv <https://github.com/direnv/direnv>`_ to make it easier to activate the devbox/uv environments.
+
+* Create a directory 'learnscripture.net' and cd into it.
+
+* Checkout the sources from central VCS into a folder called 'src'.
+  Currently central VCS is held on github.com::
 
      git clone git@github.com:learnscripture/learnscripture.net.git src
 
-   Edit your ``.git/config`` and ensure the github remote is called ``origin``
-   - this is needed for deploying.
+  Edit your ``.git/config`` and ensure the github remote is called ``origin`` -
+  this is needed for deploying.
 
-   You will also need a copy of the text sources, checked out in 'texts' in a
-   sibling directory to 'src'::
+ You will also need a copy of the text sources, checked out in 'texts' in a
+ sibling directory to 'src'::
 
      git clone git@github.com:learnscripture/learnscripture-texts.git texts
 
 
-4. Install dependencies.
+* Switch into the devbox shell. This will take a long time the first time, as everything is installed::
 
-   System dependencies:
+    devbox shell
 
-   * postgresql 12 or later
-   * memcached
-   * nodejs
-   * npm
-   * uv
+  This will install system dependencies.
 
-   Python/virtualenv dependencies: from inside the learnscripture.net/src/
-   folder, do::
+* Install Python 3.10::
 
-     uv sync
+    uv python install 3.10
 
-   npm/javascript dependencies. First do::
+* Make a virtualenv using Python 3.10::
+
+    uv venv --python python3.13 --prompt learnscripture
+
+* Ensure the current directory is on your Python path::
+
+    pwd > .venv/lib/python3.10/site-packages/projectsource.pth
+
+* Install Python dependencies::
+
+    uv sync
+
+* Create an alias for 'learnscripture.local' that points to localhost, 127.0.0.1. On
+  Linux, you do this by adding the following line to /etc/hosts::
+
+    127.0.0.1          learnscripture.local
+
+* TODO do we need these or can we do it with devbox?
+
+  npm/javascript dependencies. First do::
 
      nvm install 19
      nvm use 19
 
-   You should set up your shell to ensure this runs each time you work on the project
+  You should set up your shell to ensure this runs each time you work on the project
 
-   Now we also need our node and Javascript deps::
+  Now we also need our node and Javascript deps::
 
      npm install
 
-   We also need to install Elm:
+  We also need to install Elm:
 
-   Because we’re now on a very old version, I’ve found the easiest way is get the Elm binaries from the
-   link below and copy them into your virtualenv PATH:  https://github.com/lydell/elm-old-binaries/releases
+  Because we’re now on a very old version, I’ve found the easiest way is get the Elm binaries from the
+  link below and copy them into your virtualenv PATH:  https://github.com/lydell/elm-old-binaries/releases
 
    Then::
 
@@ -64,32 +85,39 @@ installed.
      npx elm-install
 
 
-5. Create ``learnscripture/settings_local.py`` from ``learnscripture/settings_local_example.py``
-   You can leave ``DATABASES`` as it is, or change as required.
+* Create ``learnscripture/settings_local.py`` from ``learnscripture/settings_local_example.py``
+  You can leave ``DATABASES`` as it is, or change as required.
 
-   Then create postgres databases to match the settings, both for ``learnscripture`` and
-   ``learnscripture_wordsuggestions``.
+* Initialise the Postgres DB files::
 
-   You will also need to add 'learnscripture.local' as aliases for 127.0.0.1 in /etc/hosts
+    devbox run init_db
 
-6. Create a file ``config/secrets.json`` containing at least the following:
+* In another terminal, start the services (including Postgres)::
+
+    devbox services up
+
+* In the first terminal, create the development database::
+
+    devbox run create_dev_db
+
+* Create a file ``config/secrets.json`` containing at least the following:
 
        {"ESV_V2_API_KEY": "IP"
        }
 
-   (proper contents are, well, secret).
-   You will need a proper copy from the previous maintainer to deploy.
+  (proper contents are, well, secret).
+  You will need a proper copy from the previous maintainer to deploy.
 
-   If you have access rights to the server, you can do::
+  If you have access rights to the server, you can do::
 
        scp learnscripture@learnscripture.net:/home/learnscripture/webapps/learnscripture/versions/current/src/config/secrets.json config/secrets.json
 
-   If more than one developer is working on the project, and want to deploy
-   directly, syncing this file will need to be rethought. It has been
-   deliberately excluded from the project VCS repo to allow the source code to
-   be published.
+  If more than one developer is working on the project, and want to deploy
+  directly, syncing this file will need to be rethought. It has been
+  deliberately excluded from the project VCS repo to allow the source code to
+  be published.
 
-7. Setup development database::
+* Setup development database::
 
      ./manage.py migrate
      ./manage.py migrate --database wordsuggestions
