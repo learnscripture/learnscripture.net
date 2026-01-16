@@ -5,16 +5,19 @@ Development setup
 Since there has only ever been one developer on the project to date, these
 instructions may not work completely, but they should be a start.
 
-
 This assumes a Linux machine, but Windows/Mac may work.
 
-First, install:
+First, install prerequisites:
 
 - `uv <https://docs.astral.sh/uv/>`_. This will be used to install Python and manage all Python dependencies
 - `Nix <https://nix.dev/>`_
 - `Devbox <https://www.jetify.com/docs/devbox/>`_. Devbox (which relies on Nix) will install all other “system” dependencies.
 
-- Optionally, install `direnv <https://github.com/direnv/direnv>`_ to make it easier to activate the devbox/uv environments.
+- Optionally, install `direnv <https://github.com/direnv/direnv>`_ to make it
+  easier to activate the devbox/uv environments. It is up to you if you want to
+  learn how to use it and configure it for your usage.
+
+Then install the project proper:
 
 * Create a directory 'learnscripture.net' and cd into it.
 
@@ -30,7 +33,6 @@ First, install:
  sibling directory to 'src'::
 
      git clone git@github.com:learnscripture/learnscripture-texts.git texts
-
 
 * Switch into the devbox shell. This will take a long time the first time, as everything is installed::
 
@@ -59,7 +61,7 @@ First, install:
 
     127.0.0.1          learnscripture.local
 
-* TODO do we need these or can we do it with devbox?
+* (TODO do we need these or can we do them with devbox?)
 
   npm/javascript dependencies. First do::
 
@@ -74,8 +76,10 @@ First, install:
 
   We also need to install Elm:
 
-  Because we’re now on a very old version, I’ve found the easiest way is get the Elm binaries from the
-  link below and copy them into your virtualenv PATH:  https://github.com/lydell/elm-old-binaries/releases
+  Because we’re now on a very old version, I’ve found the easiest way is get the Elm 0.18.0 binaries
+  for your system from the link below and copy them into your virtualenv PATH:
+
+  https://github.com/lydell/elm-old-binaries/releases
 
    Then::
 
@@ -117,7 +121,7 @@ First, install:
   deliberately excluded from the project VCS repo to allow the source code to
   be published.
 
-* Setup development database::
+* Run migrations for development database::
 
      ./manage.py migrate
      ./manage.py migrate --database wordsuggestions
@@ -135,29 +139,29 @@ First, install:
 
    An alternative to the above is to get a snapshot of production::
 
-     $ fab get_and_load_production_db
+     $ fab get-and-load-production_db
 
-8. See if it works by doing::
+* See if it works by doing::
 
      ./manage.py runserver
 
-   And, in separate terminals::
+  And, in two separate terminals run the following which auto-reload::
 
-     fab run_ftl2elm:true
+     fab run_ftl2elm --watch
      npm run watch
 
-   (These are long running processes that re-run themselves when files change)
+  (These are long running processes that re-run themselves when files change)
 
-   Browse the site on http://learnscripture.local:8000/
+  Browse the site on http://learnscripture.local:8000/
 
-9. Then, try to run the tests::
+* Then, try to run the tests::
 
      pytest
 
-   See also `<project_structure.rst>`_ for more info on running tests.
+  See also `<project_structure.rst>`_ for more info on running tests.
 
 
-10. Install pre-commit::
+* Install pre-commit hooks::
 
       pre-commit install
 
@@ -166,24 +170,24 @@ Additional tasks
 
 These should be done at some point, but don't need to be done immediately.
 
-11. For the 'on screen buttons' testing mode, you will need to set up the
-    contents of the word suggestions database. Since this is a large amount of
-    data, all of which is derived from the texts and other static content, it is
-    in a separate database, and not downloaded as part of the text itself. To
-    generate it, do::
+* For the 'on screen buttons' testing mode, you will need to set up the
+  contents of the word suggestions database. Since this is a large amount of
+  data, all of which is derived from the texts and other static content, it is
+  in a separate database, and not downloaded as part of the text itself. To
+  generate it, do::
 
       ./manage.py run_suggestions_analyzers NET
       ./manage.py setup_bibleverse_suggestions NET
 
-    (Other version names can be added at the end of that line)
+  (Other version names can be added at the end of that line)
 
-    This will take a long time, and thrash your computer too... it's doing Markov
-    chain analysis of various lengths on the whole Bible, plus other things, in
-    order to generate sensible alternatives to the correct word when testing if
-    the user knows what the next word is.
+  This will take a long time, and thrash your computer too... it's doing Markov
+  chain analysis of various lengths on the whole Bible, plus other things, in
+  order to generate sensible alternatives to the correct word when testing if
+  the user knows what the next word is.
 
-    The process can be interrupted with minimal loss of work, however, if
-    needed, and should display fairly detailed logs of what it is doing.
+  The process can be interrupted with minimal loss of work, however, if
+  needed, and should display fairly detailed logs of what it is doing.
 
 
 Unfinished
@@ -200,6 +204,7 @@ the developers' machines.
 
 Deployment
 ~~~~~~~~~~
+
 To be able to deploy, you need the following:
 
 * Get secrets.json from the production server
