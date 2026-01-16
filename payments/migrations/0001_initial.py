@@ -3,7 +3,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("ipn", "0003_auto_20141117_1647"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

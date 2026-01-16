@@ -15,7 +15,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0056_fix_psalms_name"),
     ]

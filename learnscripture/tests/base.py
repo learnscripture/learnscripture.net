@@ -36,7 +36,7 @@ class FuzzyInt(int):
         return other >= self.lowest and other <= self.highest
 
     def __repr__(self):
-        return "[%d..%d]" % (self.lowest, self.highest)
+        return f"[{self.lowest}..{self.highest}]"
 
 
 T = TypeVar("T")
@@ -195,7 +195,6 @@ class CatechismsMixin(Fixtures):
 
 
 class AccountTestMixin(TextVersionsMixin):
-
     create_identity = staticmethod(create_identity)
     create_account = staticmethod(create_account)
 
@@ -246,7 +245,6 @@ class LoginMixin:
 
 @pytest.mark.selenium
 class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaCleanup, StaticLiveServerTestCase):
-
     display = TESTS_SHOW_BROWSER
     default_timeout = 20
     page_load_timeout = 40
@@ -352,7 +350,6 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
 
     @contextlib.contextmanager
     def wait_for_reload(self, ignore_exceptions=None):
-
         self._driver.execute_script("document.pageReloadedYetFlag='notyet';")
         yield
 

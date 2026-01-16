@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("learnscripture", "0002_sitenotice_language_code"),
     ]

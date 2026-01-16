@@ -517,7 +517,7 @@ class Event(models.Model):
         return f"<Event id={self.id} type={self.event_type}>"
 
     def __str__(self):
-        return "Event %d" % self.id
+        return f"Event {self.id}"
 
     def get_rank(self, viewer=None, friendship_weights=None, group_ids=None, now=None):
         """

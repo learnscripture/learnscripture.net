@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accounts", "0008_remove_account_has_installed_android_app"),
         ("bibleverses", "0008_textversion_language_code"),

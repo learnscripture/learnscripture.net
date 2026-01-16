@@ -30,7 +30,6 @@ def backwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0035_auto_20180222_0626"),
     ]

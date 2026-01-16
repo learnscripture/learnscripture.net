@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("moderation", "0002_moderationaction_duration_moderationaction_user_and_more"),
     ]

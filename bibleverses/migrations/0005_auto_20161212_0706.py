@@ -16,7 +16,6 @@ def backwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0004_verse_text_fetched_at"),
     ]

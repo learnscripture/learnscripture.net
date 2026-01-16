@@ -50,7 +50,6 @@ class FilterFormMixin:
 
 
 class SignUpForm(forms.ModelForm):
-
     password = forms.CharField(label=t_lazy("accounts-password"), max_length=100, widget=forms.PasswordInput)
     username = forms.RegexField(
         label=t_lazy("accounts-username"),

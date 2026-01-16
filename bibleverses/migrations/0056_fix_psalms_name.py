@@ -12,7 +12,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0055_auto_20221022_2023"),
     ]

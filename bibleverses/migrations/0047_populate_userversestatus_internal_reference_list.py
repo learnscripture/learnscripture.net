@@ -27,7 +27,6 @@ def backwards(app_configs, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0046_userversestatus_internal_reference_list"),
     ]

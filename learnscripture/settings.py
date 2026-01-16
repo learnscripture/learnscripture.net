@@ -545,9 +545,8 @@ if DEBUG:
                         "\n  ".join(sqlformat(record.sql, reindent=True).strip().splitlines()),
                     )
                 else:
-                    record.msg += "\n -- stack: \n\x1b[32m%s\x1b[0m" % (
-                        "".join(format_stack(f=frame, limit=self.limit)).rstrip()
-                    )
+                    frames = "".join(format_stack(f=frame, limit=self.limit)).rstrip()
+                    record.msg += f"\n -- stack: \n\x1b[32m{frames}\x1b[0m"
                 record.stack_patched = True
             return True
 

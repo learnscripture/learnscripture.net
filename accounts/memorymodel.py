@@ -247,7 +247,7 @@ def test_run(exponent, accuracy, interval_gap=1):
         if m.needs_testing(x, time_elapsed):
             x = m.strength_estimate(x, accuracy, time_elapsed)
             test += 1
-            print("Day %d, test %d, interval %d, strength %s" % (math.floor(days_total), test, interval, x))
+            print(f"Day {math.floor(days_total)}, test {test}, interval {interval}, strength {x}")
             interval = 0
 
 
@@ -275,7 +275,7 @@ def test_run_using_next_test_due_after(exponent, accuracy, interval_gap=1):
             last_test = current_time
             next_test = last_test + timedelta(seconds=m.next_test_due_after(s))
             test += 1
-            print("Day %d, test %d, interval %d, strength %s" % (days_total, test, interval, s))
+            print(f"Day {days_total}, test {test}, interval {interval}, strength {s}")
             interval = 0
 
 
@@ -302,10 +302,7 @@ def test_run_exact_intervals(exponent, accuracy):
         total_elapsed += interval
         test += 1
         time_elapsed_hours = 0 if time_elapsed is None else time_elapsed / 3600
-        print(
-            "Day %d, test %d, interval %s h, strength %s"
-            % (math.floor(total_elapsed / day), test, time_elapsed_hours, s)
-        )
+        print(f"Day {math.floor(total_elapsed / day)}, test {test}, interval {time_elapsed_hours} h, strength {s}")
 
 
 def test_run_passage(passage_length, days):
@@ -361,7 +358,7 @@ def test_run_passage(passage_length, days):
                 else:
                     needs_testing = MM.needs_testing(s, time_elapsed)
 
-                print("%02d: %6f %s" % (j + 1, s, "Test" if needs_testing else "No test"))
+                print(f"{int(j + 1):02}: {s:6f} {'Test' if needs_testing else 'No test'}")
 
                 if needs_testing:
                     acc = 0.95 + (random.random() / 20.0)
@@ -379,8 +376,8 @@ def test_run_passage(passage_length, days):
                     number_tested += 1
         if number_tested > 0:
             print()
-            print("Day %d" % i)
-            print("%02d/%02d" % (number_tested, passage_length))
+            print(f"Day {i}")
+            print(f"{number_tested:02}/{passage_length:02}")
     return sorted(tests_for_verse.items())
 
 

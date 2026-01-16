@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("cms", "0007_remove_contentitem_used_on_pages_data"),
     ]

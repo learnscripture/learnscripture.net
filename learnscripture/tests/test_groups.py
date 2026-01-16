@@ -48,7 +48,7 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
 
         self.assertTextPresent("Another group")
         self.assertTextAbsent("My group")
-        self.follow_link(f"a[href=\"{reverse('group', args=('another-group',))}\"]")
+        self.follow_link(f'a[href="{reverse("group", args=("another-group",))}"]')
 
         self.assertUrlsEqual(reverse("group", args=("another-group",)))
 
@@ -120,7 +120,7 @@ class GroupTests(AccountTestMixin, TestBase):
         g.add_user(creator_account)
 
         for i in range(1, 7):
-            account = Account.objects.create(username="joiner%d" % i, email="j%d@example.com" % i)
+            account = Account.objects.create(username=f"joiner{i}", email=f"j{i}@example.com")
             g.add_user(account)
             assert Award.objects.filter(account=creator_account, award_type=AwardType.ORGANIZER).count() == (
                 0 if i < 5 else 1

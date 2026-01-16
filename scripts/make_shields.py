@@ -75,7 +75,7 @@ if __name__ == "__main__":
                         svgs.append(number_file % (str(level) + "_highlight"))
 
                 fname = os.path.join(
-                    updir, "learnscripture", "static", "img", "awards", "award_%s_level_%s_%d.png" % (name, level, size)
+                    updir, "learnscripture", "static", "img", "awards", f"award_{name}_level_{level}_{size}.png"
                 )
 
                 combine([os.path.join(updir, "resources", f) for f in svgs], fname, size)

@@ -51,7 +51,6 @@ class PageTitleInline(admin.TabularInline):
 
 @admin.register(Page)
 class PageAdmin(MPTTModelAdmin):
-
     form = forms.PageForm
     fieldsets = (
         (
@@ -191,8 +190,7 @@ class FileAdmin(admin.ModelAdmin):
             messages.add_message(
                 request,
                 messages.INFO,
-                "Successfully deleted %(count)d %(items)s."
-                % {"count": deleted_count, "items": model_ngettext(self.opts, deleted_count)},
+                f"Successfully deleted {deleted_count} {model_ngettext(self.opts, deleted_count)}.",
             )
 
 

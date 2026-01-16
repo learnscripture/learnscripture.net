@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("learnscripture", "0003_alter_sitenotice_id"),
     ]

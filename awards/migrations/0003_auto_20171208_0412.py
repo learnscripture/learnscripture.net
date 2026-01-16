@@ -36,7 +36,6 @@ def backwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("awards", "0002_auto_20171208_0412"),
     ]

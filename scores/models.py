@@ -6,6 +6,7 @@ streaks and awards.
 TotalScore is a summary used for all time scores.
 
 """
+
 import uuid
 from datetime import timedelta
 
@@ -93,14 +94,7 @@ class ActionLog(models.Model):
         return f"<ActionLog {self.id}>"
 
     def __repr__(self):
-        return "<ActionLog account={} points={} reason={} localized_reference={} award={} created={}>".format(
-            self.account.username,
-            self.points,
-            self.get_reason_display(),
-            self.localized_reference,
-            self.award,
-            self.created,
-        )
+        return f"<ActionLog account={self.account.username} points={self.points} reason={self.get_reason_display()} localized_reference={self.localized_reference} award={self.award} created={self.created}>"
 
 
 class TotalScore(models.Model):

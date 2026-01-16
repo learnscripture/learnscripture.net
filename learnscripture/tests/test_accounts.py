@@ -131,21 +131,9 @@ class AccountTests(AccountTestMixin, TestBase):
         # Check notices
         username_u = quote(username)
         assert [m.message_html for m in account.identity.notices.order_by("created")] == [
-            '<img src="/static/img/awards/award_ACE_level_1_50.png"> You\'ve earned a new badge: <a href="/user/{username_u}/">Ace - level 1</a>. Points bonus: 1,000. <span class="broadcast" data-link="/user/{username_u}/" data-picture="/static/img/awards/award_ACE_level_1_100.png" data-award-id="{award_id}" data-award-level="1" data-award-name="Ace - level 1" data-account-username="{username}" data-caption="I just earned a badge: Ace - level 1">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
-                award_id=account.awards.get(award_type=AwardType.ACE, level=1).id,
-                username=username,
-                username_u=username_u,
-            ),
-            '<img src="/static/img/awards/award_ACE_level_2_50.png"> You\'ve levelled up on one of your badges: <a href="/user/{username_u}/">Ace - level 2</a>. Points bonus: 2,000. <span class="broadcast" data-link="/user/{username_u}/" data-picture="/static/img/awards/award_ACE_level_2_100.png" data-award-id="{award_id}" data-award-level="2" data-award-name="Ace - level 2" data-account-username="{username}" data-caption="I just earned a badge: Ace - level 2">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
-                award_id=account.awards.get(award_type=AwardType.ACE, level=2).id,
-                username=username,
-                username_u=username_u,
-            ),
-            '<img src="/static/img/awards/award_ACE_level_3_50.png"> You\'ve levelled up on one of your badges: <a href="/user/{username_u}/">Ace - level 3</a>. Points bonus: 4,000. <span class="broadcast" data-link="/user/{username_u}/" data-picture="/static/img/awards/award_ACE_level_3_100.png" data-award-id="{award_id}" data-award-level="3" data-award-name="Ace - level 3" data-account-username="{username}" data-caption="I just earned a badge: Ace - level 3">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
-                award_id=account.awards.get(award_type=AwardType.ACE, level=3).id,
-                username=username,
-                username_u=username_u,
-            ),
+            f'<img src="/static/img/awards/award_ACE_level_1_50.png"> You\'ve earned a new badge: <a href="/user/{username_u}/">Ace - level 1</a>. Points bonus: 1,000. <span class="broadcast" data-link="/user/{username_u}/" data-picture="/static/img/awards/award_ACE_level_1_100.png" data-award-id="{account.awards.get(award_type=AwardType.ACE, level=1).id}" data-award-level="1" data-award-name="Ace - level 1" data-account-username="{username}" data-caption="I just earned a badge: Ace - level 1">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>',
+            f'<img src="/static/img/awards/award_ACE_level_2_50.png"> You\'ve levelled up on one of your badges: <a href="/user/{username_u}/">Ace - level 2</a>. Points bonus: 2,000. <span class="broadcast" data-link="/user/{username_u}/" data-picture="/static/img/awards/award_ACE_level_2_100.png" data-award-id="{account.awards.get(award_type=AwardType.ACE, level=2).id}" data-award-level="2" data-award-name="Ace - level 2" data-account-username="{username}" data-caption="I just earned a badge: Ace - level 2">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>',
+            f'<img src="/static/img/awards/award_ACE_level_3_50.png"> You\'ve levelled up on one of your badges: <a href="/user/{username_u}/">Ace - level 3</a>. Points bonus: 4,000. <span class="broadcast" data-link="/user/{username_u}/" data-picture="/static/img/awards/award_ACE_level_3_100.png" data-award-id="{account.awards.get(award_type=AwardType.ACE, level=3).id}" data-award-level="3" data-award-name="Ace - level 3" data-account-username="{username}" data-caption="I just earned a badge: Ace - level 3">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>',
         ]
 
     def test_award_action_points_fully_learned(self):

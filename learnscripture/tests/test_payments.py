@@ -120,7 +120,6 @@ class DonationDriveTests(AccountTestMixin, TestBase):
         assert not d2.active_for_account(self.account)
 
         with travel(timezone.now() + timedelta(days=5)):
-
             # Should be active again
             assert d2.active_for_account(self.account)
 

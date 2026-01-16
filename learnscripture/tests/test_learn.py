@@ -45,7 +45,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         verse_set = VerseSet.objects.get(name=name)
         self.get_url("choose")
         self.click("#id-choose-verseset .accordion-heading")
-        self.click("#id-learn-verseset-btn-%d" % verse_set.id)
+        self.click(f"#id-learn-verseset-btn-{verse_set.id}")
         self.set_preferences(wait_for_reload=True)
         self.assertUrlsEqual(reverse("learn"))
         return verse_set
@@ -196,7 +196,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.add_verse_set("Psalm 23")
 
         for i in range(1, 7):
-            identity.record_verse_action("Psalm 23:%d" % i, "KJV", StageType.TEST, 1.0)
+            identity.record_verse_action(f"Psalm 23:{i}", "KJV", StageType.TEST, 1.0)
 
         self._make_verses_due_for_testing(identity.verse_statuses.filter(localized_reference="Psalm 23:1"))
 

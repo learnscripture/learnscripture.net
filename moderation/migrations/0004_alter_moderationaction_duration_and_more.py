@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("moderation", "0003_moderationaction_reversal_cancelled_and_more"),
     ]

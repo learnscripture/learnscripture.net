@@ -28,7 +28,6 @@ def give_learning_awards(account_id):
     finished_c = account.identity.verses_finished_count()
 
     for cls, count in [(StudentAward, started_c), (MasterAward, finished_c)]:
-
         cls(count=count).give_to(account)
 
 

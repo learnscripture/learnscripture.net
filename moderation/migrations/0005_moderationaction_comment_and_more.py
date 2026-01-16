@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("comments", "0005_alter_comment_message"),
         ("moderation", "0004_alter_moderationaction_duration_and_more"),

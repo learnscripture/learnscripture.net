@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0054_userversestatus_one_uvs_for_identity_ref_version_without_verseset"),
     ]

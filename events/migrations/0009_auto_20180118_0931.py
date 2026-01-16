@@ -18,7 +18,6 @@ def backwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("events", "0008_remove_event_message_html"),
     ]

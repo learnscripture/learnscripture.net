@@ -1,6 +1,7 @@
 """
 Word suggestion API for Django model layer code
 """
+
 import gc
 import hashlib
 import logging
@@ -31,6 +32,7 @@ COLLATER = pyuca.Collator()
 # word suggestions.
 
 # See __init__.py for comments about how this code is structured.
+
 
 # -- Create - for tests only --
 def create_word_suggestion_data(

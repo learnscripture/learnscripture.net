@@ -284,7 +284,7 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
         )
         internal_references = []
         for i in range(1, 7):
-            ref = "BOOK18 23:%d" % i
+            ref = f"BOOK18 23:{i}"
             internal_references.append(ref)
             vs.verse_choices.create(internal_reference=ref, set_order=i - 1)
 

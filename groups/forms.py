@@ -20,7 +20,6 @@ class MyModelSelect2Multiple(autocomplete.ModelSelect2Multiple):
 
 
 class EditGroupForm(forms.ModelForm):
-
     invited_users = forms.ModelMultipleChoiceField(
         label=t_lazy("groups-invited-users"),
         required=False,

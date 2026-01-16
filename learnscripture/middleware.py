@@ -24,7 +24,6 @@ def identity_middleware(get_response):
     from learnscripture import session
 
     def middleware(request):
-
         identity = session.get_identity(request)
         if identity is not None:
             request.identity = identity

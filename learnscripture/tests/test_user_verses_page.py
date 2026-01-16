@@ -31,7 +31,7 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url("user_verses")
 
         for i in range(1, 7):
-            self.assertTextPresent("Psalm 23:%d" % i)
+            self.assertTextPresent(f"Psalm 23:{i}")
 
         self.click('button[data-localized-reference="Psalm 23:2"]')
 

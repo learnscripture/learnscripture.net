@@ -280,9 +280,16 @@ class Version:
         }
 
     def make_dirs(self, c: Connection):
-        for dirname in [self.PROJECT_ROOT, self.MEDIA_ROOT_SHARED, self.DATA_ROOT_SHARED]:
+        for dirname in [
+            self.PROJECT_ROOT,
+            self.MEDIA_ROOT_SHARED,
+            self.DATA_ROOT_SHARED,
+        ]:
             files.require_directory(c, dirname)
-        links = [(self.MEDIA_ROOT, self.MEDIA_ROOT_SHARED), (self.DATA_ROOT, self.DATA_ROOT_SHARED)]
+        links = [
+            (self.MEDIA_ROOT, self.MEDIA_ROOT_SHARED),
+            (self.DATA_ROOT, self.DATA_ROOT_SHARED),
+        ]
         for link, dest in links:
             if not files.exists(c, link):
                 c.run(f"ln -s {quote(dest)} {quote(link)}")
@@ -350,7 +357,13 @@ def check_templates():
 
 
 @task()
-def deploy(c: Connection, skip_checks=False, test_host=False, skip_selenium=False, allow_missing_ftl: bool = False):
+def deploy(
+    c: Connection,
+    skip_checks=False,
+    test_host=False,
+    skip_selenium=False,
+    allow_missing_ftl: bool = False,
+):
     """
     Deploy project.
     """
@@ -458,7 +471,10 @@ def push_sources(c: Connection, target: Version):
 
     # Need settings file
     with c.cd(target_src_root):
-        c.run("cp learnscripture/settings_local_example.py learnscripture/settings_local.py", echo=True)
+        c.run(
+            "cp learnscripture/settings_local_example.py learnscripture/settings_local.py",
+            echo=True,
+        )
 
 
 def tag_deploy(c: Connection):
@@ -493,10 +509,21 @@ def install_requirements(c: Connection, target: Version):
     target_venv_vcs_root = os.path.join(target.VENV_ROOT, "src")
     previous_venv_vcs_root = os.path.join(previous_target.VENV_ROOT, "src")
     if files.exists(c, previous_venv_vcs_root):
-        c.run(f"rsync -a '--exclude=*.pyc' {previous_venv_vcs_root}/ {target_venv_vcs_root}", echo=True)
+        c.run(
+            f"rsync -a '--exclude=*.pyc' {previous_venv_vcs_root}/ {target_venv_vcs_root}",
+            echo=True,
+        )
 
-    target.project_run(c, "pip install --progress-bar off --upgrade setuptools pip wheel six", echo=True)
-    target.project_run(c, "pip install --progress-bar off -r requirements.txt --exists-action w", echo=True)
+    target.project_run(
+        c,
+        "pip install --progress-bar off --upgrade setuptools pip wheel six",
+        echo=True,
+    )
+    target.project_run(
+        c,
+        "pip install --progress-bar off -r requirements.txt --exists-action w",
+        echo=True,
+    )
 
 
 webpack_deploy_files_pattern = "./learnscripture/static/webpack_bundles/*.deploy.*"
@@ -633,7 +660,11 @@ def upload_project_templates(c, target):
 
 def update_database(c: Connection, target: Version):
     for db in target.DBS.keys():
-        target.project_run(c, f"./manage.py migrate --database {db} --noinput --fake-initial", echo=True)
+        target.project_run(
+            c,
+            f"./manage.py migrate --database {db} --noinput --fake-initial",
+            echo=True,
+        )
 
 
 def get_target_current_version(target: Version) -> Version:
@@ -661,7 +692,7 @@ def delete_old_versions(c: Connection):
 @root_task()
 def fix_perms(c: Connection, path: str, user: str):
     with c.cd(path):
-        c.run("find . -user root -exec 'chown' '%s' '{}' ';'" % user, echo=True)
+        c.run(f"find . -user root -exec 'chown' '{user}' '{{}}' ';'", echo=True)
 
 
 @task()
@@ -822,7 +853,10 @@ def install_or_renew_ssl_certificate(c: Connection):
     version = Version.current()
     certbot_static_path = version.STATIC_ROOT + "/root"
     files.require_directory(c, certbot_static_path)
-    c.run(f"letsencrypt certonly --webroot -w {certbot_static_path} -d {DOMAINS[0]}", echo=True)
+    c.run(
+        f"letsencrypt certonly --webroot -w {certbot_static_path} -d {DOMAINS[0]}",
+        echo=True,
+    )
     c.run("service nginx reload", echo=True)
 
 
@@ -838,7 +872,10 @@ def upload_letsencrypt_conf(c):
 
 @local_task()
 def create_sentry_release(c: Connection, version: str, last_commit):
-    c.run(f"sentry-cli releases --org learnscripturenet new -p production {version}", echo=True)
+    c.run(
+        f"sentry-cli releases --org learnscripturenet new -p production {version}",
+        echo=True,
+    )
     # Commits not currently publically available
     # local('sentry-cli releases --org learnscripturenet set-commits --commit "learnscripture/learnscripture.net@{commit}" {version}'.format(version=version, commit=full_hash))
     c.run(f"sentry-cli releases --org learnscripturenet finalize {version}", echo=True)
@@ -847,7 +884,10 @@ def create_sentry_release(c: Connection, version: str, last_commit):
 @local_task()
 def get_goaccess_logs(c: Connection):
     c.run("mkdir -p ../logs/", echo=True)
-    c.run("rsync -a --progress root@learnscripture.net:/var/log/goaccess ../logs/", echo=True)
+    c.run(
+        "rsync -a --progress root@learnscripture.net:/var/log/goaccess ../logs/",
+        echo=True,
+    )
 
 
 # TODO:

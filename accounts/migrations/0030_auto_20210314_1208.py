@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0052_auto_20210314_1208"),
         ("accounts", "0029_auto_20190801_1952"),

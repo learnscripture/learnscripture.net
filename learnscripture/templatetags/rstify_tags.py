@@ -38,7 +38,6 @@ class TextutilsHTMLTranslator(html4css1.HTMLTranslator):
 def rstify(
     text, initial_header_level=1, language_code="en", settings_overrides=None, writer_overrides=TextutilsHTMLWriter
 ):
-
     settings = {
         "initial_header_level": initial_header_level,
         "doctitle_xform": False,

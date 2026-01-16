@@ -3,7 +3,6 @@ from django.db.migrations.operations import RunSQL
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0002_auto_20161209_1825"),
     ]

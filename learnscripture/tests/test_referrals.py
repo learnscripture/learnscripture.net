@@ -23,7 +23,7 @@ class ReferralsTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # Should be at 'choose' page now
         vs = VerseSet.objects.get(slug="bible-101")
         self.click("#id-choose-verseset .accordion-heading")
-        self.click("#id-learn-verseset-btn-%d" % vs.id)
+        self.click(f"#id-learn-verseset-btn-{vs.id}")
         self.set_preferences()
 
         # Definitely have created new identity now, which should be linked to

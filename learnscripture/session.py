@@ -164,7 +164,7 @@ def _remove_user_verse_status(request, u_id):
     ids = _get_verse_status_ids(request)
     new_ids = []
     found_id = False
-    for (order, uvs_id, needs_testing_override) in ids:
+    for order, uvs_id, needs_testing_override in ids:
         if found_id:
             new_ids.append((order, uvs_id, needs_testing_override))
         if u_id == uvs_id:

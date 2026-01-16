@@ -1,6 +1,7 @@
 """
 Handles stored analysis
 """
+
 import hashlib
 import logging
 import os.path

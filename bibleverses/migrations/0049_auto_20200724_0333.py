@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0048_populate_userversestatus_internal_reference_list_catechisms"),
     ]

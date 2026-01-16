@@ -12,8 +12,8 @@ class ContentItemManager(models.Manager):
 
         def rename_html(html):
             return re.sub(
-                r"""(\s)href=(["'])%s""" % old_url,
-                r"\1href=\2%s" % new_url,
+                rf"""(\s)href=(["']){old_url}""",
+                rf"\1href=\2{new_url}",
                 html,
             )
 

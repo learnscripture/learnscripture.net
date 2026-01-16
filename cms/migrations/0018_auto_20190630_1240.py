@@ -7,7 +7,6 @@ import cms.utils.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("cms", "0017_auto_20190630_1239"),
     ]

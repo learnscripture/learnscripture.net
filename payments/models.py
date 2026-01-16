@@ -55,7 +55,7 @@ class DonationDrive(models.Model):
     message_html = models.TextField()
     language_code = models.CharField(max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE)
     hide_if_donated_days = models.PositiveIntegerField(
-        help_text="The donation drive will be hidden for users who have donated within " "this number of days"
+        help_text="The donation drive will be hidden for users who have donated within this number of days"
     )
     target = models.DecimalField(default=Decimal("0"), decimal_places=0, max_digits=8)
 

@@ -100,7 +100,6 @@ class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestB
         # Move time on enough so that next hit gets past learned threshold.
         identity.verse_statuses.update(strength=MM.LEARNED - 0.01)
         with travel(timezone.now() + timedelta(days=400)):
-
             for ref, version in ref_pairs:
                 # Simulate enough to get to 'learned' state.
                 action_change = identity.record_verse_action(ref, version.slug, StageType.TEST, accuracy=1)

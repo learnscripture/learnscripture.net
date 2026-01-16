@@ -27,7 +27,6 @@ from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
 class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMixin, BibleVersesMixin, TestBase):
-
     databases = {"default", "wordsuggestions"}
 
     def test_add_verse_set(self):
@@ -115,7 +114,6 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         i.record_verse_action("John 3:16", "NET", StageType.READ, 1)
         with travel(timezone.now() + timedelta(seconds=10)):
-
             uvs = i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET")
             assert uvs.memory_stage == MemoryStage.SEEN
             assert uvs.first_seen is not None
@@ -195,7 +193,6 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         assert i.next_verse_due() == uvs
 
         with travel(timezone.now() + gap + timedelta(seconds=100)) as tm:
-
             uvs.refresh_from_db()
             assert uvs.needs_testing_individual
 
@@ -338,7 +335,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         with travel(timezone.now()) as tm:
             for vn in range(1, 7):
-                ref = "Psalm 23:%d" % vn
+                ref = f"Psalm 23:{vn}"
                 with self.subTest(ref=ref):
                     i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
                     tm.shift(timedelta(days=1))
@@ -372,7 +369,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
             # Now test all verses
             for vn in range(1, 7):
-                ref = "Psalm 23:%d" % vn
+                ref = f"Psalm 23:{vn}"
                 i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
 
             # Should have nothing left to review now.
@@ -437,7 +434,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         for vn in range(1, 7):
             # NET only:
-            ref = "Psalm 23:%d" % vn
+            ref = f"Psalm 23:{vn}"
             i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
             # Put each one back by n days i.e. as if running over
             # multiple days
@@ -456,7 +453,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.add_verse_set(vs1)
 
         for vn in range(1, 7):
-            ref = "Psalm 23:%d" % vn
+            ref = f"Psalm 23:{vn}"
             i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
             # Put all into 'group testing' regime
             i.verse_statuses.filter(localized_reference=ref).update(
@@ -573,7 +570,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.add_verse_set(vs1)
 
         for vn in range(1, 7):
-            ref = "Psalm 23:%d" % vn
+            ref = f"Psalm 23:{vn}"
             i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
             i.verse_statuses.filter(localized_reference=ref).update(
                 last_tested=F("last_tested") - timedelta(10),
@@ -589,7 +586,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         assert vss[0].total_verse_count == 6
 
         for vn in range(1, 7):
-            ref = "Psalm 23:%d" % vn
+            ref = f"Psalm 23:{vn}"
             # Now, move each to beyond the threshold which triggers
             # group testing.
             # Put each 1 minute apart, to simulate having tested the whole
@@ -631,7 +628,6 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         # A quick gap
         with travel(timezone.now() + timedelta(seconds=10)) as tm:
-
             # Learn next two.
 
             for uvs in uvss2:
@@ -662,7 +658,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.add_verse_set(vs1)
 
         for vn in range(1, 7):
-            ref = "Psalm 23:%d" % vn
+            ref = f"Psalm 23:{vn}"
             i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
 
             # Make one of them needing testing
@@ -749,7 +745,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         i, account = self.create_account(version_slug="KJV")
 
-        refs = ["Genesis 1:%d" % j for j in range(1, 11)] + ["Genesis 2:%d" % j for j in range(1, 3)]
+        refs = [f"Genesis 1:{j}" for j in range(1, 11)] + [f"Genesis 2:{j}" for j in range(1, 3)]
 
         for j, ref in enumerate(refs):
             i.add_verse_choice(ref)
@@ -769,7 +765,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
     def test_verses_finished_milestone_event(self):
         i, account = self.create_account(version_slug="KJV")
 
-        refs = ["Genesis 1:%d" % j for j in range(1, 11)] + ["Genesis 2:%d" % j for j in range(1, 3)]
+        refs = [f"Genesis 1:{j}" for j in range(1, 11)] + [f"Genesis 2:{j}" for j in range(1, 3)]
 
         for j, ref in enumerate(refs):
             i.add_verse_choice(ref)
@@ -869,7 +865,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         def learn(i):
             # We simulate testing over time by moving previous data back a day
             identity.verse_statuses.update(first_seen=F("first_seen") - timedelta(days=1))
-            ref = "Genesis 1:%d" % i
+            ref = f"Genesis 1:{i}"
             identity.add_verse_choice(ref)
             identity.record_verse_action(ref, "KJV", StageType.TEST, 1.0)
 

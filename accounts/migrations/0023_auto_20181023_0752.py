@@ -44,7 +44,6 @@ def backwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accounts", "0022_remove_identity_new_learn_page"),
     ]

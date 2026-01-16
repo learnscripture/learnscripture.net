@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0060_populate_wordsuggestiondata_language_code"),
     ]

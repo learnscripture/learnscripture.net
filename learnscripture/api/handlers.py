@@ -4,6 +4,7 @@ Handlers for AJAX requests.
 This isn't really a REST API in the normal sense, and would probably need a lot
 of cleaning up if clients other than the web app were to use it.
 """
+
 import csv
 import datetime
 import json

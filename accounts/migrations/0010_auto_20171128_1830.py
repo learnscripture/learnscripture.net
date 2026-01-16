@@ -15,7 +15,6 @@ DROP TABLE IF EXISTS piston_consumer;
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accounts", "0009_auto_20171027_1336"),
         ("admin", "0001_initial"),

@@ -1,6 +1,7 @@
 """
 Utilities that deal with LearnScripture models, particularly bibleverses.models
 """
+
 from bibleverses.books import get_bible_books
 from bibleverses.models import TextType, WordSuggestionData
 

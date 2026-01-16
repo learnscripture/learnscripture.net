@@ -28,7 +28,6 @@ reverse_sql = ""
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0030_auto_20180104_1210"),
     ]

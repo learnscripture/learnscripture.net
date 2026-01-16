@@ -112,8 +112,8 @@ def search_esv_v2(version, words, page, page_size):
         "include-footnotes=0",
         "include-subheadings=0",
         "include-headings=0",
-        "page=%d" % (page + 1),
-        "results-per-page=%d" % page_size,
+        f"page={page + 1}",
+        f"results-per-page={page_size}",
     ]
 
     result_text = do_esv_v2_api("query", params)

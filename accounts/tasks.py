@@ -23,7 +23,6 @@ def notify_account_about_comment(comment_id):
 
 
 def notify_about_comment(event, comment, account):
-
     # Don't notify comment author about own comment
     if account == comment.author:
         return

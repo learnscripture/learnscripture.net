@@ -919,7 +919,8 @@ class Identity(models.Model):
 
     def bible_verse_statuses_for_learning_qs(self):
         qs = (
-            self.verse_statuses.active().filter(version__text_type=TextType.BIBLE, memory_stage__lt=MemoryStage.TESTED)
+            self.verse_statuses.active()
+            .filter(version__text_type=TextType.BIBLE, memory_stage__lt=MemoryStage.TESTED)
             # Don't include passages - we do those separately:
             .exclude(verse_set__set_type=VerseSetType.PASSAGE)
         )
@@ -1392,7 +1393,7 @@ class Notice(models.Model):
         return (timezone.now() - self.created).days >= 2
 
     def __str__(self):
-        return "Notice %d for %r" % (self.id, self.for_identity)
+        return f"Notice {self.id} for {self.for_identity}"
 
 
 @attr.s(hash=False)

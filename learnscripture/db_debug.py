@@ -246,9 +246,8 @@ def display_query_info(recorder, request=None, response=None, detailed=False, sc
                     "2",  # 2XX success
                     "3",  # 3XX redirection
                 )
-                else
                 # 4XX, 5XX - errors
-                styler.BG_RED(styler.BLACK(code))
+                else styler.BG_RED(styler.BLACK(code))
             )
             if code
             else "" + " "

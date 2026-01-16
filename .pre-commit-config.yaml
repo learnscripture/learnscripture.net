@@ -19,11 +19,6 @@ repos:
       - id: djhtml
         entry: djhtml -t 2
         language_version: python3.10
-  - repo: https://github.com/ikamensh/flynt/
-    rev: '1.0.1'
-    hooks:
-      - id: flynt
-        language_version: python3.10
   - repo: https://github.com/adamchainz/django-upgrade
     rev: '1.14.0'
     hooks:

@@ -68,7 +68,7 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
 
         vs_id = VerseSet.objects.get(name="Bible 101").id
         assert VerseSet.objects.get(id=vs_id).popularity == 0
-        self.click("#id-learn-verseset-btn-%d" % vs_id)
+        self.click(f"#id-learn-verseset-btn-{vs_id}")
         self.set_preferences(wait_for_reload=True)
         assert VerseSet.objects.get(id=vs_id).popularity == 1
 
@@ -84,7 +84,7 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
         self.click("#id-choose-verseset .accordion-heading")
 
         vs = VerseSet.objects.get(name="Psalm 23")
-        self.click("#id-learn-verseset-btn-%d" % vs.id)
+        self.click(f"#id-learn-verseset-btn-{vs.id}")
 
         self.set_preferences(wait_for_reload=True)
 
@@ -98,7 +98,7 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
         # Choose again
         self.get_url("choose")
         self.click("#id-choose-verseset .accordion-heading")
-        self.click("#id-learn-verseset-btn-%d" % vs.id)
+        self.click(f"#id-learn-verseset-btn-{vs.id}")
 
         identity = self._get_current_identity()
         assert vs.verse_choices.count() == identity.verse_statuses.filter(ignored=False).count()

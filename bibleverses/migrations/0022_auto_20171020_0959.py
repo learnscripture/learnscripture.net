@@ -33,7 +33,6 @@ def backwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("bibleverses", "0021_remove_versechoice_localized_reference"),
     ]

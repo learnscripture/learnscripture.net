@@ -18,7 +18,6 @@ def backwards(apps, _):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("comments", "0006_comment_author_was_hellbanned"),
     ]

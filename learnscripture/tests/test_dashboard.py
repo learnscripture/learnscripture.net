@@ -13,7 +13,6 @@ from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
 class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
-
     databases = {"default", "wordsuggestions"}
 
     def test_redirect(self):
@@ -37,7 +36,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
             self.click_and_confirm("#id-learning-queue-non-verse-set [name=clearbiblequeue]")
 
     def click_cancel_passage_btn(self, verse_set_id, version_id):
-        self.click_and_confirm("#id-cancelpassage-btn-%d-%d" % (verse_set_id, version_id))
+        self.click_and_confirm(f"#id-cancelpassage-btn-{verse_set_id}-{version_id}")
 
     def click_clear_catechsim_queue_btn(self):
         self.click_and_confirm("[name=clearcatechismqueue]")
@@ -105,7 +104,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
         self.assertTextPresent("Psalm 23")
 
         # Test 'Continue learning' button
-        self.submit("#id-learnpassage-btn-%d-%d" % (vs.id, i.default_bible_version.id))
+        self.submit(f"#id-learnpassage-btn-{vs.id}-{i.default_bible_version.id}")
         self.assert_learning_localized_reference("Psalm 23:1")
 
         # Test 'Cancel learning' button
@@ -179,7 +178,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
     def test_home_dashboard_routing(self):
         Identity.objects.all().delete()
         self.get_url("home")
-        self.follow_link(f"a.btn.large[href=\"{reverse('choose')}\"]")
+        self.follow_link(f'a.btn.large[href="{reverse("choose")}"]')
         self.assertUrlsEqual(reverse("choose"))
         # Getting this far shouldn't create an Identity
         assert Identity.objects.count() == 0
