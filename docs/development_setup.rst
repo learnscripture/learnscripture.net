@@ -25,14 +25,6 @@ installed.
      git clone git@github.com:learnscripture/learnscripture-texts.git texts
 
 
-3. Create a virtualenv for the project e.g.::
-
-     mkvirtualenv learnscripture --python=`which python3.10` -a `pwd`
-
-   Add project path to the venv::
-
-     pwd > $VIRTUAL_ENV/lib/python3.10/site-packages/project.pth
-
 4. Install dependencies.
 
    System dependencies:
@@ -41,11 +33,12 @@ installed.
    * memcached
    * nodejs
    * npm
+   * uv
 
    Python/virtualenv dependencies: from inside the learnscripture.net/src/
    folder, do::
 
-     pip install -r requirements.txt
+     uv sync
 
    npm/javascript dependencies. First do::
 
