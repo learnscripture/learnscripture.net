@@ -104,7 +104,7 @@ Then install the project proper:
 
     devbox run create_dev_db
 
-* Create a file ``config/secrets.json`` containing at least the following:
+* Create a file ``config/secrets.json`` containing at least the following::
 
        {"ESV_V2_API_KEY": "IP"
        }

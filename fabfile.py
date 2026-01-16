@@ -9,6 +9,7 @@ import re
 import subprocess
 import sys
 from datetime import datetime
+from pathlib import Path
 from shlex import quote
 
 from fabric.connection import Connection
@@ -38,6 +39,8 @@ PROJECT_LOCALE = "en_US.UTF-8"
 
 DEFAULT_HOST = "learnscripture.net"  # Where to deploy to.
 DEFAULT_USER = PROJECT_USER
+
+FULL_PYTHON_VERISON = Path(".python-version").read_text().strip()
 
 # Python version
 PYTHON_BIN = "python3.10"
@@ -94,6 +97,7 @@ REQS = [
     "python3.10-dev",
     "python3.10-full",
     "python3.10-venv",
+    "pipx",  # use this to install uv, use that for everything else
     "python3-virtualenvwrapper",
     "python3-setuptools",
     # For building Python extensions
@@ -162,8 +166,6 @@ def _install_system(c: Connection):
     # Remove some bloat:
     apt.remove(c, ["snapd"])
     disks.add_swap(c, size="1G", swappiness="10")
-    # Minimal Python
-    c.run("pip install -U pip virtualenv wheel virtualenvwrapper", echo=True)
     ssl.generate_ssl_dhparams(c)
 
 
@@ -497,34 +499,19 @@ def create_venv(c: Connection, target: Version):
     if files.exists(c, venv_root):
         return
 
-    c.run(f"virtualenv --python={PYTHON_BIN} {venv_root}", echo=True)
-    c.run(f"echo {target.SRC_ROOT} > {target.VENV_ROOT}/lib/{PYTHON_BIN}/site-packages/projectsource.pth")
+    c.run("pipx install uv", echo=True)
+    c.run("pipx upgrade uv", echo=True)
+    c.run("pipx ensurepath", echo=True)
+    c.run(f"uv python install {FULL_PYTHON_VERISON}", echo=True)
+    c.run(f"uv venv --seed --python={FULL_PYTHON_VERISON} {venv_root}", echo=True)
+    c.run(
+        f"echo {target.SRC_ROOT} > {target.VENV_ROOT}/lib/{PYTHON_BIN}/site-packages/projectsource.pth",
+        echo=True,
+    )
 
 
 def install_requirements(c: Connection, target: Version):
-    # For speed and to avoid over-dependence on the network, we copy 'src'
-    # directory from previous virtualenv. This does not install those packages
-    # (no .egg-link files), but it makes VCS checkout installs much faster.
-    # Other installs are kept fast due to the pip wheel cache.
-    previous_target = get_target_current_version(target)
-    target_venv_vcs_root = os.path.join(target.VENV_ROOT, "src")
-    previous_venv_vcs_root = os.path.join(previous_target.VENV_ROOT, "src")
-    if files.exists(c, previous_venv_vcs_root):
-        c.run(
-            f"rsync -a '--exclude=*.pyc' {previous_venv_vcs_root}/ {target_venv_vcs_root}",
-            echo=True,
-        )
-
-    target.project_run(
-        c,
-        "pip install --progress-bar off --upgrade setuptools pip wheel six",
-        echo=True,
-    )
-    target.project_run(
-        c,
-        "pip install --progress-bar off -r requirements.txt --exists-action w",
-        echo=True,
-    )
+    target.project_run(c, "uv sync --no-progress", echo=True)
 
 
 webpack_deploy_files_pattern = "./learnscripture/static/webpack_bundles/*.deploy.*"
