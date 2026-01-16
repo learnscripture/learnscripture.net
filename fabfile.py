@@ -204,6 +204,7 @@ TEMPLATES = [
         system=True,
         local_path="config/crontab.template",
         remote_path="/etc/cron.d/%(PROJECT_NAME)s",
+        reload_command="service cron reload",
         owner="root",
         mode="600",
     ),
