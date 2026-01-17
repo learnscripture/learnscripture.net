@@ -282,7 +282,7 @@
         <td>{{ verses_finished_this_week|intcomma }}</td>
       </tr>
       <tr>
-        <th><a href="{% url 'choose' %}?creator={{ account.username }}">{% ftlmsg 'user-stats-verse-sets-created' %}</a></th>
+        <th>{% ftlmsg 'user-stats-verse-sets-created' %}</th>
         <td>{{ verse_sets_created_all_time|intcomma }}</td>
         <td>{{ verse_sets_created_this_week|intcomma }}</td>
       </tr>
