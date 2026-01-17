@@ -40,6 +40,12 @@ Then install the project proper:
 
   This will install system dependencies.
 
+* Create an alias for 'learnscripture.local' that points to localhost, 127.0.0.1. On
+  Linux, you do this by adding the following line to /etc/hosts::
+
+    127.0.0.1          learnscripture.local
+
+
 * Install Python 3.10::
 
     uv python install 3.10
@@ -56,21 +62,7 @@ Then install the project proper:
 
     uv sync
 
-* Create an alias for 'learnscripture.local' that points to localhost, 127.0.0.1. On
-  Linux, you do this by adding the following line to /etc/hosts::
-
-    127.0.0.1          learnscripture.local
-
-* (TODO do we need these or can we do them with devbox?)
-
-  npm/javascript dependencies. First do::
-
-     nvm install 19
-     nvm use 19
-
-  You should set up your shell to ensure this runs each time you work on the project
-
-  Now we also need our node and Javascript deps::
+* Now we also need our node and Javascript deps::
 
      npm install
 
