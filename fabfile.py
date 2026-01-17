@@ -797,10 +797,9 @@ def local_restore_from_dump(c: Connection, filename):
     )
 
     filename = os.path.abspath(filename)
-    if not postgresql.check_user_exists(c, db, db.user):
-        postgresql.create_default_user(c, db)
-    postgresql.drop_db_if_exists(c, db)
-    postgresql.create_db(c, db)
+    # We don't use fabutils postgresql commands because they assume postgres is
+    # running as global service, and that doesn't seem to work when running with devbox
+    c.run("devbox run create_dev_db", echo=True)
     postgresql.restore_db(c, db, filename)
 
 
