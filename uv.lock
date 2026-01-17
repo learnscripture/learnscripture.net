@@ -490,15 +490,15 @@ wheels = [
 
 [[package]]
 name = "django-ftl"
-version = "0.13"
+version = "0.14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "fluent-compiler" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1a/c3/0ea14322908fb2f128a7afe0cff558cd73f6f0e335fd57a23b5b8ec233ca/django-ftl-0.13.tar.gz", hash = "sha256:15b079038e7f09cc65bcb617451b8803e07bb8b125927df0cf6c9c01488266c8", size = 47932, upload-time = "2021-09-16T14:48:43.75Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/31/ec/52747f9e6d955aadc291618b453f9f92ebf1335ea7d44c4b48f6dc9697bf/django-ftl-0.14.tar.gz", hash = "sha256:3f881f143dd6509175d5e0722407ddf42a84f4a10680ed972ed3b4c6ad2107aa", size = 46120, upload-time = "2023-02-16T20:23:04.759Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4a/89/80c3530490ba8ed406ae5278f82921c0ff5ac6cf9019b072f3bf921bf188/django_ftl-0.13-py2.py3-none-any.whl", hash = "sha256:cfdb4fbd422807f4f6cbccd9606e7585ddcd290f7b627ac78bd66c506337bb86", size = 13865, upload-time = "2021-09-16T14:48:42.209Z" },
+    { url = "https://files.pythonhosted.org/packages/f6/bd/9db699374a4c01b8d7715d61cbc7948a26155a2de3e5d91f82cd9c762f0f/django_ftl-0.14-py3-none-any.whl", hash = "sha256:87e1b374fb307e9bfac402abc87b347212e02288ca2d333d27bdbc481c71e0bf", size = 12350, upload-time = "2023-02-16T20:23:03.397Z" },
 ]
 
 [[package]]
@@ -788,18 +788,17 @@ wheels = [
 
 [[package]]
 name = "fluent-compiler"
-version = "0.3"
+version = "1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
     { name = "babel" },
     { name = "fluent-syntax" },
     { name = "pytz" },
-    { name = "six" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/76/87/7771a5c651da17599cff85303ff8b3150b16b880fede636de242db2b0b2b/fluent_compiler-0.3.tar.gz", hash = "sha256:a0006c833d902d6c5d277dccd3c6f26047d30a5c880865dc8594e9543ff58488", size = 81721, upload-time = "2020-11-18T18:26:15.579Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/df/32/b51e4b5708412ccd3bec1060216c711a5a36da3814346b1799652a9051af/fluent_compiler-1.1.tar.gz", hash = "sha256:7ab34182b7ef616233457bc7d17eca830aa8faa4685eed7e4498968d63cdf14e", size = 83700, upload-time = "2024-04-02T18:53:09.879Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/94/25/96ac746d5ad4871048b3d7716f433884f5cf54ac565c70e76f827937e572/fluent_compiler-0.3-py3-none-any.whl", hash = "sha256:8d7ebb23d8778f0f8dff994e7e9c7779155a8614945465b1b93fd7ad8eba8738", size = 38041, upload-time = "2020-11-18T18:26:13.991Z" },
+    { url = "https://files.pythonhosted.org/packages/ef/5c/f6fcde75c59a54209ee3a109d84506e82f55e24e77a3df0e2d5755b8a4b9/fluent_compiler-1.1-py3-none-any.whl", hash = "sha256:67486e9e12394c9c38c89705171ee965ca8163684ebaeff019d0fa23945e9827", size = 37272, upload-time = "2024-04-02T18:53:07.795Z" },
 ]
 
 [[package]]
@@ -994,7 +993,6 @@ dependencies = [
     { name = "djangorestframework" },
     { name = "docutils" },
     { name = "easy-thumbnails" },
-    { name = "fluent-compiler" },
     { name = "furl" },
     { name = "lxml" },
     { name = "numpy" },
@@ -1051,7 +1049,7 @@ requires-dist = [
     { name = "django-autoslug", specifier = "==1.9.8" },
     { name = "django-capture-tag", specifier = "==1.0" },
     { name = "django-compressor", specifier = "==4.3.1" },
-    { name = "django-ftl", specifier = "==0.13" },
+    { name = "django-ftl", specifier = ">=0.14" },
     { name = "django-markup", specifier = "==1.5" },
     { name = "django-mptt", specifier = "==0.13.4" },
     { name = "django-paypal", specifier = "==2.0" },
@@ -1063,7 +1061,6 @@ requires-dist = [
     { name = "djangorestframework", specifier = "==3.12.4" },
     { name = "docutils", specifier = "==0.18.1" },
     { name = "easy-thumbnails", specifier = "==2.8.5" },
-    { name = "fluent-compiler", specifier = "==0.3" },
     { name = "furl", specifier = "==2.1.3" },
     { name = "lxml", specifier = "==4.6.4" },
     { name = "numpy", specifier = "==1.21.4" },
