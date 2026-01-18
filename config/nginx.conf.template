@@ -46,6 +46,10 @@ server {
         return 444;
     }
 
+    if ($http_user_agent ~* "GPTBot|AhrefsBot") {
+       return 403;
+    }
+
     location /static {
         alias            %(STATIC_ROOT)s;
         access_log      off;
