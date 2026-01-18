@@ -299,7 +299,11 @@ class Version:
                 c.run(f"ln -s {quote(dest)} {quote(link)}")
 
     def project_run(self, c: Connection, cmd: str, **kwargs):
-        with c.cd(self.SRC_ROOT), c.prefix(f"source {self.VENV_ROOT}/bin/activate"):
+        with (
+            c.cd(self.SRC_ROOT),
+            c.prefix(f"source {self.VENV_ROOT}/bin/activate"),
+            c.prefix("PATH=~/.local/bin:$PATH"),
+        ):
             env = kwargs.pop("env", {})
             env["UV_PROJECT_ENVIRONMENT"] = self.VENV_ROOT
             kwargs["env"] = env
