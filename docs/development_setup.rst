@@ -210,6 +210,5 @@ To be able to deploy, you need the following:
   sentry.io, and put into ~/.sentryclirc, or into an environment variable.
 
   If you have more than one thing using sentry-cli, environment variables are
-  better. They can be put into ``postactivate`` script of the virtualenv,
-  preferably importing from elsewhere so that they are not lost
-  if the virtualenv needs to be recreated
+  better. It is recommended to make them available using direnv and a ``.envrc``
+  and/or ``.env`` file.
