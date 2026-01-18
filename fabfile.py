@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 import sys
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from shlex import quote
@@ -299,6 +300,9 @@ class Version:
 
     def project_run(self, c: Connection, cmd: str, **kwargs):
         with c.cd(self.SRC_ROOT), c.prefix(f"source {self.VENV_ROOT}/bin/activate"):
+            env = kwargs.pop("env", {})
+            env["UV_PROJECT_ENVIRONMENT"] = self.VENV_ROOT
+            kwargs["env"] = env
             return c.run(cmd, **kwargs)
 
 
@@ -494,6 +498,12 @@ def push_non_vcs_sources(c, target):
         files.put(c, src, os.path.join(target.SRC_ROOT, src))
 
 
+@contextmanager
+def use_local_bin_PATH(c: Connection):
+    with c.prefix("PATH=~/.local/bin:$PATH"):
+        yield
+
+
 def create_venv(c: Connection, target: Version):
     venv_root = target.VENV_ROOT
     if files.exists(c, venv_root):
@@ -502,8 +512,9 @@ def create_venv(c: Connection, target: Version):
     c.run("pipx install uv", echo=True)
     c.run("pipx upgrade uv", echo=True)
     c.run("pipx ensurepath", echo=True)
-    c.run(f"uv python install {FULL_PYTHON_VERISON}", echo=True)
-    c.run(f"uv venv --seed --python={FULL_PYTHON_VERISON} {venv_root}", echo=True)
+    with use_local_bin_PATH(c):
+        c.run(f"uv python install {FULL_PYTHON_VERISON}", echo=True)
+        c.run(f"uv venv --seed --python={FULL_PYTHON_VERISON} {venv_root}", echo=True)
     c.run(
         f"echo {target.SRC_ROOT} > {target.VENV_ROOT}/lib/{PYTHON_BIN}/site-packages/projectsource.pth",
         echo=True,
