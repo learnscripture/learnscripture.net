@@ -1,14 +1,36 @@
 
+map $http_user_agent $block_bad_bot {
+    default 0;
+    ~*(GPTBot|AhrefsBot|ClaudeBot|SemrushBot|Amazonbot|meta-externalagent|MJ12bot) 1;
+}
+
+server {
+    if ($block_bad_bot) {
+        return 403;
+    }
+}
+
 # Remove www prefix:
 server {
     listen 80;
     server_name www.learnscripture.net;
+
+    if ($block_bad_bot) {
+        return 403;
+    }
+
     rewrite     ^/(.*) https://learnscripture.net/$1 permanent;
 }
 
+# HTTP -> HTTPS
 server {
     listen 80;
     server_name %(DOMAINS_NGINX)s;
+
+    if ($block_bad_bot) {
+        return 403;
+    }
+
     return         301 https://$server_name$request_uri;
 }
 
@@ -21,6 +43,11 @@ server {
     server_name %(DOMAINS_NGINX)s;
     client_max_body_size 10M;
     keepalive_timeout    15;
+
+    if ($block_bad_bot) {
+        return 403;
+    }
+
 
     ssl_certificate      /etc/letsencrypt/live/learnscripture.net/fullchain.pem;
     ssl_certificate_key  /etc/letsencrypt/live/learnscripture.net/privkey.pem;
@@ -46,9 +73,13 @@ server {
         return 444;
     }
 
-    if ($http_user_agent ~* "GPTBot|AhrefsBot") {
-       return 403;
+    # Some old URLs that get too much traffic:
+    location = /choose/ {
+        if ($arg_creator) {
+            return 403;
+        }
     }
+    # -- end
 
     location /static {
         alias            %(STATIC_ROOT)s;
