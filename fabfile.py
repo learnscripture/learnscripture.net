@@ -509,10 +509,10 @@ def create_venv(c: Connection, target: Version):
     if files.exists(c, venv_root):
         return
 
-    c.run("pipx install uv", echo=True)
-    c.run("pipx upgrade uv", echo=True)
-    c.run("pipx ensurepath", echo=True)
     with use_local_bin_PATH(c):
+        c.run("pipx install uv", echo=True)
+        c.run("pipx upgrade uv", echo=True)
+        c.run("pipx ensurepath", echo=True)
         c.run(f"uv python install {FULL_PYTHON_VERISON}", echo=True)
         c.run(f"uv venv --seed --python={FULL_PYTHON_VERISON} {venv_root}", echo=True)
     c.run(
