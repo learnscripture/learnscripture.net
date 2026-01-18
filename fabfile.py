@@ -194,19 +194,19 @@ TEMPLATES = [
     Template(
         system=True,
         local_path="config/nginx.conf.template",
-        remote_path="/etc/nginx/sites-enabled/%(PROJECT_NAME)s.conf",
+        remote_path=f"/etc/nginx/sites-enabled/{PROJECT_NAME}.conf",
         reload_command="service nginx reload",
     ),
     Template(
         system=True,
         local_path="config/supervisor.conf.template",
-        remote_path="/etc/supervisor/conf.d/%(PROJECT_NAME)s.conf",
+        remote_path=f"/etc/supervisor/conf.d/{PROJECT_NAME}.conf",
         reload_command="supervisorctl reread; supervisorctl update",
     ),
     Template(
         system=True,
         local_path="config/crontab.template",
-        remote_path="/etc/cron.d/%(PROJECT_NAME)s",
+        remote_path=f"/etc/cron.d/{PROJECT_NAME}",
         reload_command="service cron reload",
         owner="root",
         mode="600",
