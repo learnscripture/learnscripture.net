@@ -68,7 +68,7 @@ dev = [
     "django-extensions==3.2.3",
     "django-functest==1.5.3",
     "django-urlconfchecks",
-    "elm-fluent==0.6.0",
+    "elm-fluent>=0.7",
     "fabric==3.0.0",
     "fabutils",
     "filelock==3.4.0",

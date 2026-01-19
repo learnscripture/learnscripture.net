@@ -709,10 +709,9 @@ wheels = [
 
 [[package]]
 name = "elm-fluent"
-version = "0.6.0"
+version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "attrs" },
     { name = "beautifulsoup4" },
     { name = "click" },
     { name = "fluent-syntax" },
@@ -721,9 +720,9 @@ dependencies = [
     { name = "lxml" },
     { name = "watchdog" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7f/d0/1b62dc44bdf53f218249281f797ec73ecac73cfbf34639d42266d111e2e6/elm_fluent-0.6.0.tar.gz", hash = "sha256:c85a6e63e8c50a25ff48e2d6552d2c8f4a713a990b937c5ec6ff2850cf398335", size = 117937, upload-time = "2020-04-09T07:12:02.274Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/91/3e/0a6dbd848f10ffb67f1e62daa46c44cd3ffd1b85ffabdb5abaaec1ec9961/elm_fluent-0.7.0.tar.gz", hash = "sha256:fc5e559cd60e1461665a7ee91d13ff9bb07d982bd091be01296369d7d551888f", size = 120208, upload-time = "2026-01-19T20:50:07.521Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/21/68/05bc34792bce7891a7c4355808741958a65bd26813aac93dcd9b2221c1e8/elm_fluent-0.6.0-py3-none-any.whl", hash = "sha256:a9f2246ae5c5e73711a9a3597d9a489c54e1bb9d180298502f0010612b186681", size = 47381, upload-time = "2020-04-09T07:12:00.504Z" },
+    { url = "https://files.pythonhosted.org/packages/bc/ca/13ccffcd9bad3e02f6487da8a11030a39b894756716e0e1a7f2db375fd8a/elm_fluent-0.7.0-py3-none-any.whl", hash = "sha256:2ee99969ef7e94858db3d11797463feec861e18909509d751e18316abaa1629a", size = 46584, upload-time = "2026-01-19T20:50:11.619Z" },
 ]
 
 [[package]]
@@ -1085,7 +1084,7 @@ dev = [
     { name = "django-extensions", specifier = "==3.2.3" },
     { name = "django-functest", specifier = "==1.5.3" },
     { name = "django-urlconfchecks", git = "https://github.com/spookylukey/django-urlconfchecks?rev=c10984a1d0b3bcc7367a1b8ee147e55a7d201f58" },
-    { name = "elm-fluent", specifier = "==0.6.0" },
+    { name = "elm-fluent", specifier = ">=0.7" },
     { name = "fabric", specifier = "==3.0.0" },
     { name = "fabutils", git = "https://github.com/learnscripture/fabutils.git?rev=67e9a529f90616312e6374de25bcf394e24d135f" },
     { name = "filelock", specifier = "==3.4.0" },
