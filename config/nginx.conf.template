@@ -73,13 +73,6 @@ server {
         return 444;
     }
 
-    # Some old URLs that get too much traffic:
-    location = /choose/ {
-        if ($arg_creator) {
-            return 403;
-        }
-    }
-    # -- end
 
     location /static {
         alias            %(STATIC_ROOT)s;
