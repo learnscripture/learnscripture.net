@@ -2,7 +2,7 @@ import dataclasses
 import re
 from dataclasses import dataclass
 
-from parsy import ParseError, char_from, generate, regex, string, string_from, whitespace
+from parsy import ParseError, Parser, char_from, generate, regex, string, string_from, whitespace
 
 from learnscripture.ftl_bundles import t
 from learnscripture.utils.cache import memoize_function
@@ -14,7 +14,7 @@ from .books import (
     get_bible_books,
     is_single_chapter_book,
 )
-from .constants import BIBLE_BOOK_INFO
+from .constants import BIBLE_BOOK_INFO, BookInfo
 from .languages import LANG, normalize_reference_input
 
 
@@ -60,8 +60,8 @@ class ParsedReference:
         if self.start_chapter is not None and self.start_chapter == self.end_chapter:
             if (
                 self.start_verse == 1
-                and self.start_chapter in self.book_info["verse_counts"]
-                and self.end_verse == self.book_info["verse_counts"][self.start_chapter]
+                and self.start_chapter in self.book_info.verse_counts
+                and self.end_verse == self.book_info.verse_counts[self.start_chapter]
             ):
                 self.start_verse = None
                 self.end_verse = None
@@ -129,7 +129,7 @@ class ParsedReference:
 
     def is_in_bounds(self) -> bool:
         book_info = self.book_info
-        chapter_count = book_info["chapter_count"]
+        chapter_count = book_info.chapter_count
         if self.is_whole_book():
             return True
         if self.start_chapter < 1:
@@ -137,7 +137,7 @@ class ParsedReference:
         if self.start_chapter > chapter_count or self.end_chapter > chapter_count:
             return False
         for chapter, verse in [(self.start_chapter, self.start_verse), (self.end_chapter, self.end_verse)]:
-            verse_count = book_info["verse_counts"][chapter]
+            verse_count = book_info.verse_counts[chapter]
             if verse is None:
                 # implies beginning/end of chapter, in bounds by definitions
                 continue
@@ -165,16 +165,16 @@ class ParsedReference:
         else:
             end_chapter = self.end_chapter
             if end_chapter is None:
-                end_chapter = self.book_info["chapter_count"]
+                end_chapter = self.book_info.chapter_count
             end_verse = self.end_verse
             if end_verse is None:
-                end_verse = self.book_info["verse_counts"][end_chapter]
+                end_verse = self.book_info.verse_counts[end_chapter]
             return self._clone(
                 start_chapter=end_chapter, start_verse=end_verse, end_chapter=end_chapter, end_verse=end_verse
             )
 
     @property
-    def book_info(self):
+    def book_info(self) -> BookInfo:
         return BIBLE_BOOK_INFO[self.internal_book_name]
 
     def to_list(self):
@@ -198,7 +198,7 @@ class ParsedReference:
             next_ref = current_ref
             verse_num = next_ref.start_verse + 1
             next_ref = dataclasses.replace(next_ref, start_verse=verse_num, end_verse=verse_num)
-            verses_in_chapter = book_info["verse_counts"][next_ref.start_chapter]
+            verses_in_chapter = book_info.verse_counts[next_ref.start_chapter]
             if next_ref.start_verse > verses_in_chapter:
                 chapter_num = next_ref.start_chapter + 1
                 verse_num = 1
@@ -272,7 +272,7 @@ optional_chapter = chapter.optional()
 verse_or_chapter = verse | chapter
 
 
-def bible_reference_parser_for_lang(language_code: str, strict: bool) -> ParsedReference:
+def bible_reference_parser_for_lang(language_code: str, strict: bool) -> Parser:
     """
     Returns a Bible reference parser for the language.
 
