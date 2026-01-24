@@ -52,7 +52,7 @@ Then install the project proper:
 
 * Make a virtualenv using Python 3.10::
 
-    uv venv --python python3.13 --prompt learnscripture
+    uv venv --python python3.10 --prompt learnscripture
 
 * Ensure the current directory is on your Python path::
 
@@ -82,7 +82,8 @@ Then install the project proper:
 
 
 * Create ``learnscripture/settings_local.py`` from ``learnscripture/settings_local_example.py``
-  You can leave ``DATABASES`` as it is, or change as required.
+  You can leave ``DATABASES`` as it is, or change as required. Normally you should
+  not need to change it, due to use of devbox.
 
 * Initialise the Postgres DB files::
 
@@ -180,6 +181,46 @@ These should be done at some point, but don't need to be done immediately.
 
   The process can be interrupted with minimal loss of work, however, if
   needed, and should display fairly detailed logs of what it is doing.
+
+Working on learnscripture
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once the initial setup above is done, while working on learnscripture, you will
+need the following commands running. For all of them you should activate the
+devbox shell first, which can be done conveniently using direnv (see `devbox
+docs about direnv
+<https://www.jetify.com/docs/devbox/ide-configuration/direnv>`_), and ensure the
+``uv`` venv is also activated, which can be done with `direnv <https://direnv.net/>`_
+
+
+- Database::
+
+      devbox services up
+
+- Development web server (essential for most tasks)::
+
+    /manage.py runserver
+
+  Or, for extra features::
+
+    DB_LOGGING=detailed ./manage.py runserver_plus
+
+- Background tasks - needed for various things to function::
+
+    ./manage.py q_cluster
+
+
+- Builders for frontend code:
+
+  - Elm/Javascript/CSS::
+
+      npm run watch
+
+  - Frontend translations::
+
+      fab run-ftl2elm --watch
+
+
 
 
 Unfinished
