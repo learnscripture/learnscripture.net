@@ -33,6 +33,7 @@ dependencies = [
     "psycopg2-binary==2.9.2",
     "pykov",
     "pymemcache==4.0.0",
+    "pypinyin>=0.55.0",
     "pyquery==1.4.3",
     "pytz==2021.3",
     "pyuca==1.2",
