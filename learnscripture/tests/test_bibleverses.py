@@ -15,6 +15,11 @@ from bibleverses.models import (
     is_continuous_set,
     split_into_words,
 )
+from bibleverses.textutils import (
+    chinese_word_to_test_string,
+    is_chinese_language,
+    words_to_test_strings,
+)
 from bibleverses.parsing import (
     internalize_localized_reference,
     parse_unvalidated_localized_reference,
@@ -709,6 +714,31 @@ class VerseUtilsTests(unittest.TestCase):
         ]
         assert split_into_words("¿No son pocos mis días?") == ["¿No", "son", "pocos", "mis", "días?"]
 
+    def test_split_into_words_chinese(self):
+        # Basic Chinese text - each character becomes a word
+        assert split_into_words("神愛世人", language_code=LANG.ZH_HANT) == ["神", "愛", "世", "人"]
+
+    def test_split_into_words_chinese_with_punctuation(self):
+        text = "神愛世人，甚至將他的獨生子賜給他們。"
+        result = split_into_words(text, language_code=LANG.ZH_HANT)
+        # Punctuation should be merged with preceding character
+        assert "，" not in result
+        assert "。" not in result
+        # Check expected structure
+        assert result[0] == "神"
+        assert result[3] == "人，"
+
+    def test_split_into_words_chinese_with_newline(self):
+        text = "神愛\n世人"
+        # Newline should be attached to preceding character
+        assert split_into_words(text, language_code=LANG.ZH_HANT) == ["神", "愛\n", "世", "人"]
+
+    def test_split_into_words_chinese_leading_punctuation(self):
+        text = "「神愛世人"
+        result = split_into_words(text, language_code=LANG.ZH_HANT)
+        # Leading punctuation should be merged with first character
+        assert result[0] == "「神"
+
     def test_split_into_words_for_suggestions_spanish(self):
         assert split_into_words_for_suggestions("¿Conque Dios os ha dicho: No comáis de todo árbol del huerto?") == [
             "conque",
@@ -856,3 +886,45 @@ class ESVTests(SetupEsvMixin, TestBase):
         verse = self.esv.verse_set.get(localized_reference=ref)
         assert verse.text_saved == text
         assert not verse.missing
+
+
+class ChineseTextUtilsTests(unittest.TestCase):
+    def test_is_chinese_language_traditional(self):
+        assert is_chinese_language(LANG.ZH_HANT)
+
+    def test_is_chinese_language_simplified(self):
+        assert is_chinese_language(LANG.ZH_HANS)
+
+    def test_is_chinese_language_english(self):
+        assert not is_chinese_language(LANG.EN)
+
+    def test_is_chinese_language_none(self):
+        assert not is_chinese_language(None)
+
+    def test_chinese_word_to_test_string_single_char(self):
+        # 神 (shen) -> s
+        assert chinese_word_to_test_string("神") == "s"
+
+    def test_chinese_word_to_test_string_with_chinese_punctuation(self):
+        # 人！ (ren + punctuation) -> r (punctuation stripped)
+        assert chinese_word_to_test_string("人！") == "r"
+
+    def test_chinese_word_to_test_string_with_comma(self):
+        # 世， (shi + Chinese comma) -> s (first letter only, punctuation stripped)
+        assert chinese_word_to_test_string("世，") == "s"
+
+    def test_words_to_test_strings_chinese(self):
+        words = ["神", "愛", "世", "人，"]
+        result = words_to_test_strings(words, language_code=LANG.ZH_HANT)
+        # 神 (shen), 愛 (ai), 世 (shi), 人 (ren)
+        assert result == ["s", "a", "s", "r"]
+
+    def test_words_to_test_strings_english(self):
+        words = ["God", "so", "loved"]
+        result = words_to_test_strings(words, language_code=LANG.EN)
+        assert result == ["God", "so", "loved"]
+
+    def test_words_to_test_strings_with_newline(self):
+        words = ["神\n", "愛"]
+        result = words_to_test_strings(words, language_code=LANG.ZH_HANT)
+        assert result == ["s\n", "a"]

@@ -21,5 +21,6 @@ def get_text_word_counts(training_texts, keys):
 @cache_results_with_pickle("wordcounts")
 def get_word_counts(training_texts, key):
     text = training_texts[key]
-    words = split_into_words_for_suggestions(text)
+    language_code = training_texts.text_version.language_code if training_texts.text_version else None
+    words = split_into_words_for_suggestions(text, language_code=language_code)
     return Counter(words)

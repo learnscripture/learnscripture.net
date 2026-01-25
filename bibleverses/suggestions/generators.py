@@ -181,11 +181,18 @@ class SuggestionGenerator:
     ]
 
     def __init__(self, training_texts):
+        self.training_texts = training_texts
         self.strategies = [mk_strategy(training_texts) for mk_strategy in self.STRATEGIES]
 
     def load_data(self, storage):
         for s in self.strategies:
             s.load(storage)
+
+    @property
+    def language_code(self):
+        if self.training_texts.text_version:
+            return self.training_texts.text_version.language_code
+        return None
 
     def suggestions_for_text(self, text):
         item_suggestions = []
@@ -196,7 +203,7 @@ class SuggestionGenerator:
 
         sentences = split_into_sentences(text)
         for sentence in sentences:
-            words = split_into_words_for_suggestions(sentence)
+            words = split_into_words_for_suggestions(sentence, language_code=self.language_code)
             for i, word in enumerate(words):
                 relevance = 1.0
                 word_suggestions = []
