@@ -1004,13 +1004,13 @@ class UserVerseStatus(models.Model):
 
     @property
     def scoring_text_words(self):
-        return split_into_words(self.scoring_text)
+        return split_into_words(self.scoring_text, language_code=self.version.language_code)
 
     @property
     def test_text_words(self):
         # For Chinese text, converts to pinyin first letters for testing
         from bibleverses.textutils import words_to_test_strings
-        return words_to_test_strings(self.scoring_text_words)
+        return words_to_test_strings(self.scoring_text_words, language_code=self.version.language_code)
 
     @cached_property
     def short_title(self):

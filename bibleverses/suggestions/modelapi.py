@@ -326,7 +326,7 @@ def get_whole_book(localized_book_name: str, version, ensure_text_present=True) 
     return retval
 
 
-def create_prompt_list(text: str, suggestion_list: list[set[str]]) -> list[list[str]]:
+def create_prompt_list(text: str, suggestion_list: list[set[str]], language_code=None) -> list[list[str]]:
     """
     Given the text of a verse, and a set of suggestions for each word,
     create a "prompt" list, which contains both the suggestions and the correct word.
@@ -339,7 +339,7 @@ def create_prompt_list(text: str, suggestion_list: list[set[str]]) -> list[list[
         # so return empty list:
         return []
 
-    correct_words = split_into_words_for_suggestions(text)
+    correct_words = split_into_words_for_suggestions(text, language_code=language_code)
     return [
         sorted(list(suggestions) + [correct_word], key=COLLATER.sort_key)
         for correct_word, suggestions in zip(correct_words, suggestion_list)

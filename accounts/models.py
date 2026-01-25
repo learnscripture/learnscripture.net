@@ -764,7 +764,9 @@ class Identity(models.Model):
                 uvs.scoring_text = answer
                 uvs.title_text = uvs.localized_reference + ". " + question
             uvs.prompt_list = create_prompt_list(
-                uvs.suggestion_text, suggestion_d.get((uvs.version_id, uvs.localized_reference), [])
+                uvs.suggestion_text,
+                suggestion_d.get((uvs.version_id, uvs.localized_reference), []),
+                language_code=uvs.version.language_code,
             )
 
         return retval
