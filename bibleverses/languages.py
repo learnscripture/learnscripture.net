@@ -5,6 +5,7 @@ Definition of languages supported for Bible texts.
 
 # For interface languages, see settings.py
 
+import re
 import unicodedata
 from dataclasses import dataclass
 
@@ -33,6 +34,8 @@ class LANG:
     TR = "tr"  # Turkish
     NL = "nl"  # Dutch
     ES = "es"  # Spanish
+    ZH_HANT = "zh-Hant"  # Chinese (Traditional)
+    ZH_HANS = "zh-Hans"  # Chinese (Simplified)
 
     # Code for language agnostic name
     INTERNAL = "internal"
@@ -43,6 +46,8 @@ LANGUAGES = [
     Language(code=LANG.NL, display_name="Nederlands"),
     Language(code=LANG.TR, display_name="Türkçe"),
     Language(code=LANG.ES, display_name="Español"),
+    Language(code=LANG.ZH_HANT, display_name="中文（繁體）"),
+    Language(code=LANG.ZH_HANS, display_name="中文（简体）"),
 ]
 
 LANGUAGES_LOOKUP = {lang.code: lang for lang in LANGUAGES}
@@ -102,11 +107,23 @@ def normalize_reference_input_spanish(query: str) -> str:
     return query
 
 
+def normalize_reference_input_chinese(query):
+    # Chinese doesn't have case, so just strip whitespace
+    query = query.strip()
+    # Add a space between Chinese characters and digits to allow references like "詩篇2"
+    # to work the same as "詩篇 2"
+    # Insert space between Chinese character and digit if not already present
+    query = re.sub(r'([\u4e00-\u9fff])(\d)', r'\1 \2', query)
+    return query
+
+
 _NORMALIZE_SEARCH_FUNCS = {
     LANG.EN: normalize_reference_input_english,
     LANG.TR: normalize_reference_input_turkish,
     LANG.NL: normalize_reference_input_dutch,
     LANG.ES: normalize_reference_input_spanish,
+    LANG.ZH_HANT: normalize_reference_input_chinese,
+    LANG.ZH_HANS: normalize_reference_input_chinese,
     LANG.INTERNAL: lambda x: x,
 }
 

@@ -20,5 +20,6 @@ def build_summed_scaled_first_word_counts(training_texts, keys):
 @cache_results_with_pickle("firstwordcounts")
 def build_first_word_counts(training_texts, key):
     text = training_texts[key]
-    first_words = sentence_first_words(text)
+    language_code = training_texts.text_version.language_code if training_texts.text_version else None
+    first_words = sentence_first_words(text, language_code=language_code)
     return word_counts(first_words)

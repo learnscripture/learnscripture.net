@@ -49,10 +49,16 @@ class Command(BaseCommand):
 
                 with gzip.open(os.path.join(input_dir, items_file), "rb") as f2:
                     version.verse_set.all().delete()
+                    version.qapairs.all().delete()
+                    to_create = []
                     for i, obj in enumerate(serializers.deserialize(format, f2, **common_options)):
-                        obj.save()
-                        if (i + 1) % 100 == 0:
+                        to_create.append(obj.object)
+                        if (i + 1) % 1000 == 0:
                             print(f"Item {i + 1} loaded.")
+
+                    print(f"Saving {len(to_create)} items...")
+                    cls = to_create[0].__class__
+                    cls.objects.bulk_create(to_create, batch_size=1000)
 
                 if version.text_type == TextType.BIBLE:
                     print("Generating search index...")

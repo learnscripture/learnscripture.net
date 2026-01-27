@@ -255,7 +255,7 @@ class Account(AbstractBaseUser):
             return []
 
         action_logs = []
-        word_count = count_words(text)
+        word_count = count_words(text, language_code=language_code)
         max_points = word_count * Scores.points_per_word(language_code)
         if old_memory_stage >= MemoryStage.TESTED:
             reason = ScoreReason.VERSE_REVIEWED
@@ -764,7 +764,9 @@ class Identity(models.Model):
                 uvs.scoring_text = answer
                 uvs.title_text = uvs.localized_reference + ". " + question
             uvs.prompt_list = create_prompt_list(
-                uvs.suggestion_text, suggestion_d.get((uvs.version_id, uvs.localized_reference), [])
+                uvs.suggestion_text,
+                suggestion_d.get((uvs.version_id, uvs.localized_reference), []),
+                language_code=uvs.version.language_code,
             )
 
         return retval
