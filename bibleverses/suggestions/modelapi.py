@@ -314,7 +314,7 @@ def hash_text(text):
     return hashlib.sha1(text.encode("utf-8")).hexdigest()
 
 
-def get_whole_book(localized_book_name: str, version, ensure_text_present=True) -> ComboVerse:
+def get_whole_book(localized_book_name: str, version: TextVersion, ensure_text_present: bool = True) -> ComboVerse:
     retval = ComboVerse(
         localized_book_name,
         list(
@@ -328,7 +328,7 @@ def get_whole_book(localized_book_name: str, version, ensure_text_present=True) 
     return retval
 
 
-def create_prompt_list(text: str, suggestion_list: list[set[str]], language_code=None) -> list[list[str]]:
+def create_prompt_list(text: str, suggestion_list: list[set[str]], *, language_code: str) -> list[list[str]]:
     """
     Given the text of a verse, and a set of suggestions for each word,
     create a "prompt" list, which contains both the suggestions and the correct word.

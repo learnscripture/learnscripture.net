@@ -40,7 +40,7 @@ def build_summed_markov_chains_for_texts(training_texts, keys, size):
 @cache_results_with_pickle("markov")
 def build_markov_chains_for_text(training_texts: TrainingTexts, key, size):
     text = training_texts[key]
-    language_code = training_texts.text_version.language_code if training_texts.text_version else None
+    language_code: str = training_texts.text_version.language_code
     sentences = text.split(".")
     v_accum, c_accum = pykov.maximum_likelihood_probabilities([])
     matrices = []

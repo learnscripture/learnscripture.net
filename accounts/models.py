@@ -255,7 +255,7 @@ class Account(AbstractBaseUser):
             return []
 
         action_logs = []
-        word_count = count_words(text)
+        word_count = count_words(text, language_code=language_code)
         max_points = word_count * Scores.points_per_word(language_code)
         if old_memory_stage >= MemoryStage.TESTED:
             reason = ScoreReason.VERSE_REVIEWED

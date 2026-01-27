@@ -1,6 +1,8 @@
 import random
 from collections import Counter
 
+from bibleverses.suggestions.trainingtexts import TrainingTexts
+
 from .constants import (
     ALL_TEXT,
     FIRST_WORD_FREQUENCY_ANALYSIS,
@@ -180,7 +182,7 @@ class SuggestionGenerator:
         ThesaurusSuggestionsOther,
     ]
 
-    def __init__(self, training_texts):
+    def __init__(self, training_texts: TrainingTexts):
         self.training_texts = training_texts
         self.strategies = [mk_strategy(training_texts) for mk_strategy in self.STRATEGIES]
 
@@ -189,10 +191,8 @@ class SuggestionGenerator:
             s.load(storage)
 
     @property
-    def language_code(self):
-        if self.training_texts.text_version:
-            return self.training_texts.text_version.language_code
-        return None
+    def language_code(self) -> str:
+        return self.training_texts.text_version.language_code
 
     def suggestions_for_text(self, text):
         item_suggestions = []

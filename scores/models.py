@@ -35,7 +35,7 @@ class Scores:
     # This is based on a comparison of the number of words in a typical Bible
     # translation for each language:
     #
-    # - NET for English     751460
+    # - NET for English     751460   # - this is the standard we compare others to
     # - TCL02 for Turkish   448155
     # - SV-RJ for Dutch     770099
     # - RVG for Spanish     712554
@@ -47,7 +47,7 @@ class Scores:
 
     # >>> from bibleverses.textutils import split_into_words
     # >>> text = TextVersion.objects.get(short_name='...')
-    # >>> sum([len(split_into_words(v.text_saved)) for v in text.verse_set.filter(missing=False, merged_into__isnull=True)])
+    # >>> sum([len(split_into_words(v.text_saved, language_code=text.language_code)) for v in text.verse_set.filter(missing=False, merged_into__isnull=True)])
 
     # Then do: 751460 / words_in_bible * 20
 

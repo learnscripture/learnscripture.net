@@ -1,6 +1,7 @@
 import re
+from collections.abc import Sequence
 
-from pypinyin import lazy_pinyin, Style
+from pypinyin import Style, lazy_pinyin
 
 ALPHANUMERIC_RE = re.compile(r"\w")
 WORD_SPLITTER = re.compile(r"( |\n)")
@@ -14,12 +15,12 @@ def is_newline(text):
     return text == "\n"
 
 
-def is_chinese_language(language_code):
+def is_chinese_language(language_code: str):
     """Check if language code indicates Chinese (Traditional or Simplified)."""
-    return language_code is not None and language_code.startswith("zh")
+    return language_code.startswith("zh")
 
 
-def split_into_words(text, fix_punctuation_whitespace=True, language_code=None):
+def split_into_words(text: str, *, fix_punctuation_whitespace: bool = True, language_code: str):
     """
     Splits text into series of words. Punctuation and newlines are left in
     place.
@@ -27,7 +28,6 @@ def split_into_words(text, fix_punctuation_whitespace=True, language_code=None):
     If fix_punctuation_whitespace==True (the default), then 'words' that consist
     only of punctuation are merged with neighbouring actual words.
 
-    language_code should be passed to enable correct splitting for Chinese text.
     """
     # The result is passed back through client side and used as
     # the text to display and test against. It keeps newlines because
@@ -113,11 +113,11 @@ def merge_items_right(words, predicate):
     return retval[::-1]
 
 
-def count_words(text, language_code=None):
+def count_words(text: str, *, language_code: str):
     return len(split_into_words(text, language_code=language_code))
 
 
-def chinese_word_to_test_string(word):
+def chinese_word_to_test_string(word: str):
     """
     Convert a Chinese word to a test string.
 
@@ -136,7 +136,7 @@ def chinese_word_to_test_string(word):
     pinyin_list = lazy_pinyin(word, style=Style.NORMAL)
 
     # Common Chinese punctuation marks to strip from test strings
-    chinese_punctuation = '，。、；：！？（）【】《》「」『』'
+    chinese_punctuation = "，。、；：！？（）【】《》「」『』"
 
     # Collect test string characters
     test_chars = []
@@ -169,10 +169,10 @@ def chinese_word_to_test_string(word):
                 test_chars.append(py)
             # Chinese punctuation is skipped (not appended)
 
-    return ''.join(test_chars)
+    return "".join(test_chars)
 
 
-def words_to_test_strings(words, language_code=None):
+def words_to_test_strings(words: Sequence[str], *, language_code: str):
     """
     Convert a list of words to their test strings.
 
@@ -193,9 +193,9 @@ def words_to_test_strings(words, language_code=None):
     result = []
     for word in words:
         # Strip whitespace to check the actual content
-        word_stripped = word.rstrip('\n').strip()
+        word_stripped = word.rstrip("\n").strip()
 
-        if is_punctuation(word_stripped) or word_stripped == '':
+        if is_punctuation(word_stripped) or word_stripped == "":
             # Punctuation-only or empty: return the word as-is for display
             # but frontend will skip it because it has no alphanumeric characters
             result.append(word)
@@ -203,7 +203,7 @@ def words_to_test_strings(words, language_code=None):
             # Convert Chinese word to pinyin first letters
             test_str = chinese_word_to_test_string(word_stripped)
             # Preserve trailing newline if present
-            if word.endswith('\n'):
-                test_str += '\n'
+            if word.endswith("\n"):
+                test_str += "\n"
             result.append(test_str)
     return result

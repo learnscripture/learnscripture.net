@@ -1,5 +1,7 @@
 from collections import Counter
 
+from bibleverses.suggestions.trainingtexts import TrainingTexts
+
 from ..constants import WORD_COUNTS_ANALYSIS
 from ..utils.numbers import aggregate_word_counts
 from ..utils.pickling import cache_results_with_pickle
@@ -19,8 +21,8 @@ def get_text_word_counts(training_texts, keys):
 
 
 @cache_results_with_pickle("wordcounts")
-def get_word_counts(training_texts, key):
+def get_word_counts(training_texts: TrainingTexts, key: str):
     text = training_texts[key]
-    language_code = training_texts.text_version.language_code if training_texts.text_version else None
+    language_code: str = training_texts.text_version.language_code
     words = split_into_words_for_suggestions(text, language_code=language_code)
     return Counter(words)
