@@ -1,7 +1,7 @@
 
 map $http_user_agent $block_bad_bot {
     default 0;
-    ~*(GPTBot|AhrefsBot|ClaudeBot|SemrushBot|Amazonbot|meta-externalagent|MJ12bot) 1;
+    ~*(MJ12bot|AhrefsBot|SemrushBot|GPTBot|ClaudeBot|Amazonbot|meta-externalagent) 1;
 }
 
 server {
