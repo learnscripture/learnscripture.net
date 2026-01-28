@@ -1815,7 +1815,13 @@ def activity_stream(request):
         request,
         "learnscripture/activity_stream.html",
         {
-            "results": get_paged_results(events, request, 40),
+            "results": get_paged_results(
+                events,
+                request,
+                40,
+                # Limit items, due to bots crawling excessively.
+                max_items_to_show=600,
+            ),
             "title": t("activity-page-title"),
             "following_ids": [] if viewer is None else [a.id for a in viewer.following.all()],
         },

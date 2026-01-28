@@ -1,5 +1,7 @@
 import attr
 import furl
+from django.db.models import QuerySet
+from django.http import HttpRequest
 
 
 @attr.s(auto_attribs=True)
@@ -23,7 +25,9 @@ def get_request_from_item(request):
         return 0
 
 
-def get_paged_results(queryset, request, page_size):
+def get_paged_results(
+    queryset: QuerySet, request: HttpRequest, page_size: int, *, max_items_to_show: int | None = None
+):
     """
     Return a Page of the queryset, using standard paging mechanism and the page number from the request.
     """
@@ -33,6 +37,12 @@ def get_paged_results(queryset, request, page_size):
     # Get one extra to see if there is more
     result_page = list(queryset[from_item : last_item + 1])
     more = len(result_page) > page_size
+    if max_items_to_show is not None:
+        if from_item > max_items_to_show:
+            result_page = []  # No results.
+        if last_item >= max_items_to_show:
+            more = False
+
     # Then trim result_page to correct size
     result_page = result_page[0:page_size]
     shown_count = from_item + len(result_page)
