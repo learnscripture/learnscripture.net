@@ -1,8 +1,16 @@
 
+# Block some bots
 map $http_user_agent $block_bad_bot {
     default 0;
     ~*(MJ12bot|AhrefsBot|SemrushBot|GPTBot|ClaudeBot|Amazonbot|meta-externalagent) 1;
 }
+
+# Some bad URLs that bots are consuming - old `/choose/?creator=`
+map "$uri:$arg_creator" $block_choose_creator {
+    default         0;
+    "~^/choose/:.+" 1;
+}
+
 
 server {
     if ($block_bad_bot) {
@@ -45,6 +53,9 @@ server {
     keepalive_timeout    15;
 
     if ($block_bad_bot) {
+        return 403;
+    }
+    if ($block_choose_creator) {
         return 403;
     }
 
