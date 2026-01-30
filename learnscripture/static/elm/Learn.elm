@@ -1,5 +1,6 @@
 port module Learn exposing (AccountData, ActionCompleteType(..), ActionLog, ActionLogStore, Attempt, AttemptRecords, AutoSavedPreferences, Button, ButtonBase, ButtonDefault(..), ButtonEnabled(..), CallId, CheckResult(..), CurrentTestWord(..), CurrentVerse, CurrentWordData, Dropdown(..), Flags, HelpTour(..), HelpTourData, HelpTourStep, HideType(..), HttpConfig, IconName, LearnOrder, LearningSession(..), LearningStage(..), LearningStageType(..), LearningType(..), LinkIconAlign(..), Model, Msg(..), NextVerse(..), Part(..), Preferences, ProgressData(..), QueuedCall, RecallDef, RecallProgress, ReviewSoonerData, ScoreReason(..), SessionData, SessionStats, StageButton, TestCompleteData, TestDueAfter(..), TestOrReadPreference(..), TestProgress, TestType(..), TestingMethod(..), TextType(..), TrackedHttpCall(..), UpdateTypingBoxData, Url, User(..), UvsId, VerseApiCallData, VerseBatch, VerseBatchBase, VerseBatchRaw, VersePromptList, VerseSet, VerseSetType(..), VerseStatus, VerseStatusBase, VerseStatusRaw, VerseStore, Version, Word, WordId, WordIndex, WordPrompt, WordPrompts, WordType(..), WordTypeString, accuracyDefaultMorePracticeLevel, actionButtons, actionCompleteUrl, actionLogDecoder, actionLogListToDict, actionLogsDecoder, addOrderedTrackedCall, addTrackedCall, adjustModelForHelpTour, ajaxInfo, allVersesLoaded, allowTestInsteadOfRead, allowedHints, allowedMistakesForTestingMethod, andThen, andThenDo, asPercentString, attemptReturn, autoSavedPreferencesDecoder, beep, bold, buttonsForStage, calculateNewVerseStrength, calculateNextTestDue, callLoadVerses, callRecordCancelLearning, callRecordReadComplete, callRecordResetProgress, callRecordReviewSooner, callRecordSkipVerse, callRecordTestComplete, cancelLearningUrl, checkCurrentWordAndUpdate, checkWord, chooseN, classForTypingBox, clickableClass, closeDropdownIfOpen, closeDropdowns, confirm, confirmTask, copyrightNotice, currentSetType, currentVerseStrength, damerauLevenshteinDistance, dashboardUrl, decodeAutoSavedPreferences, decodePreferences, dedupeBy, defaultLocale, defaultNumberFormatting, delay, doHelpTourStep, dropEndWhile, dropWhile, dropdownHeadingAttributes, dropdownIsOpen, emptyDecoder, emptyNode, emptySpan, encodeBool, encodeFloat, encodeTestType, encodeTrackedCall, encodeTrackedCallsList, enumDecoder, errorMessage, finishHelpTour, finishStage, flashActionLogDuration, focusDefaultButton, formatNumber, friendlyTimeUntil, getAt, getCurrentTestProgress, getCurrentTestWordList, getCurrentVerse, getCurrentWordAttempt, getFocusAttributes, getFollowingVersesInStore, getHintsUsed, getLocale, getNextCurrentWord, getNextVerse, getOrderedQueuedCalls, getPreviousVerse, getPreviousVersesInStore, getReturnCaption, getReturnUrl, getSessionProgressData, getStages, getStagesByStrength, getTestResult, getTestingMethod, getTypingBoxFocusDataForMsg, getUpdateTypingBoxData, getUserName, getWordAttempt, getWordAttemptWithInitial, getWordId, getWordPromptList, handleActionLogs, handleFocusResult, handleOnScreenButtonClick, handleRecordActionCompleteReturned, handleResetProgress, handleRetries, handleSessionStatsLoaded, handleTypedEnter, handleTypedInput, handleUseHint, handleVersesToLearn, handleWordButtonClicked, hardModeStrengthThreshold, helpTourButtons, helpTourCommandForStep, helpTourHighlightElement, hiddenWordsGenerator, hideRandomWords, hideTypingBoxData, hintButton, idForButton, idForLatestActionLogSpan, idPrefixForButton, init, initialRecallProgress, initialTestProgress, initialTourSteps, initializeStage, instructions, intEnumDecoder, isAttemptFailure, isAttemptHint, isLoadVersesCall, isPassageSet, isPracticeTest, isRecordCall, isReference, isScreenLargeEnoughForSidePanels, isTestingReference, isTestingStage, iso8601decoder, languageDecoder, learningStageTypeForStage, learningTypeDecoder, linebreak, listIndices, loadActionLogs, loadActionLogsUrl, loadSessionStats, loadSessionStatsUrl, loadVerses, loadingDiv, main, makeHttpCall, makeIcon, markCallFinished, markFailAndRetry, markPermanentFailCall, markWord, maxHttpRetries, menuIsPinned, mergeSession, moreVersesToLearn, moveToNextStage, moveToNextStageOrSubStage, moveToNextSubStage, moveToNextVerse, moveToPreviousStage, myHttpGet, myHttpPost, navLink, nextHelpTourStep, normalizeVerseBatch, normalizeVerseStatuses, normalizeWordForSuggestion, normalizeWordForTest, nullOr, onClickSimply, onEnter, onEscape, onScreenTestingButtons, oneHour, oneYear, partsForVerse, pinButton, pinnedAttributes, preferencesDecoder, preferencesLinkAttrs, prettyReason, previousHelpTourStep, processNewActionLogs, punctuationRegex, queueBlocked, readingWordClass, recallStage1, recallStage2, recallStage3, recallStage4, recallStageFinished, recallStageWordCount, recallStageWordsFinishedCount, recallWords, receivePreferences, recordCancelLearning, recordReadComplete, recordResetProgress, recordReviewSooner, recordSkipVerse, recordTestComplete, referenceToParts, regexRemoveAll, resetProgressUrl, resultComment, retryFailedCalls, reviewSoonerDecoder, reviewSoonerUrl, runConfirm, saveAutoSavedPreferences, saveCallsToLocalStorage, saveMiscPreferencesUrl, saveTrackedCallsToLocalStorage, scaledStrength, scoreReasonDecoder, scoringEnabled, sendMsg, sendStartTrackedCallMsg, sessionProgress, sessionStatsDecoder, setDropdownOpen, setHiddenWords, setPinnedMenus, setupCurrentVerse, shouldCheckTypedWord, shouldShowPreviousVerse, shouldShowReference, shouldTestReferenceForTestingMethod, shouldUseHardTestingMode, signedNumberToString, simplifyTurkish, skipVerseUrl, stageOrVerseChangeCommands, stageTypeRead, stageTypeTest, startHelpTour, startMorePractice, startTrackedCall, stringEnumDecoder, stripOuterPunctuation, stripPunctuation, subWordParts, subscriptions, syncingDiv, testCompleteDataDecoder, testMethodUsesTextBox, testTypeDecoder, testingMethodDecoder, textTypeDecoder, toggleDropdown, togglePinnableMenu, togglePreferTestsToReading, trackedCallDecoder, trackedCallQueueEmpty, trackedCallsListDecoder, trackedHttpCallCaption, translate, triggerQueuedCalls, typingBox, typingBoxContainerId, typingBoxId, typingBoxInUse, update, updateCurrentStage, updateCurrentVerse, updateCurrentVersePlus, updateHelpTour, updateMain, updateRecallProcess, updateSessionData, updateSessionDataPlus, updateTestProgress, updateTypingBox, updateTypingBoxCommand, updateWordAttempts, userDisplayName, verseApiCallDataDecoder, verseBatchRawCtr, verseBatchRawDecoder, verseBatchToSession, verseLoadFailed, verseLoadInProgress, versePartsToHtml, verseSetDecoder, verseSetLink, verseSetTypeDecoder, verseStatusRawCtr, verseStatusRawDecoder, verseStatusResetProgress, verseStatusToApiCallData, verseWordToParts, versesToLearnUrl, versionDecoder, vibrateDevice, view, viewActionLogs, viewButton, viewButtonSimple, viewButton_, viewCurrentVerse, viewHelpTour, viewMain, viewSessionStats, viewTopNav, viewVerseOptionsMenu, viewVerseOptionsMenuButton, withCurrentTestWord, withCurrentVerse, withSessionData, wordButton, wordButtonClass, wordButtonClasses, wordsForVerse, zip)
 
+import Char
 import Dict
 import Dom
 import Erl
@@ -192,6 +193,9 @@ init flags =
             , testOrReadPreference = PreferReading
             , windowSize = windowSize
             , helpTour = Nothing
+            , isComposing = False
+            , skipNextInput = False
+            , lastCommittedInput = Nothing
             }
     in
     -- If we have a backlog of saved calls from a previous session, we must
@@ -265,6 +269,9 @@ type alias Model =
         , width : Int
         }
     , helpTour : Maybe HelpTour
+    , isComposing : Bool
+    , skipNextInput : Bool
+    , lastCommittedInput : Maybe String
     }
 
 
@@ -456,6 +463,7 @@ type alias VerseStatusBase a =
         , textOrder : Int
         , promptList : VersePromptList
         , scoringTextWords : List String
+        , testTextWords : List String
         , titleText : String
         , learnOrder : LearnOrder
     }
@@ -481,12 +489,13 @@ verseStatusRawCtr :
     -> Int
     -> VersePromptList
     -> List String
+    -> List String
     -> String
     -> Int
     -> Maybe Int
     -> String
     -> VerseStatusRaw
-verseStatusRawCtr i s lt lr n t s2 s3 t2 l2 v v2 =
+verseStatusRawCtr i s lt lr n t s2 s3 s4 t2 l2 v v2 =
     { id = i
     , strength = s
     , lastTested = lt
@@ -495,6 +504,7 @@ verseStatusRawCtr i s lt lr n t s2 s3 t2 l2 v v2 =
     , textOrder = t
     , promptList = s2
     , scoringTextWords = s3
+    , testTextWords = s4
     , titleText = t2
     , learnOrder = l2
     , verseSetId = v
@@ -1499,6 +1509,7 @@ type alias Word =
     { type_ : WordType
     , index : WordIndex
     , text : String
+    , testText : String
     }
 
 
@@ -1513,7 +1524,7 @@ type alias WordIndex =
 
 partsForVerse : VerseStatus -> LearningStageType -> TestingMethod -> List Part
 partsForVerse verse learningStageType testingMethod =
-    (List.map2 verseWordToParts verse.scoringTextWords (listIndices verse.scoringTextWords)
+    (List.map3 verseWordToParts verse.scoringTextWords verse.testTextWords (listIndices verse.scoringTextWords)
         |> List.concat
         |> dropEndWhile (\p -> p == Linebreak)
     )
@@ -1554,18 +1565,24 @@ Only used for within verse body
 The initial sentence has already been split into words server side, and this
 function does not split off punctuation, but keeps it as part of the word.
 
+Takes both display text (w) and test text (testW). For Chinese, testW contains
+pinyin first letters while w contains the Chinese characters.
 -}
-verseWordToParts : String -> WordIndex -> List Part
-verseWordToParts w idx =
+verseWordToParts : String -> String -> WordIndex -> List Part
+verseWordToParts w testW idx =
     let
         ( start, end ) =
             ( String.slice 0 -1 w, String.right 1 w )
+
+        ( testStart, testEnd ) =
+            ( String.slice 0 -1 testW, String.right 1 testW )
     in
     if end == "\n" then
         [ WordPart
             { type_ = BodyWord
             , index = idx
             , text = start
+            , testText = testStart
             }
         , Linebreak
         ]
@@ -1575,6 +1592,7 @@ verseWordToParts w idx =
             { type_ = BodyWord
             , index = idx
             , text = w
+            , testText = testW
             }
         , Space
         ]
@@ -1619,6 +1637,7 @@ referenceToParts reference =
                     { type_ = ReferenceWord
                     , index = idx
                     , text = w
+                    , testText = w
                     }
         )
         (List.range 0 (List.length parts))
@@ -2018,6 +2037,8 @@ typingBox stage testingMethod =
             ++ (if inUse then
                     [ E.onInput TypingBoxInput
                     , onEnter TypingBoxEnter
+                    , onCompositionStart CompositionStart
+                    , onCompositionEnd CompositionEnd
                     ]
 
                 else
@@ -2586,6 +2607,16 @@ onEscape msg =
     E.on "keydown" (JD.andThen isEscape E.keyCode)
 
 
+onCompositionStart : a -> H.Attribute a
+onCompositionStart msg =
+    E.on "compositionstart" (JD.succeed msg)
+
+
+onCompositionEnd : (String -> a) -> H.Attribute a
+onCompositionEnd msg =
+    E.on "compositionend" (JD.map msg (JD.at [ "target", "value" ] JD.string))
+
+
 
 {- View - help -}
 
@@ -2950,6 +2981,8 @@ type Msg
     | WordButtonClicked WordId
     | TypingBoxInput String
     | TypingBoxEnter
+    | CompositionStart
+    | CompositionEnd String
     | OnScreenButtonClick String
     | UseHint
     | TrackHttpCall TrackedHttpCall
@@ -3039,6 +3072,32 @@ updateMain msg model =
 
         TypingBoxEnter ->
             handleTypedEnter model
+
+        CompositionStart ->
+            -- IME composition started (e.g., fcitx5 for Chinese input)
+            -- Set flag to ignore intermediate input events
+            ( { model | isComposing = True }, Cmd.none )
+
+        CompositionEnd input ->
+            -- We are done composing; process committed input and ignore the duplicate input event that follows.
+            let
+                model1 =
+                    { model | isComposing = False }
+
+                model2 =
+                    updateTestProgress model1 (\tp -> { tp | currentTypedText = String.trimRight input })
+
+                shouldCheck =
+                    (String.length (normalizeWordForTest input) > 0)
+
+                ( model3, cmd1 ) =
+                    if shouldCheck then
+                        checkCurrentWordAndUpdate model2 input
+
+                    else
+                        ( model2, Cmd.none )
+            in
+            ( { model3 | skipNextInput = True, lastCommittedInput = Just input }, cmd1 )
 
         OnScreenButtonClick text ->
             handleOnScreenButtonClick model text
@@ -3463,6 +3522,7 @@ normalizeVerseStatuses vrb =
             , textOrder = vs.textOrder
             , promptList = vs.promptList
             , scoringTextWords = vs.scoringTextWords
+            , testTextWords = vs.testTextWords
             , titleText = vs.titleText
             , learnOrder = vs.learnOrder
             , verseSet =
@@ -4771,32 +4831,50 @@ handleWordButtonClicked model wordId =
 
 handleTypedInput : Model -> String -> ( Model, Cmd Msg )
 handleTypedInput model input =
-    let
-        oldTypedText =
-            case getCurrentTestProgress model of
-                Nothing ->
-                    ""
+    -- Ignore the first input after compositionend that echoes the committed text
+    -- (same value we just processed on compositionend), but only if it matches.
+    if model.skipNextInput && Just input == model.lastCommittedInput then
+        ( { model | skipNextInput = False, lastCommittedInput = Nothing }, Cmd.none )
 
-                Just tp ->
-                    tp.currentTypedText
+    else if model.skipNextInput then
+        -- Different text: process normally, but clear the skip flag
+        handleTypedInput { model | skipNextInput = False, lastCommittedInput = Nothing } input
 
-        newModel1 =
-            updateTestProgress model
-                (\tp ->
-                    { tp | currentTypedText = String.trimRight input }
-                )
+    else
+        -- During IME composition, keep the text in sync but don't check yet.
+        if model.isComposing then
+            ( updateTestProgress model (\tp -> { tp | currentTypedText = String.trimRight input }), Cmd.none )
 
-        testingMethod =
-            getTestingMethod newModel1
+        else
+            let
+                oldTypedText =
+                    case getCurrentTestProgress model of
+                        Nothing ->
+                            ""
 
-        ( newModel2, cmd ) =
-            if shouldCheckTypedWord testingMethod oldTypedText input then
-                checkCurrentWordAndUpdate newModel1 input
+                        Just tp ->
+                            tp.currentTypedText
 
-            else
-                ( newModel1, Cmd.none )
-    in
-    ( newModel2, cmd )
+                newModel1 =
+                    updateTestProgress model
+                        (\tp ->
+                            { tp | currentTypedText = String.trimRight input }
+                        )
+
+                testingMethod =
+                    getTestingMethod newModel1
+
+                shouldCheck =
+                    shouldCheckTypedWord testingMethod oldTypedText input
+
+                ( newModel2, cmd ) =
+                    if shouldCheck then
+                        checkCurrentWordAndUpdate newModel1 input
+
+                    else
+                        ( newModel1, Cmd.none )
+            in
+            ( newModel2, cmd )
 
 
 handleTypedEnter : Model -> ( Model, Cmd Msg )
@@ -4849,6 +4927,32 @@ handleUseHint model =
             )
 
 
+containsChineseCharacters : String -> Bool
+containsChineseCharacters str =
+    -- Check if string contains any Chinese (CJK) characters
+    -- Unicode range for CJK Unified Ideographs: U+4E00 to U+9FFF
+    String.any (\char -> Char.toCode char >= 0x4E00 && Char.toCode char <= 0x9FFF) str
+
+
+getCurrentTestWord : Model -> Maybe CurrentWordData
+getCurrentTestWord model =
+    case model.learningSession of
+        Session session ->
+            let
+                currentVerse =
+                    session.currentVerse
+
+                testingMethod =
+                    getTestingMethod model
+            in
+            withCurrentTestWord currentVerse
+                Nothing
+                (\testType testProgress currentWord -> Just currentWord)
+
+        _ ->
+            Nothing
+
+
 shouldCheckTypedWord : TestingMethod -> String -> String -> Bool
 shouldCheckTypedWord testingMethod oldText input =
     let
@@ -4870,8 +4974,6 @@ shouldCheckTypedWord testingMethod oldText input =
             (String.length trimmedText > 0)
                 && -- Don't check again if they typed punctuation etc.
                    (oldTrimmedText /= trimmedText)
-                && -- Don't check again if they pressed delete or backspace
-                   (String.length trimmedText > String.length oldTrimmedText)
                 && -- predictive keyboards can send multiple events if words are chosen,
                    -- and the second event will usually have a trailing whitespace.
                    -- We don't want to respond to this at all, otherwise a mispressed
@@ -4897,7 +4999,7 @@ checkCurrentWordAndUpdate model input =
                 (\testType testProgress currentWord ->
                     let
                         correct =
-                            checkWord currentWord.word.text input testingMethod
+                            checkWord currentWord.word input testingMethod
 
                         checkResult =
                             if correct then
@@ -4915,33 +5017,45 @@ checkCurrentWordAndUpdate model input =
             )
 
 
-checkWord : String -> String -> TestingMethod -> Bool
+checkWord : Word -> String -> TestingMethod -> Bool
 checkWord word input testingMethod =
     let
         wordN =
-            normalizeWordForTest word
+            normalizeWordForTest word.testText
 
         inputN =
             normalizeWordForTest input
+
+        matchesPinyinFirstLetter =
+            String.right 1 inputN == String.left 1 wordN
+
+        matchesChineseCharacter =
+            containsChineseCharacters word.text
+                && (String.right 1 inputN == String.left 1 (normalizeWordForTest word.text))
     in
     case testingMethod of
         FullWords ->
-            if String.length wordN <= 2 then
-                wordN == inputN
-
+            if containsChineseCharacters word.text then
+                -- For Chinese FullWords, we expect the user to type the Chinese character(s)
+                -- (found in word.text), not the Pinyin (which will be in word.testText).
+                normalizeWordForTest word.text == inputN
             else
-                (String.left 1 wordN
-                    == String.left 1 inputN
-                )
-                    && (damerauLevenshteinDistance wordN inputN
-                            <= ceiling ((toFloat <| String.length wordN) / 4.0)
-                       )
+                if String.length wordN <= 2 then
+                    wordN == inputN
+
+                else
+                    (String.left 1 wordN
+                        == String.left 1 inputN
+                    )
+                        && (damerauLevenshteinDistance wordN inputN
+                                <= ceiling ((toFloat <| String.length wordN) / 4.0)
+                        )
 
         FirstLetter ->
-            String.right 1 inputN == String.left 1 wordN
+            matchesPinyinFirstLetter || matchesChineseCharacter
 
         OnScreen ->
-            normalizeWordForSuggestion word == input
+            normalizeWordForSuggestion word.text == input
 
 
 normalizeWordForTest : String -> String
@@ -5021,7 +5135,7 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
                             attempt.checkResults |> List.filter isAttemptHint |> List.length
 
                         singleLetterWord =
-                            (normalizeWordForTest word.text |> String.length) == 1
+                            (normalizeWordForTest word.testText |> String.length) == 1
 
                         firstLetterTestingMethod =
                             case testingMethod of
@@ -7132,6 +7246,7 @@ adjustModelForHelpTour model =
                     , promptList = []
                     , titleText = "John 3:16"
                     , scoringTextWords = [ "For", "this", "is", "the", "way", "God", "loved", "the", "world:", "He", "gave", "his", "one", "and", "only", "Son,", "so", "that", "everyone", "who", "believes", "in", "him", "will", "not", "perish", "but", "have", "eternal", "life." ]
+                    , testTextWords = [ "For", "this", "is", "the", "way", "God", "loved", "the", "world:", "He", "gave", "his", "one", "and", "only", "Son,", "so", "that", "everyone", "who", "believes", "in", "him", "will", "not", "perish", "but", "have", "eternal", "life." ]
                     , learnOrder = 0
                     , verseSet = Nothing
                     , version =
@@ -7183,6 +7298,7 @@ adjustModelForHelpTour model =
                                         | localizedReference = userVerseStatus.localizedReference
                                         , titleText = userVerseStatus.titleText
                                         , scoringTextWords = userVerseStatus.scoringTextWords
+                                        , testTextWords = userVerseStatus.testTextWords
                                         , strength = userVerseStatus.strength
                                     }
                             in
@@ -7311,6 +7427,12 @@ updateHelpTour msg model helpTour =
             ignoreIt
 
         TypingBoxEnter ->
+            ignoreIt
+
+        CompositionStart ->
+            ignoreIt
+
+        CompositionEnd _ ->
             ignoreIt
 
         OnScreenButtonClick _ ->
@@ -7515,6 +7637,7 @@ verseStatusRawDecoder =
         |> JDP.required "text_order" JD.int
         |> JDP.required "prompt_list" (JD.list (JD.list JD.string))
         |> JDP.required "scoring_text_words" (JD.list JD.string)
+        |> JDP.required "test_text_words" (JD.list JD.string)
         |> JDP.required "title_text" JD.string
         |> JDP.required "learn_order" JD.int
         |> JDP.required "verse_set_id" (nullOr JD.int)
