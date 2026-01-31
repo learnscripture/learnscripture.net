@@ -1116,7 +1116,7 @@ class UserVerseStatus(models.Model):
         return f"{self.localized_reference}, {self.version.slug}"
 
     def __repr__(self):
-        return f"<UserVerseStatus {self}>"
+        return f"<UserVerseStatus {self.id=} {self}>"
 
     class Meta:
         unique_together = [("for_identity", "verse_set", "localized_reference", "version")]
