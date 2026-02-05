@@ -304,6 +304,7 @@ if DEVBOX:
             "localhost",
         ]
     )
+    INSTALLED_APPS.append("django_watchfiles")
 
 if DEBUG:
     # INSTALLED_APPS.append("debug_toolbar")
