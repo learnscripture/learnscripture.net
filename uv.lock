@@ -999,6 +999,7 @@ dependencies = [
     { name = "psycopg2-binary" },
     { name = "pykov" },
     { name = "pymemcache" },
+    { name = "pypinyin" },
     { name = "pyquery" },
     { name = "pytz" },
     { name = "pyuca" },
@@ -1067,6 +1068,7 @@ requires-dist = [
     { name = "psycopg2-binary", specifier = "==2.9.2" },
     { name = "pykov", url = "https://github.com/riccardoscalco/Pykov/archive/16cda2f2c0ed8143ddcfa25dac34d3dadc982380.tar.gz" },
     { name = "pymemcache", specifier = "==4.0.0" },
+    { name = "pypinyin", specifier = ">=0.55.0" },
     { name = "pyquery", specifier = "==1.4.3" },
     { name = "pytz", specifier = "==2021.3" },
     { name = "pyuca", specifier = "==1.2" },
@@ -1505,6 +1507,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/80/be/97b83a464498a79103036bc74d1038df4a7ef0e402cfaf4d5e113fb14759/pyopenssl-25.3.0.tar.gz", hash = "sha256:c981cb0a3fd84e8602d7afc209522773b94c1c2446a3c710a75b06fe1beae329", size = 184073, upload-time = "2025-09-17T00:32:21.037Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d1/81/ef2b1dfd1862567d573a4fdbc9f969067621764fbb74338496840a1d2977/pyopenssl-25.3.0-py3-none-any.whl", hash = "sha256:1fda6fc034d5e3d179d39e59c1895c9faeaf40a79de5fc4cbbfbe0d36f4a77b6", size = 57268, upload-time = "2025-09-17T00:32:19.474Z" },
+]
+
+[[package]]
+name = "pypinyin"
+version = "0.55.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b4/a4/784cf98c09e0dc22776b0d7d8a4a5b761218bcae4608c2416ce1e167c8af/pypinyin-0.55.0.tar.gz", hash = "sha256:b5711b3a0c6f76e67408ec6b2e3c4987a3a806b7c528076e7c7b86fcf0eaa66b", size = 839836, upload-time = "2025-07-20T12:01:50.657Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b9/7b/4cabc76fcc21c3c7d5c671d8783984d30ac9d3bb387c4ba784fca3cdfa3a/pypinyin-0.55.0-py2.py3-none-any.whl", hash = "sha256:d53b1e8ad2cdb815fb2cb604ed3123372f5a28c6f447571244aca36fc62a286f", size = 840203, upload-time = "2025-07-20T12:01:48.535Z" },
 ]
 
 [[package]]

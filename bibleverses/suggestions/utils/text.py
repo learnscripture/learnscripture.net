@@ -21,8 +21,8 @@ BAD_WORD_PUNCTUATION_RE = re.compile(
 # but the default way of calling split_into_words will fix this.
 
 
-def bad_punctuation(text):
-    words = split_into_words(text, fix_punctuation_whitespace=False)
+def bad_punctuation(text: str, *, language_code: str):
+    words = split_into_words(text, fix_punctuation_whitespace=False, language_code=language_code)
 
     # Certain punctuation must not appear in middle of words
     # Ignore punctuation at end
@@ -52,13 +52,16 @@ def normalize_word(word):
     return word.lower()
 
 
-def split_into_words_for_suggestions(text):
-    return list(map(normalize_word, split_into_words(text)))
+def split_into_words_for_suggestions(text: str, *, language_code: str):
+    return list(map(normalize_word, split_into_words(text, language_code=language_code)))
 
 
 def split_into_sentences(text):
     return [s for s in [s.strip(PUNCTUATION_OR_WHITESPACE) for s in text.split(".")] if s]
 
 
-def sentence_first_words(text):
-    return [split_into_words_for_suggestions(sentence)[0] for sentence in split_into_sentences(text)]
+def sentence_first_words(text, language_code=None):
+    return [
+        split_into_words_for_suggestions(sentence, language_code=language_code)[0]
+        for sentence in split_into_sentences(text)
+    ]

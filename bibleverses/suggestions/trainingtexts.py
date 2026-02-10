@@ -23,12 +23,13 @@ class TrainingTexts:
     that is used by an analysis.
     """
 
-    def __init__(self, text_version: TextVersion | None = None, text_slug: str | None = None, disallow_loading=False):
+    def __init__(self, *, text_version: TextVersion, text_slug: str | None = None, disallow_loading: bool = False):
         self._keys = []
         self._values = {}
-        self.text_version: TextVersion | None = text_version
-        if text_version is not None:
+        self.text_version: TextVersion = text_version
+        if text_slug is None:
             text_slug = text_version.slug
+            assert text_slug is not None
         self.text_slug: str = text_slug
         self.disallow_loading = disallow_loading or (text_version is None)
 
@@ -53,7 +54,7 @@ class TrainingTexts:
 
 
 class BibleTrainingTexts(TrainingTexts):
-    def __init__(self, books=None, text_version=None, **kwargs):
+    def __init__(self, *, text_version: TextVersion, books: list[str], **kwargs):
         super().__init__(text_version=text_version, **kwargs)
         all_books = []
         for book in books:

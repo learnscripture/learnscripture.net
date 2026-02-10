@@ -4,7 +4,7 @@ import math
 import operator
 import random
 from collections import defaultdict
-from functools import reduce
+from functools import cached_property, reduce
 
 from autoslug import AutoSlugField
 from django.contrib.postgres.fields import ArrayField
@@ -13,7 +13,6 @@ from django.db.models import F, Func, Q, Value
 from django.db.models.constraints import UniqueConstraint
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.functional import cached_property
 
 from accounts import memorymodel
 from learnscripture.datastructures import lazy_dict_like
@@ -97,7 +96,9 @@ class TextVersion(models.Model):
     full_name = models.CharField(max_length=255, unique=True)
     url = models.URLField(default="", blank=True)
     text_type = models.CharField(max_length=20, choices=TextType.choices, default=TextType.BIBLE)
-    language_code = models.CharField(max_length=2, blank=False, choices=LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE.code)
+    language_code = models.CharField(
+        max_length=10, blank=False, choices=LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE.code
+    )
     description = models.TextField(blank=True)
 
     public = models.BooleanField(default=True)
@@ -295,6 +296,8 @@ POSTGRES_SEARCH_CONFIGURATIONS = {
     LANG.NL: "dutch",
     LANG.TR: "turkish",
     LANG.ES: "spanish",
+    LANG.ZH_HANT: "simple",  # PostgreSQL doesn't have built-in Chinese; use 'simple' for basic indexing
+    LANG.ZH_HANS: "simple",  # Simplified Chinese
 }
 
 
@@ -677,7 +680,7 @@ class VerseSet(models.Model):
 
     language_code = models.CharField(
         t_lazy("versesets-language"),
-        max_length=2,
+        max_length=10,
         blank=False,
         help_text=t_lazy("versesets-language.help-text"),
         choices=LANGUAGE_CHOICES,
@@ -993,16 +996,23 @@ class UserVerseStatus(models.Model):
 
     # This will be overwritten by get_verse_statuses_bulk
     @cached_property
-    def scoring_text(self):
+    def scoring_text(self) -> str:
         return self.text if self.version.is_bible else self.answer
 
     @cached_property
-    def suggestion_text(self):
+    def suggestion_text(self) -> str:
         return self.text if self.version.is_bible else self.answer
 
-    @property
-    def scoring_text_words(self):
-        return split_into_words(self.scoring_text)
+    @cached_property
+    def scoring_text_words(self) -> str:
+        return split_into_words(self.scoring_text, language_code=self.version.language_code)
+
+    @cached_property
+    def test_text_words(self) -> str:
+        # For Chinese text, converts to pinyin first letters for testing
+        from bibleverses.textutils import words_to_test_strings
+
+        return words_to_test_strings(self.scoring_text_words, language_code=self.version.language_code)
 
     @cached_property
     def short_title(self):
