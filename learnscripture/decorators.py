@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.functional import wraps
-from render_block import render_block_to_string
+from render_block import BlockNotFound, render_block_to_string
 
 from learnscripture import session
 from learnscripture.ftl_bundles import t
@@ -120,6 +120,7 @@ def for_htmx(
 
     def decorator(view):
         @wraps(view)
+        @exceptions_to_400(BlockNotFound)
         def _view(request, *args, **kwargs):
             resp = view(request, *args, **kwargs)
             if request.headers.get("Hx-Request", False):
