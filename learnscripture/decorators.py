@@ -1,5 +1,8 @@
-from django.http import HttpResponseRedirect
-from django.http.response import HttpResponse, HttpResponseForbidden
+from collections.abc import Callable
+from typing import TypeAlias
+
+from django.http import HttpRequest, HttpResponseRedirect
+from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import render
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
@@ -10,6 +13,9 @@ from learnscripture import session
 from learnscripture.ftl_bundles import t
 
 from .utils.urls import build_preferences_url
+
+# TODO Python 3.11 and greater, allow more args.
+ViewFunc: TypeAlias = Callable[[HttpRequest], HttpResponse]
 
 
 def require_identity(view_func):
@@ -153,3 +159,21 @@ def _get_param_from_request(request, param):
     elif request.method == "POST" and param in request.POST:
         return request.POST[param]
     return None
+
+
+def exceptions_to_400(*exceptions: type[Exception]) -> Callable[[ViewFunc], ViewFunc]:
+    """
+    Decorator that converts certain exceptions to HTTP 400 response
+    """
+
+    def decorator(view: ViewFunc) -> ViewFunc:
+        @wraps(view)
+        def _view(request: HttpRequest, *args, **kwargs) -> HttpResponse:
+            try:
+                return view(request, *args, **kwargs)
+            except exceptions:
+                return HttpResponseBadRequest(content="Invalid request")
+
+        return _view
+
+    return decorator
