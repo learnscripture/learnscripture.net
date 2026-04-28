@@ -1,6 +1,6 @@
 import pytest
+from django.core.exceptions import BadRequest
 from django.http import HttpRequest, HttpResponse
-from django.http.response import HttpResponseBadRequest
 from django.test.client import RequestFactory
 
 from learnscripture.decorators import exceptions_to_400
@@ -16,6 +16,6 @@ def test_exceptions_to_400_decorator(rf: RequestFactory):
         my_view(request)
 
     protected_view = exceptions_to_400(ValueError)(my_view)
-    response = protected_view(request)
 
-    assert isinstance(response, HttpResponseBadRequest)
+    with pytest.raises(BadRequest):
+        protected_view(request)

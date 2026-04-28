@@ -1,8 +1,9 @@
 from collections.abc import Callable
 from typing import TypeAlias
 
+from django.core.exceptions import BadRequest
 from django.http import HttpRequest, HttpResponseRedirect
-from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.http.response import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
@@ -173,7 +174,7 @@ def exceptions_to_400(*exceptions: type[Exception]) -> Callable[[ViewFunc], View
             try:
                 return view(request, *args, **kwargs)
             except exceptions:
-                return HttpResponseBadRequest(content="Invalid request")
+                raise BadRequest()
 
         return _view
 
