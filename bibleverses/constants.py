@@ -1524,6 +1524,7 @@ Numbers
 
 Deuteronomy
     Deut.
+    Deu.
     De.
     Dt.
 
@@ -1654,6 +1655,7 @@ Proverbs
 Ecclesiastes
     Eccles.
     Eccle.
+    Eccl.
     Ecc.
     Ec.
     Qoh.
