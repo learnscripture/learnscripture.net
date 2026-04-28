@@ -85,6 +85,7 @@ from learnscripture.forms import (
     VerseSetSearchForm,
 )
 from learnscripture.ftl_bundles import t
+from learnscripture.utils.validation import checked_int
 from moderation import models as moderation
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts
@@ -376,13 +377,13 @@ def dashboard(request):
         return HttpResponseRedirect(reverse("choose"))
 
     if request.method == "POST":
-        get_catechism_id = lambda: int(request.POST["catechism_id"])
+        get_catechism_id = lambda: checked_int(request.POST["catechism_id"])
         if "continue_session" in request.POST:
             return HttpResponseRedirect(get_learn_page(request))
 
         if "learnbiblequeue" in request.POST:
             if "verse_set_id" in request.POST:
-                vs_id = int(request.POST["verse_set_id"])
+                vs_id = checked_int(request.POST["verse_set_id"])
             else:
                 vs_id = None
             return learn_set(request, identity.bible_verse_statuses_for_learning(vs_id), session.LearningType.LEARNING)
@@ -410,13 +411,13 @@ def dashboard(request):
             # Some of these are sent via the verse_options.html template,
             # not from the dashboard.
 
-            vs_id = int(request.POST["verse_set_id"])
-            verse_set = VerseSet.objects.get(id=vs_id)
+            vs_id = checked_int(request.POST["verse_set_id"])
+            verse_set = get_object_or_404(VerseSet.objects.all(), id=vs_id)
 
             if "uvs_id" in request.POST:
                 # Triggered from 'verse_options.html'
-                uvs_id = int(request.POST["uvs_id"])
-                main_uvs = identity.verse_statuses.get(id=uvs_id)
+                uvs_id = checked_int(request.POST["uvs_id"])
+                main_uvs = get_object_or_404(identity.verse_statuses.all(), id=uvs_id)
                 version_id = main_uvs.version_id
 
                 uvss = identity.verse_statuses_for_passage(vs_id, version_id)
@@ -446,7 +447,7 @@ def dashboard(request):
                 return learn_set(request, uvss, session.LearningType.PRACTICE)
 
         if "reviewverse" in request.POST:
-            uvs = identity.verse_statuses.get(id=int(request.POST["uvs_id"]))
+            uvs = get_object_or_404(identity.verse_statuses.all(), id=checked_int(request.POST["uvs_id"]))
             return learn_set(
                 request, [uvs], session.LearningType.REVISION if uvs.needs_testing else session.LearningType.PRACTICE
             )
@@ -459,7 +460,7 @@ def dashboard(request):
 
         if "clearbiblequeue" in request.POST:
             if "verse_set_id" in request.POST:
-                vs_id = int(request.POST["verse_set_id"])
+                vs_id = checked_int(request.POST["verse_set_id"])
             else:
                 vs_id = None
             identity.clear_bible_learning_queue(vs_id)
@@ -468,8 +469,8 @@ def dashboard(request):
             identity.clear_catechism_learning_queue(get_catechism_id())
             return HttpResponseRedirect(reverse("dashboard"))
         if "cancelpassage" in request.POST:
-            vs_id = int(request.POST["verse_set_id"])
-            version_id = int(request.POST["version_id"])
+            vs_id = checked_int(request.POST["verse_set_id"])
+            version_id = checked_int(request.POST["version_id"])
             identity.cancel_passage(vs_id, version_id)
             return HttpResponseRedirect(reverse("dashboard"))
 
@@ -734,7 +735,7 @@ def handle_choose_set(request):
         version = default_bible_version
 
     try:
-        vs_id = int(request.POST["verseset_id"])
+        vs_id = checked_int(request.POST["verseset_id"])
         vs = verse_sets.prefetch_related("verse_choices").get(id=vs_id)
     except (KeyError, ValueError, VerseSet.DoesNotExist):
         return HttpResponseRedirect(reverse("choose"))
@@ -770,7 +771,7 @@ def view_catechism_list(request):
             # Shouldn't get here if UI preferences javascript is working right.
             return redirect_via_prefs(request)
         try:
-            catechism = TextVersion.objects.get(id=int(request.POST["catechism_id"]))
+            catechism = TextVersion.objects.get(id=checked_int(request.POST["catechism_id"]))
         except (KeyError, ValueError, TextVersion.DoesNotExist):
             raise Http404
         return learn_set(request, request.identity.add_catechism(catechism), session.LearningType.LEARNING)

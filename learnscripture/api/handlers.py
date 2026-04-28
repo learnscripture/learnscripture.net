@@ -38,6 +38,7 @@ from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.ftl_bundles import t
 from learnscripture.utils.templates import render_to_string_ftl
+from learnscripture.utils.validation import checked_int
 from learnscripture.views import bible_versions_for_request, todays_stats, verse_sets_visible_for_request
 from scores.models import get_verses_started_per_day, get_verses_tested_per_day
 
@@ -212,7 +213,7 @@ class VersesToLearnHandler(ApiView):
         return retval
 
 
-def get_verse_set_id(verse_status):
+def get_verse_set_id(verse_status: dict) -> int | None:
     """
     Returns the verse set ID for a verse status dictionary (sent by client) or
     None if there is none
@@ -229,7 +230,7 @@ class ActionCompleteHandler(ApiView):
         identity: Identity = request.identity
 
         try:
-            uvs_id = int(request.POST["uvs_id"])
+            uvs_id = checked_int(request.POST["uvs_id"])
             needs_testing = request.POST["uvs_needs_testing"] == "true"
         except (KeyError, ValueError):
             return rc.BAD_REQUEST("uvs_id, uvs_needs_testing required")
@@ -288,7 +289,7 @@ class ActionCompleteHandler(ApiView):
 class SkipVerseHandler(ApiView):
     @require_preexisting_identity_m
     def post(self, request):
-        uvs_id = int(request.POST["uvs_id"])
+        uvs_id = checked_int(request.POST["uvs_id"])
         session.verse_status_skipped(request, uvs_id)
         return {}
 
@@ -296,7 +297,7 @@ class SkipVerseHandler(ApiView):
 class CancelLearningVerseHandler(ApiView):
     @require_preexisting_identity_m
     def post(self, request):
-        uvs_id = int(request.POST["uvs_id"])
+        uvs_id = checked_int(request.POST["uvs_id"])
         localized_reference = request.POST["localized_reference"]
         version_slug = request.POST["version_slug"]
         request.identity.cancel_learning([localized_reference], version_slug)
@@ -307,8 +308,8 @@ class CancelLearningVerseHandler(ApiView):
 class CancelLearningPassageHandler(ApiView):
     @require_preexisting_identity_m
     def post(self, request):
-        vs_id = int(request.POST["verse_set_id"])
-        version_id = int(request.POST["version_id"])
+        vs_id = checked_int(request.POST["verse_set_id"])
+        version_id = checked_int(request.POST["version_id"])
         request.identity.cancel_passage(vs_id, version_id)
         return {}
 
@@ -327,7 +328,7 @@ class ReviewSoonerHandler(ApiView):
     def post(self, request):
         localized_reference = request.POST["localized_reference"]
         version_slug = request.POST["version_slug"]
-        review_after = int(request.POST["review_after"])
+        review_after = checked_int(request.POST["review_after"])
         request.identity.review_sooner(localized_reference, version_slug, review_after)
         return {}
 
