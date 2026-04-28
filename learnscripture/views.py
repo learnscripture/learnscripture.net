@@ -90,6 +90,7 @@ from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts
 
 from .decorators import (
+    exceptions_to_400,
     for_htmx,
     has_preferences,
     redirect_via_prefs,
@@ -959,6 +960,7 @@ def edit_set(request, slug: str):
 
 
 @require_account_with_redirect
+@exceptions_to_400(InvalidVerseReference)
 def create_or_edit_set(request, set_type=None, slug: str | None = None):
     form_class = VerseSetForm
 
@@ -1091,7 +1093,7 @@ def create_or_edit_set(request, set_type=None, slug: str | None = None):
     )
 
 
-def normalize_break_list(breaks):
+def normalize_break_list(breaks: str) -> str:
     break_list = parse_break_list(breaks)
     break_list = [r.get_start() for r in break_list]
     return ",".join(r.canonical_form() for r in break_list)

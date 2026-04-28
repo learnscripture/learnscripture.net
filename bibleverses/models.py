@@ -4,6 +4,7 @@ import math
 import operator
 import random
 from collections import defaultdict
+from collections.abc import Sequence
 from functools import reduce
 
 from autoslug import AutoSlugField
@@ -706,15 +707,15 @@ class VerseSet(models.Model):
         return reverse("view_verse_set", kwargs=dict(slug=self.slug))
 
     @property
-    def is_passage(self):
+    def is_passage(self) -> bool:
         return self.set_type == VerseSetType.PASSAGE
 
     @property
-    def is_selection(self):
+    def is_selection(self) -> bool:
         return self.set_type == VerseSetType.SELECTION
 
     @property
-    def breaks_formatted(self):
+    def breaks_formatted(self) -> str:
         return ", ".join(f"{pr.start_chapter}:{pr.start_verse}" for pr in parse_break_list(self.breaks))
 
     def set_verse_choices(self, internal_reference_list):
@@ -1395,7 +1396,7 @@ def is_continuous_set(verse_list):
     return [v.localized_reference for v in verse_list] == [v.localized_reference for v in combined]
 
 
-def get_passage_sections(verse_list, breaks):
+def get_passage_sections(verse_list: Sequence[UserVerseStatus], breaks: str) -> Sequence[Sequence[UserVerseStatus]]:
     """
     Given a list of objects with either a correct 'localized_reference' or
     'internal_reference' attribute, and a break list (a comma separated list of
@@ -1411,8 +1412,8 @@ def get_passage_sections(verse_list, breaks):
 
     break_ref_list = [p.get_start() for p in parse_break_list(breaks)]
 
-    sections = []
-    current_section = []
+    sections: list[list[UserVerseStatus]] = []
+    current_section: list[UserVerseStatus] = []
     for v in verse_list:
         if hasattr(v, "internal_reference"):
             parsed_ref = parse_validated_internal_reference(v.internal_reference)

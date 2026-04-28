@@ -458,7 +458,7 @@ def internalize_localized_reference(language_code, localized_reference):
     return parse_validated_localized_reference(language_code, localized_reference).to_internal().canonical_form()
 
 
-def parse_break_list(breaks):
+def parse_break_list(breaks: str) -> list[ParsedReference]:
     """
     Parse a break list, which is a comma separated list of internal references, or raise a ValueError for failure.
     """
@@ -467,4 +467,4 @@ def parse_break_list(breaks):
         return (bible_reference_parser_for_lang(LANG.INTERNAL, True).sep_by(string(","))).parse(breaks)
 
     except ParseError:
-        raise ValueError(f"'{breaks}' is not a valid list of internal Bible references")
+        raise InvalidVerseReference(f"'{breaks}' is not a valid list of internal Bible references")

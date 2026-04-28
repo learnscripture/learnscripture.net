@@ -1241,7 +1241,7 @@ class Identity(models.Model):
                 if uvs.strength < memorymodel.LEARNED:
                     uvs.needs_testing_override = True
 
-    def get_next_section(self, uvs_list, verse_set, add_buffer=True):
+    def get_next_section(self, uvs_list: list[UserVerseStatus], verse_set: VerseSet, *, add_buffer=True):
         """
         Given a UVS list and a VerseSet, get the items in uvs_list
         which are the next section to review.
