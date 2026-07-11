@@ -731,13 +731,13 @@ def handle_choose_set(request):
     version = None
     try:
         version = TextVersion.objects.get(slug=request.POST["version_slug"])
-    except (KeyError, TextVersion.DoesNotExist):
+    except KeyError, TextVersion.DoesNotExist:
         version = default_bible_version
 
     try:
         vs_id = checked_int(request.POST["verseset_id"])
         vs = verse_sets.prefetch_related("verse_choices").get(id=vs_id)
-    except (KeyError, ValueError, VerseSet.DoesNotExist):
+    except KeyError, ValueError, VerseSet.DoesNotExist:
         return HttpResponseRedirect(reverse("choose"))
     return learn_set(request, identity.add_verse_set(vs, version=version), session.LearningType.LEARNING)
 
@@ -749,7 +749,7 @@ def handle_choose_verse(request):
     default_bible_version = default_bible_version_for_request(request)
     try:
         version = TextVersion.objects.get(slug=request.POST["version"])
-    except (KeyError, TextVersion.DoesNotExist):
+    except KeyError, TextVersion.DoesNotExist:
         version = default_bible_version
 
     try:
@@ -772,7 +772,7 @@ def view_catechism_list(request):
             return redirect_via_prefs(request)
         try:
             catechism = TextVersion.objects.get(id=checked_int(request.POST["catechism_id"]))
-        except (KeyError, ValueError, TextVersion.DoesNotExist):
+        except KeyError, ValueError, TextVersion.DoesNotExist:
             raise Http404
         return learn_set(request, request.identity.add_catechism(catechism), session.LearningType.LEARNING)
 
@@ -884,7 +884,7 @@ def view_verse_set(request, slug: str):
 
     try:
         version = bible_versions_for_request(request).get(slug=request.GET["version"])
-    except (KeyError, TextVersion.DoesNotExist):
+    except KeyError, TextVersion.DoesNotExist:
         version = default_bible_version_for_request(request)
 
     verse_list = get_verse_set_verse_list(version, verse_set)
@@ -1280,7 +1280,7 @@ def password_reset_confirm(request, uidb64: str, token: str):
     try:
         uid_int = urlsafe_base64_decode(uidb64)
         user = Account.objects.get(id=uid_int)
-    except (ValueError, Account.DoesNotExist):
+    except ValueError, Account.DoesNotExist:
         user = None
 
     if user is not None and token_generator.check_token(user, token):
@@ -1626,7 +1626,7 @@ def group_wall(request, slug: str):
     # page of comments.
     try:
         selected_comment_id = int(request.GET["comment"])
-    except (KeyError, ValueError):
+    except KeyError, ValueError:
         selected_comment_id = None
 
     comments = group.comments.visible_for_account(account)
@@ -1919,7 +1919,7 @@ def add_verse_to_queue(request):
     version = None
     try:
         version = TextVersion.objects.get(slug=request.POST["version"])
-    except (KeyError, TextVersion.DoesNotExist):
+    except KeyError, TextVersion.DoesNotExist:
         return HttpResponseBadRequest("Invalid version_slug")
 
     ref = request.POST.get("localized_reference", None)
@@ -1969,7 +1969,7 @@ def add_comment(request: HttpRequest, model: str, instance_id: int, new_comment_
             try:
                 getter = COMMENTABLE_GETTERS[model]
                 commentable: Group | Event = getter(instance_id)
-            except (KeyError, ObjectDoesNotExist):
+            except KeyError, ObjectDoesNotExist:
                 return HttpResponseBadRequest("Invalid model/instance_id values")
             if isinstance(commentable, Group) and not commentable.accepts_comments_from(account):
                 validation_error = t("comments-not-member-of-group")

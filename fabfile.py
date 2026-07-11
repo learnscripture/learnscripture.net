@@ -44,7 +44,7 @@ DEFAULT_USER = PROJECT_USER
 FULL_PYTHON_VERISON = Path(".python-version").read_text().strip()
 
 # Python version
-PYTHON_BIN = "python3.10"
+PYTHON_BIN = "python3.14"
 PYTHON_PREFIX = ""  # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = f"{PYTHON_PREFIX}/bin/{PYTHON_BIN}" if PYTHON_PREFIX else PYTHON_BIN
 
@@ -94,10 +94,10 @@ REQS = [
     "python3-pip",
     "python3-wheel",
     "python3-virtualenv",
-    "python3.10",
-    "python3.10-dev",
-    "python3.10-full",
-    "python3.10-venv",
+    "python3.14",
+    "python3.14-dev",
+    "python3.14-full",
+    "python3.14-venv",
     "pipx",  # use this to install uv, use that for everything else
     "python3-virtualenvwrapper",
     "python3-setuptools",
@@ -247,7 +247,7 @@ class Version:
     DATA_ROOT_SHARED = PROJECT_ROOT_BASE + "/data"
 
     @classmethod
-    def current(cls) -> "Version":
+    def current(cls) -> Version:
         return cls(CURRENT_VERSION)
 
     def __init__(self, version):

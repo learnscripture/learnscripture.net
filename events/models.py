@@ -496,7 +496,7 @@ EVENT_LOGIC_CLASSES = {
 
 
 class Event(models.Model):
-    event_type = models.CharField(max_length=40, choices=EventType.choices)
+    event_type = models.CharField(max_length=40, choices=EventType)
     weight = models.PositiveSmallIntegerField(default=10)
     event_data = models.JSONField(default=dict, blank=True)
     created = models.DateTimeField(default=timezone.now, db_index=True)
@@ -611,7 +611,7 @@ class Event(models.Model):
 
         try:
             return Comment.objects.get(id=int(self.event_data["comment_id"]))
-        except (KeyError, Comment.DoesNotExist):
+        except KeyError, Comment.DoesNotExist:
             return None
 
     def ordered_comments(self):

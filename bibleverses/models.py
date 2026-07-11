@@ -97,7 +97,7 @@ class TextVersion(models.Model):
     slug = models.CharField(max_length=20, unique=True)
     full_name = models.CharField(max_length=255, unique=True)
     url = models.URLField(default="", blank=True)
-    text_type = models.CharField(max_length=20, choices=TextType.choices, default=TextType.BIBLE)
+    text_type = models.CharField(max_length=20, choices=TextType, default=TextType.BIBLE)
     language_code = models.CharField(max_length=2, blank=False, choices=LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE.code)
     description = models.TextField(blank=True)
 
@@ -663,7 +663,7 @@ class VerseSet(models.Model):
     slug = AutoSlugField(populate_from="name", unique=True)
     description = models.TextField(t_lazy("versesets-description"), blank=True)
     additional_info = models.TextField(t_lazy("versesets-additional-info"), blank=True)
-    set_type = models.CharField(max_length=20, choices=VerseSetType.choices)
+    set_type = models.CharField(max_length=20, choices=VerseSetType)
 
     public = models.BooleanField(t_lazy("versesets-public"), default=False)
     breaks = models.TextField(default="", blank=True)
@@ -963,7 +963,7 @@ class UserVerseStatus(models.Model):
 
     # The following fields vary over time and care should be taken in things
     # like create_verse_status to copy these attributes if there are duplicates.
-    memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choices, default=MemoryStage.ZERO)
+    memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage, default=MemoryStage.ZERO)
     strength = models.FloatField(default=0.00)
     added = models.DateTimeField()
     first_seen = models.DateTimeField(null=True, blank=True)

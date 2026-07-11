@@ -2,50 +2,50 @@
 name = "learnscripture"
 version = "1.0"
 readme = "README.rst"
-requires-python = "==3.10.*"
+requires-python = "==3.14.*"
 dependencies = [
-    "aldjemy==2.6",
-    "attrs==21.2.0",
-    "certifi==2021.10.8",
-    "concurrent-log-handler==0.9.19",
-    "django>=4.2,<5",
-    "django-anymail==8.4",
+    "aldjemy>=2.6",
+    "attrs>=21.2.0",
+    "certifi>=2021.10.8",
+    "concurrent-log-handler>=0.9.19",
+    "django>=5.2,<6",
+    "django-anymail>=8.4",
     "django-autocomplete-light==3.9.4",
-    "django-autoslug==1.9.8",
-    "django-capture-tag==1.0",
-    "django-compressor==4.3.1",
+    "django-autoslug>=1.9.8",
+    "django-capture-tag>=1.0",
+    "django-compressor>=4.3.1",
     "django-ftl>=0.14",
-    "django-markup==1.5",
-    "django-mptt==0.13.4",
-    "django-paypal==2.0",
+    "django-markup>=1.5",
+    "django-mptt>=0.13.4",
+    "django-paypal>=2.0",
     "django-q2>=1.10.0",
-    "django-render-block==0.9.1",
-    "django-spurl==0.6.8",
-    "django-sql-utils==0.6.1",
-    "django-webpack-loader==1.8.1",
+    "django-render-block>=0.9.1",
+    "django-spurl>=0.6.8",
+    "django-sql-utils>=0.6.1",
+    "django-webpack-loader>=1.8.1",
     "djangorestframework>=3.16",
-    "docutils==0.18.1",
-    "easy-thumbnails==2.8.5",
-    "furl==2.1.3",
-    "lxml==4.6.4",
-    "numpy==1.21.4",
-    "parsy==1.4.0",
-    "psycopg2-binary==2.9.2",
+    "docutils>=0.18.1",
+    "easy-thumbnails>=2.8.5",
+    "furl>=2.1.3",
+    "lxml>=4.6.4",
+    "numpy>=1.21.4",
+    "parsy>=1.4.0",
+    "psycopg2-binary>=2.9.2",
     "pykov",
-    "pymemcache==4.0.0",
-    "pyquery==1.4.3",
-    "pytz==2021.3",
-    "pyuca==1.2",
-    "requests==2.26.0",
-    "sentry-sdk==1.5.0",
-    "sqlalchemy==1.4.27",
-    "uwsgi==2.0.20",
+    "pymemcache>=4.0.0",
+    "pyquery>=1.4.3",
+    "pytz>=2021.3",
+    "pyuca>=1.2",
+    "requests>=2.26.0",
+    "sentry-sdk>=1.5.0",
+    "sqlalchemy>=1.4.27",
+    "uwsgi>=2.0.20",
 ]
 
 
 [tool.ruff]
 line-length = 120
-target-version = 'py310'
+target-version = 'py314'
 
 [tool.ruff.lint]
 extend-select = [
@@ -77,7 +77,8 @@ dev = [
     "mock==4.0.3",
     "pglite>=1.0.13",
     "pip-tools==6.12.2",
-    "pre-commit==2.15.0",
+    "pre-commit>=4.6",
+    "pre-commit-uv>=4.2.2",
     "pyinotify==0.9.6",
     "pytest==6.2.5",
     "pytest-django==4.5.2",

@@ -66,7 +66,7 @@ class Scores:
 class ActionLog(models.Model):
     account = models.ForeignKey("accounts.Account", on_delete=models.CASCADE, related_name="action_logs")
     points = models.PositiveIntegerField()
-    reason = models.PositiveSmallIntegerField(choices=ScoreReason.choices)
+    reason = models.PositiveSmallIntegerField(choices=ScoreReason)
     localized_reference = models.CharField(max_length=255, blank=True)
     accuracy = models.FloatField(null=True, blank=True)
     created = models.DateTimeField(db_index=True)

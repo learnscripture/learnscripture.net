@@ -232,7 +232,7 @@ class ActionCompleteHandler(ApiView):
         try:
             uvs_id = checked_int(request.POST["uvs_id"])
             needs_testing = request.POST["uvs_needs_testing"] == "true"
-        except (KeyError, ValueError):
+        except KeyError, ValueError:
             return rc.BAD_REQUEST("uvs_id, uvs_needs_testing required")
 
         practice = request.POST.get("practice", "false") == "true"
@@ -249,7 +249,7 @@ class ActionCompleteHandler(ApiView):
         # Retrieve UVS
         try:
             uvs = request.identity.verse_statuses.get(id=uvs_id)
-        except (KeyError, UserVerseStatus.DoesNotExist):
+        except KeyError, UserVerseStatus.DoesNotExist:
             return rc.BAD_REQUEST("valid verse_status id/uvs_id for user required")
 
         # Apply actions

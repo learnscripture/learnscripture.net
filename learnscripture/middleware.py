@@ -1,3 +1,4 @@
+import datetime as dt
 import os
 import time
 import urllib.parse
@@ -159,7 +160,7 @@ def debug_middleware(get_response):
         if "now" in request.GET:
             now = time.strptime(request.GET["now"], "%Y-%m-%d %H:%M:%S")
             now_ts = time.mktime(now)
-            now_dt = datetime.fromtimestamp(now_ts).replace(tzinfo=timezone.utc)
+            now_dt = datetime.fromtimestamp(now_ts).replace(tzinfo=dt.UTC)
             time.time = lambda: now_ts
 
             # We can't monkeypatch datetime, but we always use timezone.now so

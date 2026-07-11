@@ -454,7 +454,7 @@ AWARD_LOGIC_CLASSES = {
 
 
 class Award(models.Model):
-    award_type = models.CharField(max_length=40, choices=AwardType.choices)
+    award_type = models.CharField(max_length=40, choices=AwardType)
     level = models.PositiveSmallIntegerField()
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="awards")
     created = models.DateTimeField(default=timezone.now)

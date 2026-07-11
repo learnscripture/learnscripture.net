@@ -113,87 +113,10 @@
         }
       }
     },
-    "postgresql@13": {
-      "last_modified": "2022-05-18T02:28:07Z",
+    "postgresql_18": {
       "plugin_version": "0.0.2",
-      "resolved": "github:NixOS/nixpkgs/52dc75a4fee3fdbcb792cb6fba009876b912bfe0#postgresql",
-      "source": "devbox-search",
-      "version": "13.6",
-      "systems": {
-        "aarch64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/881zgzrp4i9n94299yq459c5w51828r0-postgresql-13.6",
-              "default": true
-            },
-            {
-              "name": "man",
-              "path": "/nix/store/jrmk1xagi4zsgrcb4b4yz6i3wqgkhbjh-postgresql-13.6-man",
-              "default": true
-            },
-            {
-              "name": "doc",
-              "path": "/nix/store/5m1pw4kcfy1961y36kbljwqc0w4s2r5z-postgresql-13.6-doc"
-            },
-            {
-              "name": "lib",
-              "path": "/nix/store/bjr2vakf641zfgj4f4pd0xslmznpapqb-postgresql-13.6-lib"
-            }
-          ],
-          "store_path": "/nix/store/881zgzrp4i9n94299yq459c5w51828r0-postgresql-13.6"
-        },
-        "aarch64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/dxxs5ydqi4a627ssl4699qfwlv3g7yfy-postgresql-13.6",
-              "default": true
-            },
-            {
-              "name": "man",
-              "path": "/nix/store/alh0cdp8g5s4bbsb55hqg2h6fmhw8b67-postgresql-13.6-man",
-              "default": true
-            },
-            {
-              "name": "debug",
-              "path": "/nix/store/5rf3fhbgk9falby02f7kpmbrkg3pa315-postgresql-13.6-debug"
-            },
-            {
-              "name": "doc",
-              "path": "/nix/store/xgymb5bmk22flqk6lacf9sxpfmz40lk1-postgresql-13.6-doc"
-            },
-            {
-              "name": "lib",
-              "path": "/nix/store/5x341ym80yssjg9a1j767g2i8jkgpxhh-postgresql-13.6-lib"
-            }
-          ],
-          "store_path": "/nix/store/dxxs5ydqi4a627ssl4699qfwlv3g7yfy-postgresql-13.6"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/9likd3n1ph8ixmzn79l5sxafi0zxyq8m-postgresql-13.6",
-              "default": true
-            },
-            {
-              "name": "man",
-              "path": "/nix/store/lhfcmg8gxvvsrb2sc2r5q5dlb34livhy-postgresql-13.6-man",
-              "default": true
-            },
-            {
-              "name": "doc",
-              "path": "/nix/store/61xw9lxy9si32alnil2i7ksg5skj2qdv-postgresql-13.6-doc"
-            },
-            {
-              "name": "lib",
-              "path": "/nix/store/k0gcvrd1by4260glsi85msc8x0jrf1yc-postgresql-13.6-lib"
-            }
-          ],
-          "store_path": "/nix/store/9likd3n1ph8ixmzn79l5sxafi0zxyq8m-postgresql-13.6"
-        }
-      }
+      "resolved": "github:NixOS/nixpkgs/13868c071cc73a5e9f610c47d7bb08e5da64fdd5?narHash=sha256-ZhuYJbwbZT32QA95tSkXd9zXHcdZj90EzHpEXBMabaw%3D#postgresql_18",
+      "source": "nixpkg"
     }
   }
 }

@@ -499,13 +499,13 @@ class Identity(models.Model):
     desktop_testing_method = models.CharField(
         max_length=20,
         verbose_name=t_lazy("accounts-desktop-testing-method"),
-        choices=TestingMethod.choices,
+        choices=TestingMethod,
         default=TestingMethod.FIRST_LETTER,
     )
     touchscreen_testing_method = models.CharField(
         max_length=20,
         verbose_name=t_lazy("accounts-touchscreen-testing-method"),
-        choices=TestingMethod.choices,
+        choices=TestingMethod,
         default=TestingMethod.FIRST_LETTER,
     )
     enable_animations = models.BooleanField(t_lazy("accounts-enable-animations"), blank=True, default=True)
@@ -528,7 +528,7 @@ class Identity(models.Model):
         Account, on_delete=models.SET_NULL, null=True, default=None, blank=True, related_name="referrals"
     )
     heatmap_default_stats_type = models.CharField(
-        max_length=20, choices=HeatmapStatsType.choices, default=HeatmapStatsType.COMBINED
+        max_length=20, choices=HeatmapStatsType, default=HeatmapStatsType.COMBINED
     )
     heatmap_default_show = models.BooleanField(default=True)
 

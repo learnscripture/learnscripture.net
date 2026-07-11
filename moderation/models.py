@@ -52,7 +52,7 @@ class ModerationActionQuerySet(models.QuerySet):
 
 class ModerationAction(models.Model):
     action_by = models.ForeignKey(Account, related_name="moderation_actions_taken", on_delete=models.CASCADE)
-    action_type = models.CharField(max_length=50, choices=ModerationActionType.choices)
+    action_type = models.CharField(max_length=50, choices=ModerationActionType)
 
     # Target: Only one of the following should be non-null:
     group = models.ForeignKey(Group, null=True, blank=True, related_name="moderation_actions", on_delete=models.CASCADE)

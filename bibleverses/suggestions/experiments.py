@@ -16,7 +16,7 @@ from .trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
 
 try:
     import pympler.asizeof
-except (ImportError, AttributeError):  # PyPy
+except ImportError, AttributeError:  # PyPy
     pympler = None
 
 

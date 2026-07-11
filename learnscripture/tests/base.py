@@ -4,7 +4,7 @@ import os
 import time
 from collections.abc import Callable, Generator
 from functools import wraps
-from typing import Any, TypeVar
+from typing import Any
 from unittest.case import _UnexpectedSuccess
 
 import pytest
@@ -39,10 +39,7 @@ class FuzzyInt(int):
         return f"[{self.lowest}..{self.highest}]"
 
 
-T = TypeVar("T")
-
-
-def sequence(func: Callable[[int], T]) -> Generator[T, None, None]:
+def sequence[T](func: Callable[[int], T]) -> Generator[T]:
     """
     Generates a sequence of values from a sequence of integers starting at zero,
     passed through the callable, which must take an integer argument.
@@ -343,9 +340,11 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
             lambda driver: driver.execute_script('return (typeof(jQuery) == "undefined" || jQuery.active == 0)')
         )
         self.wait_until(
-            lambda _: not self.is_element_present(".htmx-request")
-            and not self.is_element_present(".htmx-swapping")
-            and not self.is_element_present(".htmx-settling")
+            lambda _: (
+                not self.is_element_present(".htmx-request")
+                and not self.is_element_present(".htmx-swapping")
+                and not self.is_element_present(".htmx-settling")
+            )
         )
 
     @contextlib.contextmanager

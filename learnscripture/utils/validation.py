@@ -7,5 +7,5 @@ def checked_int(value: str | None):
     """
     try:
         return int(value)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         raise BadRequest(f"Bad value {value}, expecting int")

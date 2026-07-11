@@ -46,17 +46,17 @@ Then install the project proper:
     127.0.0.1          learnscripture.local
 
 
-* Install Python 3.10::
+* Install Python 3.14::
 
-    uv python install 3.10
+    uv python install 3.14
 
-* Make a virtualenv using Python 3.10::
+* Make a virtualenv using Python 3.14::
 
-    uv venv --python python3.10 --prompt learnscripture
+    uv venv --python python3.14 --prompt learnscripture
 
 * Ensure the current directory is on your Python path::
 
-    pwd > .venv/lib/python3.10/site-packages/projectsource.pth
+    pwd > .venv/lib/python3.14/site-packages/projectsource.pth
 
 * Install Python dependencies::
 

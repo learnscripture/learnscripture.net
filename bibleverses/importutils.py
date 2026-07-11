@@ -33,7 +33,7 @@ def create_verse_for_parsed_ref(
     )
 
 
-def get_all_parsed_refs(lang=LANG.INTERNAL) -> Generator[ParsedReference, None, None]:
+def get_all_parsed_refs(lang=LANG.INTERNAL) -> Generator[ParsedReference]:
     for book_num, book_name in enumerate(_BIBLE_BOOKS_FOR_LANG[lang]):
         info = BIBLE_BOOK_INFO[f"BOOK{book_num}"]
         for chapter in range(1, info.chapter_count + 1):
