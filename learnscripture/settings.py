@@ -307,7 +307,7 @@ if DEVBOX:
     INSTALLED_APPS.append("django_watchfiles")
 
 if DEBUG:
-    # INSTALLED_APPS.append("debug_toolbar")
+    INSTALLED_APPS.append("debug_toolbar")
     INSTALLED_APPS.append("django_extensions")  # For runserver_plus
     INSTALLED_APPS.append("django_urlconfchecks")
 
