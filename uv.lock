@@ -1050,6 +1050,7 @@ dev = [
     { name = "filelock" },
     { name = "ipython" },
     { name = "mock" },
+    { name = "pglite" },
     { name = "pip-tools" },
     { name = "pre-commit" },
     { name = "pyinotify" },
@@ -1119,6 +1120,7 @@ dev = [
     { name = "filelock", specifier = "==3.4.0" },
     { name = "ipython", specifier = "==8.11" },
     { name = "mock", specifier = "==4.0.3" },
+    { name = "pglite", specifier = ">=1.0.13" },
     { name = "pip-tools", specifier = "==6.12.2" },
     { name = "pre-commit", specifier = "==2.15.0" },
     { name = "pyinotify", specifier = "==0.9.6" },
@@ -1278,6 +1280,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9e/c3/059298687310d527a58bb01f3b1965787ee3b40dce76752eda8b44e9a2c5/pexpect-4.9.0-py2.py3-none-any.whl", hash = "sha256:7236d1e080e4936be2dc3e326cec0af72acf9212a7e1d060210e70a47e253523", size = 63772, upload-time = "2023-11-25T06:56:14.81Z" },
 ]
+
+[[package]]
+name = "pglite"
+version = "1.0.13"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/43/92d252eba8410d44ed9f6e41c8819f37ad68cc76f7436ca1f04e4c7b2467/pglite-1.0.13.tar.gz", hash = "sha256:24b16d1fa054d02e303f29bd3b06d8129670c9bfdc90ef21f70ebc9dea0915e6", size = 6056, upload-time = "2020-09-01T08:16:49.144Z" }
 
 [[package]]
 name = "pickleshare"
