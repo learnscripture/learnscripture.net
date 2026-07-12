@@ -1,11 +1,10 @@
 import re
 from datetime import timedelta
-from urllib.parse import quote
+from urllib.parse import ParseResult, quote, urlparse
 
 from django.core import mail
 from django.db.models import F
 from django.urls import reverse
-from six.moves.urllib.parse import ParseResult, urlparse
 
 from accounts.models import Account, ActionChange
 from awards.models import AwardType

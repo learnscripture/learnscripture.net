@@ -107,7 +107,9 @@ class TotalScore(models.Model):
 
 
 def active_user_query(q, hellbanned_mode):
-    from learnscripture.utils.sqla import accounts_account as account
+    from learnscripture.utils.sqla import get_accounts_account
+
+    account = get_accounts_account()
 
     retval = q.where(account.c.is_active == True)  # noqa
     if not hellbanned_mode:
@@ -116,7 +118,9 @@ def active_user_query(q, hellbanned_mode):
 
 
 def leaderboard_group_filter(q, hellbanned_mode, group):
-    from learnscripture.utils.sqla import accounts_account
+    from learnscripture.utils.sqla import get_accounts_account
+
+    accounts_account = get_accounts_account()
 
     if group is not None:
         members = group.members.all()
@@ -134,10 +138,10 @@ def get_all_time_leaderboard(hellbanned_mode, from_item, page_size, group=None):
     from sqlalchemy.sql import select
     from sqlalchemy.sql.functions import next_value
 
-    from learnscripture.utils.sqla import accounts_account, default_engine, scores_totalscore
+    from learnscripture.utils.sqla import default_engine, get_accounts_account, get_scores_totalscore
 
-    account = accounts_account
-    totalscore = scores_totalscore
+    account = get_accounts_account()
+    totalscore = get_scores_totalscore()
 
     sequence_name = f"rank_seq_{uuid.uuid4().hex}"
     sq = Sequence(sequence_name)
@@ -174,10 +178,10 @@ def get_leaderboard_since(since, hellbanned_mode, from_item, page_size, group=No
     from sqlalchemy.sql import func, select
     from sqlalchemy.sql.functions import next_value
 
-    from learnscripture.utils.sqla import accounts_account, default_engine, scores_actionlog
+    from learnscripture.utils.sqla import default_engine, get_accounts_account, get_scores_actionlog
 
-    account = accounts_account
-    actionlog = scores_actionlog
+    account = get_accounts_account()
+    actionlog = get_scores_actionlog()
 
     sequence_name = f"rank_seq_{uuid.uuid4().hex}"
     sq = Sequence(sequence_name)
@@ -222,8 +226,9 @@ def get_number_of_distinct_hours_for_account_id(account_id):
     from sqlalchemy import func
     from sqlalchemy.sql import distinct, extract, select
 
-    from learnscripture.utils.sqla import default_engine, scores_actionlog
+    from learnscripture.utils.sqla import default_engine, get_scores_actionlog
 
+    scores_actionlog = get_scores_actionlog()
     sq1 = select(
         [distinct(extract("hour", scores_actionlog.c.created)).label("hours")],
         scores_actionlog.c.account_id == account_id,
@@ -251,7 +256,7 @@ def get_verses_started_counts(identity_ids, started_since=None):
     from sqlalchemy.sql import and_, select
 
     from bibleverses.models import MemoryStage
-    from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine
+    from learnscripture.utils.sqla import default_engine, get_bibleverses_userversestatus
 
     # The important points about this complex query are:
     #
@@ -263,6 +268,7 @@ def get_verses_started_counts(identity_ids, started_since=None):
     if len(identity_ids) == 0:
         return {}
 
+    bibleverses_userversestatus = get_bibleverses_userversestatus()
     uvs = bibleverses_userversestatus
     q1 = (
         select(
@@ -285,7 +291,9 @@ def get_verses_started_per_day(identity_id):
     from sqlalchemy import func
     from sqlalchemy.sql import and_, select
 
-    from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine
+    from learnscripture.utils.sqla import default_engine, get_bibleverses_userversestatus
+
+    bibleverses_userversestatus = get_bibleverses_userversestatus()
 
     day_col = func.date_trunc("day", bibleverses_userversestatus.c.first_seen).label("day")
 
@@ -316,7 +324,9 @@ def get_verses_tested_per_day(account_id):
     from sqlalchemy import func
     from sqlalchemy.sql import and_, select
 
-    from learnscripture.utils.sqla import default_engine, scores_actionlog
+    from learnscripture.utils.sqla import default_engine, get_scores_actionlog
+
+    scores_actionlog = get_scores_actionlog()
 
     day_col = func.date_trunc("day", scores_actionlog.c.created).label("day")
     q1 = (
@@ -342,12 +352,15 @@ def get_verses_finished_count(identity_id, finished_since=None):
     from accounts.memorymodel import MM
     from bibleverses.models import MemoryStage
     from learnscripture.utils.sqla import (
-        accounts_identity,
-        bibleverses_userversestatus,
         default_engine,
-        scores_actionlog,
+        get_accounts_identity,
+        get_bibleverses_userversestatus,
+        get_scores_actionlog,
     )
 
+    accounts_identity = get_accounts_identity()
+    bibleverses_userversestatus = get_bibleverses_userversestatus()
+    scores_actionlog = get_scores_actionlog()
     uvs = bibleverses_userversestatus
     from_table = uvs
     filters = and_(

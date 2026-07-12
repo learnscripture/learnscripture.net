@@ -151,6 +151,8 @@ class Fixtures:
     def setUpFixtures(cls):
         pass
 
+    databases = "__all__"
+
 
 class TextVersionsMixin(Fixtures):
     @classmethod

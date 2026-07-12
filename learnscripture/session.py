@@ -1,3 +1,4 @@
+import datetime as dt
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -108,7 +109,7 @@ def get_learning_session_start(request):
     if learning_start is None:
         return None
     else:
-        return datetime.utcfromtimestamp(int(learning_start)).replace(tzinfo=timezone.utc)
+        return datetime.utcfromtimestamp(int(learning_start)).replace(tzinfo=dt.UTC)
 
 
 def _set_verse_statuses(request, user_verse_statuses):

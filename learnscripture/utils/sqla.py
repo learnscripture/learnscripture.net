@@ -6,8 +6,8 @@ from scores.models import ActionLog, TotalScore
 
 default_engine = get_engine()
 
-scores_actionlog = ActionLog.sa.table
-scores_totalscore = TotalScore.sa.table
-accounts_account = Account.sa.table
-accounts_identity = Identity.sa.table
-bibleverses_userversestatus = UserVerseStatus.sa.table
+get_scores_actionlog = lambda: ActionLog.sa.__table__
+get_scores_totalscore = lambda: TotalScore.sa.__table__
+get_accounts_account = lambda: Account.sa.__table__
+get_accounts_identity = lambda: Identity.sa.__table__
+get_bibleverses_userversestatus = lambda: UserVerseStatus.sa.__table__
