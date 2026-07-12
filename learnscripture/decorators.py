@@ -1,5 +1,4 @@
 from collections.abc import Callable
-from typing import TypeAlias
 
 from django.core.exceptions import BadRequest
 from django.http import HttpRequest, HttpResponseRedirect
@@ -15,8 +14,7 @@ from learnscripture.ftl_bundles import t
 
 from .utils.urls import build_preferences_url
 
-# TODO Python 3.11 and greater, allow more args.
-ViewFunc: TypeAlias = Callable[[HttpRequest], HttpResponse]
+type ViewFunc = Callable[[HttpRequest], HttpResponse]
 
 
 def require_identity(view_func):

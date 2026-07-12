@@ -28,15 +28,6 @@ wheels = [
 ]
 
 [[package]]
-name = "appdirs"
-version = "1.4.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41", size = 13470, upload-time = "2020-05-11T07:59:51.037Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3b/00/2344469e2084fb287c2e0b57b72910309874c3245463acd6cf5e3db69324/appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128", size = 9566, upload-time = "2020-05-11T07:59:49.499Z" },
-]
-
-[[package]]
 name = "asgiref"
 version = "3.11.1"
 source = { registry = "https://pypi.org/simple" }
@@ -738,20 +729,19 @@ wheels = [
 
 [[package]]
 name = "elm-fluent"
-version = "0.7.0"
+version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "click" },
     { name = "fluent-syntax" },
-    { name = "fs" },
     { name = "language-tags" },
     { name = "lxml" },
     { name = "watchdog" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/91/3e/0a6dbd848f10ffb67f1e62daa46c44cd3ffd1b85ffabdb5abaaec1ec9961/elm_fluent-0.7.0.tar.gz", hash = "sha256:fc5e559cd60e1461665a7ee91d13ff9bb07d982bd091be01296369d7d551888f", size = 120208, upload-time = "2026-01-19T20:50:07.521Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2c/e3/44494aa7f2a6c427d55990c2a286179f6e9c63bac46065b23d309ccadb53/elm_fluent-0.8.0.tar.gz", hash = "sha256:c5cfb7436cbef13c2543a07e528d2c1c34a236c1b7e2f41ad93ae86d7c301afb", size = 123130, upload-time = "2026-07-12T15:53:35.985Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/ca/13ccffcd9bad3e02f6487da8a11030a39b894756716e0e1a7f2db375fd8a/elm_fluent-0.7.0-py3-none-any.whl", hash = "sha256:2ee99969ef7e94858db3d11797463feec861e18909509d751e18316abaa1629a", size = 46584, upload-time = "2026-01-19T20:50:11.619Z" },
+    { url = "https://files.pythonhosted.org/packages/0c/16/99cdc3dd548298125e3e521173a6a70676ea5b7304e7cebba678e17aa6c7/elm_fluent-0.8.0-py3-none-any.whl", hash = "sha256:3b6711fba4fd1f475da948a6ed5e25745c3047790035339e9861c38c8f27525c", size = 48801, upload-time = "2026-07-12T15:53:34.635Z" },
 ]
 
 [[package]]
@@ -796,6 +786,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "fabutils-cciw"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fabric" },
+    { name = "invoke" },
+    { name = "makefun" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c4/cf/63d6c433004760349d8a08ea9463c43b797bafd614b6017942577846b495/fabutils_cciw-0.1.1.tar.gz", hash = "sha256:03174e022692b04ff3af9608aa0aa9e152a09b01a41dbfe3136c8fcfaa3b7955", size = 9942, upload-time = "2024-11-15T22:12:22.765Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/22/bb/909ed8651c48d74b0483177903d3f430750f5940dbcbb3c09b1ad154e80c/fabutils_cciw-0.1.1-py3-none-any.whl", hash = "sha256:74b1dbbf9db425d3b7730da26e7454bc66c1f1fa790a8ab39af2c8ad62ee106c", size = 11710, upload-time = "2024-11-15T22:12:21.648Z" },
+]
+
+[[package]]
 name = "filelock"
 version = "3.29.7"
 source = { registry = "https://pypi.org/simple" }
@@ -829,20 +833,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/51/52/de75f2faf499ed5a089acff2ab8bda5fc3b8db8a3f1615428ef9ccbf1917/fluent.syntax-0.19.0.tar.gz", hash = "sha256:920326d7f46864b9758f0044e9968e3112198bc826acee16ddd8f11d359004fd", size = 15039, upload-time = "2023-03-16T11:03:24.023Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/54/28/475734afb670bf7932caa1828183a4687cac51111950b9fb633c4f976afc/fluent.syntax-0.19.0-py2.py3-none-any.whl", hash = "sha256:b352b3475fac6c6ed5f06527921f432aac073d764445508ee5218aeccc7cc5c4", size = 16432, upload-time = "2023-03-16T11:03:21.934Z" },
-]
-
-[[package]]
-name = "fs"
-version = "2.4.16"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "appdirs" },
-    { name = "setuptools" },
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5d/a9/af5bfd5a92592c16cdae5c04f68187a309be8a146b528eac3c6e30edbad2/fs-2.4.16.tar.gz", hash = "sha256:ae97c7d51213f4b70b6a958292530289090de3a7e15841e108fbe144f069d313", size = 187441, upload-time = "2022-05-02T09:25:54.22Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b9/5c/a3d95dc1ec6cdeb032d789b552ecc76effa3557ea9186e1566df6aac18df/fs-2.4.16-py2.py3-none-any.whl", hash = "sha256:660064febbccda264ae0b6bace80a8d1be9e089e0a5eb2427b7d517f9a91545c", size = 135261, upload-time = "2022-05-02T09:25:52.363Z" },
 ]
 
 [[package]]
@@ -1036,6 +1026,7 @@ dev = [
     { name = "elm-fluent" },
     { name = "fabric" },
     { name = "fabutils" },
+    { name = "fabutils-cciw" },
     { name = "filelock" },
     { name = "ipython" },
     { name = "mock" },
@@ -1103,9 +1094,10 @@ dev = [
     { name = "django-functest", specifier = ">=1.5.3" },
     { name = "django-urlconfchecks", git = "https://github.com/spookylukey/django-urlconfchecks?rev=c10984a1d0b3bcc7367a1b8ee147e55a7d201f58" },
     { name = "django-watchfiles", specifier = ">=1.4.0" },
-    { name = "elm-fluent", specifier = ">=0.7" },
+    { name = "elm-fluent", specifier = ">=0.8" },
     { name = "fabric", specifier = ">=3.0.0" },
     { name = "fabutils", git = "https://github.com/learnscripture/fabutils.git?rev=67e9a529f90616312e6374de25bcf394e24d135f" },
+    { name = "fabutils-cciw", specifier = ">=0.1.1" },
     { name = "filelock", specifier = ">=3.4.0" },
     { name = "ipython", specifier = ">=8.11" },
     { name = "mock", specifier = ">=4.0.3" },
@@ -1890,15 +1882,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/60/31/b7341f156a5f6f36f0b4845d6f1c28a2ae4799171dba7007f3a1e9b234b4/sentry_sdk-2.64.0.tar.gz", hash = "sha256:68be2c29e14ae310f8a39e1a79916b6d85c6cb41dcce789d14ff05fe293e4c55", size = 921020, upload-time = "2026-06-30T08:13:47.682Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/36/a8/3fb9a4319efa3b26f5be0e90e6d8918df43fa7c7e977d26390f589501d82/sentry_sdk-2.64.0-py3-none-any.whl", hash = "sha256:715ea91ca860a819e8d8a50a7bde3a80d0df3b4ed7b6660a20fb9a2d084188f1", size = 498901, upload-time = "2026-06-30T08:13:45.566Z" },
-]
-
-[[package]]
-name = "setuptools"
-version = "83.0.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/34/26/f5d29e25ffdb535afef2d35cdb55b325298f96debd670da4c325e08d70f4/setuptools-83.0.0.tar.gz", hash = "sha256:025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef", size = 1154254, upload-time = "2026-07-04T15:31:22.699Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5d/40/e1e72872c6354b306daef1703549e8e83b4d43cfea356311bf722a043752/setuptools-83.0.0-py3-none-any.whl", hash = "sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3", size = 1008090, upload-time = "2026-07-04T15:31:20.885Z" },
 ]
 
 [[package]]

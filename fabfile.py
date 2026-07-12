@@ -109,7 +109,8 @@ REQS = [
     "libxslt-dev",  # For lxml/uwsgi
     "libffi-dev",  # For cffi
     # Soft PIL + jpegtran-cffi dependencies
-    "libturbojpeg",
+    "libturbojpeg0",
+    "libturbojpeg0-dev",
     "libjpeg8",
     "libjpeg8-dev",
     "libpng-dev",
@@ -118,9 +119,9 @@ REQS = [
     "zlib1g",
     "zlib1g-dev",
     # Soft uwsgi requirement (for harakiri alerts)
-    "libpcre3-dev",
+    "libpcre2-dev",
     # Other
-    "letsencrypt",
+    "certbot",
     "joe",
     "goaccess",  # web analytics. Actually we need v1.4 or later
 ]
@@ -173,7 +174,7 @@ def _install_system(c: Connection):
 def _configure_services(c: Connection):
     files.append(
         c,
-        "/etc/postgresql/12/main/postgresql.conf",
+        "/etc/postgresql/18/main/postgresql.conf",
         [
             "#------- Added for LearnScripture -----",
             "synchronous_commit = off",
@@ -355,6 +356,7 @@ def deploy_system(c: Connection):
     target = Version.current()
     for template in get_system_templates():
         context_data = TEMPLATE_CONTEXT | target.__dict__
+        print(f"Uploading {template.remote_path}")
         upload_template_and_reload(c, template, context_data)
 
 
