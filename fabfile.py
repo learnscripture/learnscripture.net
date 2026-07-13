@@ -847,6 +847,7 @@ def migrate_upload_db(c: Connection, local_filename: str):
     stop_all(c)
     local_filename = os.path.normpath(os.path.abspath(local_filename))
     remote_filename = f"/home/{PROJECT_USER}/{os.path.basename(local_filename)}"
+    print(f"Uploading {local_filename}")
     files.put(c, local_filename, remote_filename)
     target = Version.current()
     remote_restore_db_from_dump(c, target.DBS[DB_LABEL_DEFAULT], remote_filename)
