@@ -108,7 +108,7 @@ the process works.
    still working - see below.
 
 8. Upload DB to new server - make sure -H is correct, and change
-   ``[filename]`` to the file downloaded in step 7::
+   ``[filename]`` to the path to the file downloaded in step 7 (in ../db/backups)::
 
      fab -H learnscripture3.digitalocean.com migrate-upload-db [filename]
 
@@ -204,6 +204,39 @@ Now we'll repeat some steps, with changes:
 16. Switch DNS to the new server in the DigitalOcean control panel. Put DNS TTL
     back up to 86400
 
+17. Optionally, to make the old server proxy requests to the new, adjust the nginx
+    config on the old server with this block replacing all ``location`` blocks::
+
+      location / {
+          proxy_pass https://NEW_SERVER_IP;
+
+          # Preserve the original hostname
+          proxy_set_header Host $host;
+
+          # Preserve client information
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+          proxy_set_header X-Forwarded-Host $host;
+
+          # HTTP/1.1 for keepalive/WebSockets
+          proxy_http_version 1.1;
+          proxy_set_header Connection "";
+
+          # If proxying directly to an IP with a certificate for the hostname,
+          # use SNI and verify against the hostname.
+          proxy_ssl_server_name on;
+          proxy_ssl_name $host;
+
+          # Optional timeouts
+          proxy_connect_timeout 10s;
+          proxy_send_timeout 60s;
+          proxy_read_timeout 60s;
+      }
+
+    This will reduce downtime while DNS propagates.
+
+    TODO automate this.
 
 Done!
 
