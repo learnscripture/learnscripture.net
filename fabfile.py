@@ -797,6 +797,7 @@ def get_and_load_production_db(c: Connection):
 def get_live_db(c: Connection):
     filename = dump_db(c, Version.current().DBS[DB_LABEL_DEFAULT])
     c.local(f"mkdir -p {LOCAL_DB_BACKUPS}")
+    print(f"Downloading {filename}")
     return files.get(c, filename, LOCAL_DB_BACKUPS + "/" + os.path.basename(filename))
 
 
