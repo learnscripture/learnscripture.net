@@ -17,11 +17,18 @@ First, install prerequisites:
   easier to activate the devbox/uv environments. It is up to you if you want to
   learn how to use it and configure it for your usage.
 
-Then install the project proper:
+Then install the project proper. There are two repos:
+
+* The ``main`` repo, which is publicly accessible: https://github.com/learnscripture/learnscripture.net/
+
+* The ``texts`` repo, which is private, because it contains copyrighted material: https://github.com/learnscripture/learnscripture-texts
+
+
+Steps to set up:
 
 * Create a directory 'learnscripture.net' and cd into it.
 
-* Checkout the sources from central VCS into a folder called 'main'.
+* Checkout the main sources from central VCS into a folder called 'main'.
   Currently central VCS is held on github.com::
 
      git clone git@github.com:learnscripture/learnscripture.net.git main
@@ -29,10 +36,11 @@ Then install the project proper:
   Edit your ``.git/config`` and ensure the github remote is called ``origin`` -
   this is needed for deploying.
 
- You will also need a copy of the text sources, checked out in 'texts' in a
- sibling directory to 'main'::
+* You will also need a copy of the text sources, checked out in 'texts' in a sibling directory to 'main'::
 
      git clone git@github.com:learnscripture/learnscripture-texts.git texts
+
+  This will require coordination with the main devs to get access.
 
 * Switch into the devbox shell. This will take a long time the first time, as everything is installed::
 
@@ -69,7 +77,7 @@ Then install the project proper:
   We also need to install Elm:
 
   Because we’re now on a very old version, I’ve found the easiest way is get the Elm 0.18.0 binaries
-  for your system from the link below and copy them into your virtualenv PATH:
+  for your system from the link below and copy them into your virtualenv PATH in ``.venv/bin``.
 
   https://github.com/lydell/elm-old-binaries/releases
 
