@@ -62,9 +62,9 @@ Steps to set up:
 
     uv venv --python python3.14 --prompt learnscripture
 
-* Ensure the current directory is on your Python path::
+* Ensure the ``src`` directory is on your Python path::
 
-    pwd > .venv/lib/python3.14/site-packages/projectsource.pth
+    echo `pwd`/src > .venv/lib/python3.14/site-packages/projectsource.pth
 
 * Install Python dependencies::
 
@@ -83,7 +83,7 @@ Steps to set up:
 
    Then::
 
-     cd learnscripture/static/elm
+     cd src/learnscripture/static/elm
      npx elm-install
      cd tests
      npx elm-install

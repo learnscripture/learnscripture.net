@@ -16,9 +16,9 @@
         "sourceMap": true,                        /* Generates corresponding '.map' file. */
         // "outFile": "./",                       /* Concatenate and emit output to single file. */
         // "outDir": "./",                        /* Redirect output structure to the directory. */
-        "outDir": "./learnscripture/static/build/",
+        "outDir": "./src/learnscripture/static/build/",
         // "rootDir": "./",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
-        "rootDir": "./learnscripture/static/js/",
+        "rootDir": "./src/learnscripture/static/js/",
         // "removeComments": true,                /* Do not emit comments to output. */
         // "noEmit": true,                        /* Do not emit outputs. */
         // "importHelpers": true,                 /* Import emit helpers from 'tslib'. */
@@ -60,7 +60,7 @@
         // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     },
     "include": [
-        "learnscripture/static/js/**/*"
+        "src/learnscripture/static/js/**/*"
     ],
     "exclude": [
         "node_modules"

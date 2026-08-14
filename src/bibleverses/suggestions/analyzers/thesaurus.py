@@ -19,7 +19,7 @@ Thesaurus = dict[str, list[str]]
 
 
 def english_thesaurus() -> Thesaurus:
-    fname = os.path.join(settings.SRC_ROOT, "resources", "thesaurus", "en.txt.gz")
+    fname = os.path.join(settings.REPO_ROOT, "resources", "thesaurus", "en.txt.gz")
     f = gzip.open(fname, "rb").read().decode("utf8")
     thesaurus = {line.split(",")[0]: line.split(",")[1:] for line in f.split("\n")}
 

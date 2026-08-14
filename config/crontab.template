@@ -1,5 +1,5 @@
 LS_PYTHON=%(VENV_ROOT)s/bin/python
-LS_MANAGE=%(SRC_ROOT)s/manage.py
+LS_MANAGE=%(REPO_ROOT)s/manage.py
 
 20         3    * * *  %(PROJECT_USER)s $LS_PYTHON $LS_MANAGE create_awards_daily
 20         4    * * *  %(PROJECT_USER)s $LS_PYTHON $LS_MANAGE clearsessions

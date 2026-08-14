@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import toml
 from django.conf import settings
 from django_functest import FuncBaseMixin
@@ -54,7 +52,7 @@ class LanguageTestsFB(LanguageTestsBase, BibleVersesMixin, FullBrowserTest):
 
 
 def test_l10n_toml_updated():
-    l10n_toml = toml.load(Path(settings.SRC_ROOT) / "l10n.toml")
+    l10n_toml = toml.load(settings.REPO_ROOT / "l10n.toml")
     for code, _ in settings.LANGUAGES:
         assert code in l10n_toml["locales"]
         if code != "en":

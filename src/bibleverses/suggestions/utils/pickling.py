@@ -1,5 +1,4 @@
 import logging
-import os.path
 import pickle
 from functools import wraps
 
@@ -44,18 +43,18 @@ def cache_results_with_pickle(filename_suffix):
                 level = "__level" + "_".join(str(a) for a in args)
             else:
                 level = ""
-            fname = os.path.join(settings.DATA_ROOT, "wordsuggestions", f"{filename_key}{level}.{filename_suffix}.data")
-            if os.path.exists(fname):
-                logger.info("Loading %s", fname)
-                new_data = pickle.load(open(fname, "rb"))
+            fpath = settings.DATA_ROOT / "wordsuggestions" / f"{filename_key}{level}.{filename_suffix}.data"
+            if fpath.exists():
+                logger.info("Loading %s", fpath)
+                new_data = pickle.load(open(fpath, "rb"))
                 return new_data[full_lookup_key]
             else:
                 retval = func(training_texts, key, *args)
 
                 new_data = {full_lookup_key: retval}
-                ensure_dir(fname)
-                with open(fname, "wb") as f:
-                    logger.info("Writing %s...", fname)
+                ensure_dir(fpath)
+                with open(fpath, "wb") as f:
+                    logger.info("Writing %s...", fpath)
                     pickle.dump(new_data, f)
 
                 return retval

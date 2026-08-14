@@ -5,7 +5,7 @@ var webpack = require('webpack')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const BundleTracker = require('webpack-bundle-tracker')
 
-var elmSource = path.resolve(__dirname, './learnscripture/static/elm');
+var elmSource = path.resolve(__dirname, './src/learnscripture/static/elm');
 
 module.exports = (env) => {
     var mode = env.mode
@@ -19,11 +19,11 @@ module.exports = (env) => {
         context: __dirname,
         target: "web",
         entry: {
-            main: './learnscripture/static/js/index',
-            stats: './learnscripture/static/js/stats',
+            main: './src/learnscripture/static/js/index',
+            stats: './src/learnscripture/static/js/stats',
         },
         output: {
-            path: path.resolve(__dirname, 'learnscripture/static/webpack_bundles'),
+            path: path.resolve(__dirname, 'src/learnscripture/static/webpack_bundles'),
             filename: "[name]-[fullhash]." + filenameSuffix + ".js",
             chunkFilename: "[name]-[fullhash]" + filenameSuffix + ".js"
         },
@@ -78,9 +78,9 @@ module.exports = (env) => {
             extensions: ['.tsx', '.ts', '.js'],
             modules: [
                 "node_modules",
-                path.resolve(__dirname, 'learnscripture/static/lib'),
-                path.resolve(__dirname, 'learnscripture/static/js'),
-                path.resolve(__dirname, 'learnscripture/static/css'),
+                path.resolve(__dirname, 'src/learnscripture/static/lib'),
+                path.resolve(__dirname, 'src/learnscripture/static/js'),
+                path.resolve(__dirname, 'src/learnscripture/static/css'),
             ],
             alias: {
                 "jquery": "jquery/src/jquery",

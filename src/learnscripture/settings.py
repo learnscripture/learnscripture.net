@@ -5,6 +5,7 @@ import os
 import socket
 import subprocess
 import sys
+from pathlib import Path
 
 hostname = socket.gethostname()
 CHECK_DEPLOY = "manage.py check --deploy" in " ".join(sys.argv)
@@ -24,18 +25,18 @@ DEBUG = DEVBOX and not RUNNING_MIGRATIONS
 TESTS_RUNNING = False
 
 
-SRC_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # ../
-PROJECT_ROOT = os.path.dirname(SRC_ROOT)
-HOME_DIR = os.environ["HOME"]
+REPO_ROOT = Path(os.path.abspath(__file__)).parent.parent.parent  # ../..
+PROJECT_ROOT = REPO_ROOT.parent
+HOME_DIR = Path(os.environ["HOME"])
 
 if LIVEBOX:
-    LOG_ROOT = os.path.join(HOME_DIR, "logs")
+    LOG_ROOT = HOME_DIR / "logs"
 else:
-    LOG_ROOT = os.path.join(PROJECT_ROOT, "logs")
-if not os.path.exists(LOG_ROOT):
+    LOG_ROOT = PROJECT_ROOT / "logs"
+if not LOG_ROOT.exists():
     os.system(f"mkdir -p {LOG_ROOT}")
 
-secrets = json.load(open(os.path.join(SRC_ROOT, "config", "secrets.json")))
+secrets = json.load(open(os.path.join(REPO_ROOT, "config", "secrets.json")))
 
 MAILGUN_API_KEY = secrets.get("MAILGUN_API_KEY", None)
 MAILGUN_DOMAIN = "learnscripture.net"
@@ -177,9 +178,9 @@ USE_I18N = True
 USE_TZ = True
 
 # Sync with fabfile
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, "usermedia")
-STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
-DATA_ROOT = os.path.join(PROJECT_ROOT, "data")  # See also bibleverses.storage.suggestions.DATA_ROOT
+MEDIA_ROOT = PROJECT_ROOT / "usermedia"
+STATIC_ROOT = PROJECT_ROOT / "static"
+DATA_ROOT = PROJECT_ROOT / "data"  # See also bibleverses.storage.suggestions.DATA_ROOT
 
 
 MEDIA_URL = "/usermedia/"
@@ -383,7 +384,7 @@ if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
 
-    version = subprocess.check_output(["git", "-C", SRC_ROOT, "rev-parse", "HEAD"]).strip().decode("utf-8")
+    version = subprocess.check_output(["git", "-C", str(REPO_ROOT), "rev-parse", "HEAD"]).strip().decode("utf-8")
     release = "learnscripturenet@" + version
     sentry_sdk.init(
         dsn=SENTRY_DSN,
@@ -500,7 +501,7 @@ WEBPACK_LOADER = {
     "DEFAULT": {
         "CACHE": not DEBUG,
         "BUNDLE_DIR_NAME": "webpack_bundles/",
-        "STATS_FILE": os.path.join(SRC_ROOT, WEBPACK_STATS_FILE),
+        "STATS_FILE": str(REPO_ROOT / WEBPACK_STATS_FILE),
         "POLL_INTERVAL": 0.1,
         # "TIMEOUT": None,
         "IGNORE": [r".+\.hot-update.js", r".+\.map"],

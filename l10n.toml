@@ -11,8 +11,8 @@ locales = [
 
 [[paths]]
 
-reference = "learnscripture/locales/en/**/*.ftl"
-l10n = "learnscripture/locales/{locale}/**/*.ftl"
+reference = "src/learnscripture/locales/en/**/*.ftl"
+l10n = "src/learnscripture/locales/{locale}/**/*.ftl"
 locales = [
     "tr",
     "es",

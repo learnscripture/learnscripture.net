@@ -32,8 +32,11 @@ from .tools.wordcounts import WordCounts
 
 logger = logging.getLogger(__name__)
 
+
 rel = lambda *x: os.path.normpath(os.path.join(os.path.abspath(os.path.dirname(__file__)), *x))
-DATA_ROOT = rel("..", "..", "..", "data")
+REPO_ROOT = Path(os.path.abspath(__file__)).parent.parent.parent.parent
+DATA_ROOT = REPO_ROOT.parent / "data"
+assert DATA_ROOT.exists()
 
 
 @dataclass
@@ -82,7 +85,7 @@ class AnalysisStorage:
         self.loaded = {}
 
     def saved_analysis_file(self, analyzer, training_text_keys) -> Path:
-        return Path(self._storage_name_for_analysis(analyzer=analyzer, training_text_keys=training_text_keys))
+        return self._storage_name_for_analysis(analyzer=analyzer, training_text_keys=training_text_keys)
 
     def save_analysis(self, data, analyzer, training_text_keys):
         serializer = self._serializer_for_analyzer(analyzer)
@@ -104,25 +107,25 @@ class AnalysisStorage:
 
     def load_analysis(self, analyzer_name, training_text_keys):
         training_text_keys = list(training_text_keys)
-        filename = self._storage_name_for_analysis(analyzer_name=analyzer_name, training_text_keys=training_text_keys)
-        if filename in self.loaded:
-            return self.loaded[filename]
+        filepath = self._storage_name_for_analysis(analyzer_name=analyzer_name, training_text_keys=training_text_keys)
+        if filepath in self.loaded:
+            return self.loaded[filepath]
         serializer = self._serializer_for_analyzer_name(analyzer_name)
         logger.info("Loading analysis %s for keys %s\n", serializer.name, training_text_keys)
-        if not os.path.exists(filename):
+        if not filepath.exists():
             raise AnalysisMissing(
-                f"Analysis file {filename} missing for analysis {serializer.name}, text {training_text_keys!r}"
+                f"Analysis file {filepath} missing for analysis {serializer.name}, text {training_text_keys!r}"
             )
-        with open(filename, "rb") as f:
-            logger.info("...from file %s\n", filename)
+        with open(filepath, "rb") as f:
+            logger.info("...from file %s\n", filepath)
             retval = serializer.load(f)
-            self.loaded[filename] = retval
+            self.loaded[filepath] = retval
             return retval
 
     def _name_and_format_for_analyzer(self, analyzer):
         return analyzer.name, self._serializer_for_analyzer(analyzer).format_version
 
-    def _storage_name_for_analysis(self, analyzer=None, analyzer_name=None, training_text_keys=None):
+    def _storage_name_for_analysis(self, analyzer=None, analyzer_name=None, training_text_keys=None) -> Path:
         if analyzer is not None:
             serializer = self._serializer_for_analyzer(analyzer)
         else:
@@ -145,4 +148,4 @@ class AnalysisStorage:
                 "analysisdata",
             ]
         )
-        return os.path.join(DATA_ROOT, "wordsuggestions", filename)
+        return DATA_ROOT / "wordsuggestions" / filename

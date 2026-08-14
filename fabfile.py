@@ -254,7 +254,7 @@ class Version:
     def __init__(self, version):
         self.version = version
         self.PROJECT_ROOT = os.path.join(self.VERSIONS_ROOT, version)
-        self.SRC_ROOT = os.path.join(self.PROJECT_ROOT, "src")
+        self.REPO_ROOT = os.path.join(self.PROJECT_ROOT, "src")
         self.VENV_ROOT = os.path.join(self.PROJECT_ROOT, "venv")
         # MEDIA_ROOT/STATIC_ROOT/DATA_ROOT -  sync with settings
         self.STATIC_ROOT = os.path.join(self.PROJECT_ROOT, "static")
@@ -301,7 +301,7 @@ class Version:
 
     def project_run(self, c: Connection, cmd: str, **kwargs):
         with (
-            c.cd(self.SRC_ROOT),
+            c.cd(self.REPO_ROOT),
             c.prefix(f"source {self.VENV_ROOT}/bin/activate"),
             c.prefix("PATH=~/.local/bin:$PATH"),
         ):
@@ -421,7 +421,7 @@ def code_quality_checks(c: Connection, skip_selenium: bool = False, allow_missin
     c.run("ruff check .", echo=True)
     check_ftl(c, allow_missing_ftl=allow_missing_ftl)
     run_ftl2elm(c)
-    with c.cd("learnscripture/static/elm"):
+    with c.cd("src/learnscripture/static/elm"):
         c.run("npx elm-test --skip-install", echo=True)
     c.run("pytest -n2" + (" -m 'not selenium'" if skip_selenium else ""), echo=True)
 
@@ -450,31 +450,31 @@ def push_sources(c: Connection, target: Version):
     """
     Push source code to server
     """
-    ensure_src_dir(c, target)
+    ensure_repo_dir(c, target)
 
     # For speed, we copy from previous dir
     previous_target = get_target_current_version(target)
-    target_src_root = target.SRC_ROOT
-    previous_src_root = previous_target.SRC_ROOT
+    target_repo_root = target.REPO_ROOT
+    previous_repo_root = previous_target.REPO_ROOT
 
-    if not files.exists(c, os.path.join(target_src_root, ".git")):
+    if not files.exists(c, os.path.join(target_repo_root, ".git")):
         previous_target = get_target_current_version(target)
-        previous_src_root = previous_target.SRC_ROOT
-        if files.exists(c, previous_src_root) and files.exists(c, os.path.join(previous_src_root, ".git")):
+        previous_repo_root = previous_target.REPO_ROOT
+        if files.exists(c, previous_repo_root) and files.exists(c, os.path.join(previous_repo_root, ".git")):
             # For speed, clone the 'current' repo which will be very similar to
             # what we are pushing.
-            c.run(f"git clone {previous_src_root} {target_src_root}", echo=True)
-            with c.cd(target_src_root):
+            c.run(f"git clone {previous_repo_root} {target_repo_root}", echo=True)
+            with c.cd(target_repo_root):
                 c.run("git checkout master || git checkout -b master", echo=True)
         else:
-            with c.cd(target_src_root):
+            with c.cd(target_repo_root):
                 c.run("git init", echo=True)
-        with c.cd(target_src_root):
+        with c.cd(target_repo_root):
             c.run("echo '[receive]' >> .git/config")
             c.run("echo 'denyCurrentBranch = ignore' >> .git/config")
 
-    c.local(f"git push ssh://{c.user}@{c.host}/{target_src_root}", echo=True)
-    with c.cd(target_src_root):
+    c.local(f"git push ssh://{c.user}@{c.host}/{target_repo_root}", echo=True)
+    with c.cd(target_repo_root):
         c.run(f"git reset --hard {target.version}", echo=True)
     # NB we also use git at runtime in settings file to set Sentry release,
     # see settings.py
@@ -483,9 +483,9 @@ def push_sources(c: Connection, target: Version):
     push_non_vcs_sources(c, target)
 
     # Need settings file
-    with c.cd(target_src_root):
+    with c.cd(target_repo_root):
         c.run(
-            "cp learnscripture/settings_local_example.py learnscripture/settings_local.py",
+            "cp src/learnscripture/settings_local_example.py src/learnscripture/settings_local.py",
             echo=True,
         )
 
@@ -494,14 +494,14 @@ def tag_deploy(c: Connection):
     c.local("git tag deploy-production-$(date --utc --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')")
 
 
-def ensure_src_dir(c: Connection, target: Version):
-    if not files.exists(c, target.SRC_ROOT):
-        c.run(f"mkdir -p {target.SRC_ROOT}")
+def ensure_repo_dir(c: Connection, target: Version):
+    if not files.exists(c, target.REPO_ROOT):
+        c.run(f"mkdir -p {target.REPO_ROOT}")
 
 
 def push_non_vcs_sources(c, target):
     for src in NON_VCS_SOURCES:
-        files.put(c, src, os.path.join(target.SRC_ROOT, src))
+        files.put(c, src, os.path.join(target.REPO_ROOT, src))
 
 
 @contextmanager
@@ -522,7 +522,7 @@ def create_venv(c: Connection, target: Version):
         c.run(f"uv python install {FULL_PYTHON_VERISON}", echo=True)
         c.run(f"uv venv --seed --python={FULL_PYTHON_VERISON} {venv_root}", echo=True)
     c.run(
-        f"echo {target.SRC_ROOT} > {target.VENV_ROOT}/lib/{PYTHON_BIN}/site-packages/projectsource.pth",
+        f"echo {target.REPO_ROOT}/src > {target.VENV_ROOT}/lib/{PYTHON_BIN}/site-packages/projectsource.pth",
         echo=True,
     )
 
@@ -531,7 +531,7 @@ def install_requirements(c: Connection, target: Version):
     target.project_run(c, "uv sync --no-progress", echo=True)
 
 
-webpack_deploy_files_pattern = "./learnscripture/static/webpack_bundles/*.deploy.*"
+webpack_deploy_files_pattern = "./src/learnscripture/static/webpack_bundles/*.deploy.*"
 webpack_stats_file = "./webpack-stats.deploy.json"
 
 
@@ -596,7 +596,7 @@ def _check_missing_ftl_messages():
 
 @local_task()
 def run_ftl2elm(c: Connection, watch=False):
-    cmdline = "ftl2elm --locales-dir learnscripture/locales --output-dir learnscripture/static/elm --when-missing=fallback --include='**/learn.ftl'"
+    cmdline = "ftl2elm --locales-dir src/learnscripture/locales --output-dir src/learnscripture/static/elm --when-missing=fallback --include='**/learn.ftl'"
     if watch:
         cmdline += " --watch --verbose"
     c.run(cmdline, echo=True)
@@ -627,13 +627,13 @@ def push_static(c: Connection, target: Version):
 
     # Now rewrite stats file to use server paths
     for name, asset in webpack_data["assets"].items():
-        asset["path"] = os.path.join(target.SRC_ROOT, "learnscripture/static/webpack_bundles", asset["name"])
+        asset["path"] = os.path.join(target.REPO_ROOT, "src/learnscripture/static/webpack_bundles", asset["name"])
     with open(webpack_stats_file, "w") as fp:
         json.dump(webpack_data, fp)
 
     for f in list(s1) + [webpack_stats_file]:
         rel_f = os.path.relpath(f)
-        remote_f = os.path.join(target.SRC_ROOT, rel_f)
+        remote_f = os.path.join(target.REPO_ROOT, rel_f)
         d = os.path.dirname(remote_f)
         if not files.exists(c, d):
             c.run(f"mkdir -p {d}", echo=True)
