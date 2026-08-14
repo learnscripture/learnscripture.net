@@ -21,16 +21,16 @@ Then install the project proper:
 
 * Create a directory 'learnscripture.net' and cd into it.
 
-* Checkout the sources from central VCS into a folder called 'src'.
+* Checkout the sources from central VCS into a folder called 'main'.
   Currently central VCS is held on github.com::
 
-     git clone git@github.com:learnscripture/learnscripture.net.git src
+     git clone git@github.com:learnscripture/learnscripture.net.git main
 
   Edit your ``.git/config`` and ensure the github remote is called ``origin`` -
   this is needed for deploying.
 
  You will also need a copy of the text sources, checked out in 'texts' in a
- sibling directory to 'src'::
+ sibling directory to 'main'::
 
      git clone git@github.com:learnscripture/learnscripture-texts.git texts
 
@@ -123,8 +123,8 @@ Then install the project proper:
 
      ./manage.py load_text ../texts/db_dumps NET
 
-   This assumes you are in the ``src`` directory, with the directory structure
-   described above, so the ``texts`` directory is a sibling of ``src`` and
+   This assumes you are in the ``main`` directory, with the directory structure
+   described above, so the ``texts`` directory is a sibling of ``main`` and
    contains the learnscripture-texts repo.
 
    You can add additional text names after ``NET`` above, but you need at
